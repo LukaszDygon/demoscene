@@ -1,0 +1,323 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>PROTON MOTIVE</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:pointer;color:#f3e6d3}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.o{position:fixed;pointer-events:none;font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans","DejaVu Sans",sans-serif;text-shadow:0 0 4px #000,0 0 14px #000;transition:opacity 1.1s}
+#ti{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#ti h1,#en h2{margin:0;font-weight:200;font-size:min(9vw,92px);letter-spacing:.32em;text-indent:.32em;line-height:1}
+#ti h1 b,#en h2 b{font-weight:700;color:#ffb35c}
+#ti hr,#en hr{width:min(46vw,420px);border:0;height:1px;margin:1.6em 0 1.3em;background:linear-gradient(90deg,transparent,#ff9a3c,transparent)}
+#ti p,#en p{margin:.35em 0;font-size:min(3vw,14px);letter-spacing:.42em;text-transform:uppercase;opacity:.82}
+#ti .k{margin-top:2.6em;color:#ffcf96;animation:br 2.4s ease-in-out infinite}
+#ti .w{font-size:min(2.4vw,10px);opacity:.5;margin-top:1.2em}
+@keyframes br{50%{opacity:.35}}
+#cp{left:4.2vw;opacity:0;font-size:min(2.6vw,15px);letter-spacing:.18em;max-width:70vw}
+#cp b{display:block;font-weight:600;text-transform:uppercase;letter-spacing:.38em;font-size:1.05em;color:#ffd7a8;border-left:2px solid #ff9a3c;padding-left:.8em}
+#cp i{display:block;font-style:normal;font-weight:300;opacity:.75;margin-top:.45em;padding-left:1em;font-size:.92em}
+#hd{right:4.2vw;opacity:0;font:400 min(2.2vw,12px) ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;letter-spacing:.2em;color:#ffb35c;white-space:pre}
+#en{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity 2.5s}
+#en .k{margin-top:2.4em;font-size:min(2.4vw,10px);opacity:.55}
+</style></head><body><canvas id=c></canvas>
+<div class=o id=ti><h1>PROTON<b> </b>MOTIVE</h1><hr><p>a 64k intro on bioenergetics</p><p>glucose &rarr; electrons &rarr; protons &rarr; ATP</p><p class=k>[ click / space ] respire</p><p class=w>sound on &middot; f for fullscreen</p></div>
+<div class=o id=cp></div><div class=o id=hd></div>
+<div class=o id=en><h2>PROTON<b> </b>MOTIVE</h2><hr><p>&Delta;p &rarr; ATP</p><p>three catalytic sites &middot; twelve c-subunits &middot; one turn</p><p class=k>64k &middot; webgl2 + webaudio &middot; 134 bpm &middot; mmxxvi</p></div>
+<script>var SONG=(()=>{
+const BPM=134,BAR=240/BPM,ST=BAR/16,BARS=120,LEN=BARS*BAR+8,M=Math,PI=M.PI,TAU=2*PI,ex=M.exp,sn=M.sin,th=M.tanh,
+rn=()=>M.random()*2-1,hs=x=>(x=sn(x*127.1+311.7)*43758.5453)-M.floor(x),
+SEC=[0,8,16,24,40,56,72,80,104,112,120,1e9],sec=b=>{let s=0;while(b>=SEC[s+1])s++;return s},
+GR=s=>s>0&&s<6||s==7||s==8,eu=(k,i)=>i*k%16<k,hz=m=>440*2**((m-69)/12),
+HOPS=[0,1,2,3,4,5,6,8,10,12,14];
+function ev(b){const s=sec(b),E=[],P=(t,y,v=1,p=0)=>E.push([t,y,v,p]),end=b+1==SEC[s+1],g=GR(s),fill=g&&(end||b%8==7)&&b!=71;
+if(s==0&&b>3||g)for(let i=0;i<16;i+=4)if(!(fill&&end&&i==12)&&!(b==71&&i>4))P(i,0,s?1:.55);
+if(s==6&&b<76)P(0,0,.42),P(3,0,.22);
+if(b==116)P(0,0,1.15);
+if(g&&s)for(let i=0;i<16;i++){const off=i%4==2,r=hs(b*16+i);
+if(s==1){off&&P(i,1,.6)}
+else if(off)P(i,s>2?2:1,s>2?.55:.75);
+else if(i%4||s>2)P(i,1,(s>2?.22:.14)+.2*r+(i%2?0:.12))}
+if(g&&s>1)for(const i of[4,12])if(!(b==71&&i>4))P(i,3,1);
+if(s==4||s==5||s==7||s==8)for(let i=0;i<16;i+=2)P(i,4,i%4?.5:.32);
+if(s>2&&g){const k=s==3?5:s<6?7:5,r=(s==3?3:s<6?1:2)+(b>>2)%3*2;for(let i=0;i<16;i++)eu(k,(i+r)%16)&&i%4&&P(i,5,.35+.35*hs(b+i*.37),hs(i*3.1+s)*4|0)}
+if(s==0&&b%2)P(8,5,.45,-1);
+if(s==6&&b<79)P(8,5,.3,-1);
+if(b==79)P(12,5,1,-2);
+if(fill){const n=end?8:4;for(let i=16-n;i<16;i++)P(i,6,.35+.65*(i-16+n)/n,(i-16+n)/n)}
+if(b>=64&&b<72){const d=b<66?4:b<68?2:b<70?1:.5;for(let i=0;i<16;i+=d)P(i,6,.3+.65*((b-64)*16+i)/128,(b-64)/8+i/128)}
+if(s==7||s==8)for(let i=0;i<16;i++)P(i,7,i%4?.45:.85,i%4);
+if(s==7||s==8)for(let i=0;i<16;i+=4)P(i,8,.75,(b*4+i/4)%3);
+if(s==9&&b<119){P(0,8,.7-.07*(b-112),b*4%3);P(10,8,.3,(b*4+2)%3)}
+if(s==0&&b%2||s==6&&b<79)P(0,8,s?.55:.35,b%3);
+if(b==9||b==11)P(0,9,.8,0),P(1,9,.5,3);
+if(b%16==15&&g&&s>2)for(let i=12;i<16;i++)P(i+.5,11,.25+.1*(i-12),1);
+if(s==4||s==5)HOPS.forEach((i,k)=>P(i,9,s==4?.6:.35,k));
+const bp=s==1?b>9?[2]:[]:s==2?[2,3]:g?[1,2,3]:[];
+for(let i=0;i<16;i+=4)if(!(b==71&&i>4))bp.forEach(j=>P(i+j,10,[.55,1,.75][j-1],s<3?0:s<5?1:s==5?b<64?2:3:3));
+if(s==8)for(const i of[7.5,15.5])P(i,10,.6,3);
+if((s==7||s==8)&&b%2)P(15,3,.35);
+const sp=s==3?b%2?[6]:[3,10]:s==4||s==7?b%2?[6,14]:[3,10]:s==5?b%2?[6,14]:[3,7,10]:s==8?[3,6,10,14]:[];
+sp.forEach(i=>P(i,11,.6,b>=48&&!(s==5&&b<64)?1:0));
+[8,12,16,24,40,56,80,88,96,104,112,116].includes(b)&&P(0,12,b==80?1:.7);
+[7,11,15,23,39,55,79,103,111].includes(b)&&P(0,13,.8);
+if(s==5&&b>=60||s==7||s==8)for(const i of[7,15])P(i,14,.45,s==5?(b-60)/12:0);
+if(s==4||s==5||s==7||s==8)for(let i=0;i<16;i++)P(i,15,(i%2?.55:.3)*(.7+.3*hs(b*7+i)));
+[12,24,40,56,80,104].includes(b)&&P(0,16,b==80?1:.7);
+return E.sort((a,c)=>a[0]-c[0])}
+const CA={};
+function prep(SR){if(CA[SR])return CA[SR];
+const R={},
+mk=(d,f,ch=1,nf)=>{const n=SR*d|0,o=[];for(let c=0;c<ch;c++){const x=new Float32Array(n),g=f(c);for(let i=0;i<n;i++)x[i]=g(i/SR,i)*(nf?1:M.min(1,(n-i)/SR*100));o.push(x)}return o},
+svf=()=>{let s1=0,s2=0;const F=(x,fc,q)=>{const g=M.tan(PI*M.min(fc,SR*.45)/SR),k=1/q,a1=1/(1+g*(g+k)),a2=g*a1,v3=x-s2,v1=a1*s1+a2*v3,v2=s2+a2*s1+g*a2*v3;s1=2*v1-s1;s2=2*v2-s2;F.b=v1;F.h=x-k*v1-v2;return v2};return F},
+blep=(p,d)=>p<d?(p/=d,p+p-p*p-1):p>1-d?(p=(p-1)/d,p*p+p+p+1):0,
+saw=()=>{let p=M.random();return f=>{const d=f/SR;p+=d;p-=p|0;return 2*p-1-blep(p,d)}},
+met=t=>{let s=0;for(const f of[205.3,304.4,369.6,522.7,540,800])s+=sn(TAU*f*1.7*t)>0?1:-1;return s/6},
+ir=(d,k,c)=>mk(d,()=>{let y=0;return t=>(y+=(rn()-y)*c*ex(-t*.7),y*ex(-t*k)*M.min(1,t*250))},2);
+R.K=mk(.75,()=>{let p=0;return t=>{p+=TAU*(43+100*ex(-t*22)+300*ex(-t*150))/SR;return th(2*sn(p)*ex(-t*3.6)*(1-ex(-t*900)))*.95+rn()*ex(-t*900)*.2}});
+R.J=mk(.6,()=>{let p=0;const f=svf();return t=>{p+=TAU*(45+120*ex(-t*26)+420*ex(-t*190))/SR;f(rn(),3200,.9);return th(2.8*sn(p)*ex(-t*4.4)*(1-ex(-t*900)))*.82+f.b*ex(-t*500)*.45}});
+R.H=mk(.25,()=>{const f=svf();return t=>(f(met(t)*.6+rn()*.5,7500,.9),f.h*ex(-t*48))});
+R.O=mk(.8,()=>{const f=svf();return t=>(f(met(t)*.6+rn()*.5,7000,.8),f.h*ex(-t*6.5)*.8)});
+R.R=mk(1.6,()=>{const f=svf();return t=>(f(met(t*1.31)*.8+rn()*.25,5200,1.3),f.b*(.45*ex(-t*2.4)+.6*ex(-t*28)))});
+R.C=mk(.5,()=>{const f=svf();return t=>(f(rn(),1250,1.3),f.b*2.4*(t<.033?ex(-(t%.011)*260):ex(-(t-.033)*15)))});
+R.S=mk(.4,()=>{const f=svf();let p=0;return t=>{p+=TAU*(182+60*ex(-t*40))/SR;f(rn(),2600,.7);return th(1.6*(sn(p)*ex(-t*28)*.7+f.b*ex(-t*15)*1.5))}});
+R.M=mk(1.1,()=>t=>th(2.5*sn(TAU*340*t+2.8*ex(-t*9)*sn(TAU*913*t))*sn(TAU*587*t+1.3)*ex(-t*7))*.7);
+R.T=mk(.12,()=>{const f=svf();return t=>(f(rn()*ex(-t*420),3100,7),f.b*2+sn(TAU*1720*t)*ex(-t*85)*.3)});
+R.Q=mk(.5,()=>{let p=0;return t=>{p+=TAU*(105+70*ex(-t*20))/SR;return th(1.5*(sn(p)+.3*sn(2.71*p))*ex(-t*9))*.8}});
+R.X=mk(3,()=>{const f=svf();return t=>(f(rn()+met(t*2.3)*.4,6000,.6),f.h*(ex(-t*1.4)*.8+ex(-t*14)*.5))},2);
+R.B=mk(2.2,()=>t=>(sn(TAU*523.25*t+2*ex(-t*5)*sn(TAU*1831*t))*ex(-t*2.4)+.35*sn(TAU*1052*t)*ex(-t*6)+.2*sn(TAU*2600*t)*ex(-t*14))*.5);
+R.Z=mk(.35,()=>{let p=0;return t=>{p+=TAU*(170+2600*ex(-t*28))/SR;return sn(p+1.5*sn(p*1.51))*ex(-t*12)*(1-ex(-t*2e3))*.6}});
+R.W=mk(BAR,()=>{const f=svf();return t=>{const u=t/BAR;f(rn(),300*30**u,2.5);return f.b*u*u*u*1.5}},2);
+R.U=mk(8*BAR,()=>{const f=svf(),a=saw(),b=saw();return t=>{const u=t/8/BAR,q=hz(53)*2**(u*1.5);f(rn()*.6+(a(q)+b(q*1.006))*.25,200*45**u,1.5+u*4);return f.b*u*u*1.2}},2);
+R.L=[.09,.062,.044,.03].map(dc=>mk(.42,()=>{const f=svf(),a=saw(),b=saw();let p=0;return t=>{p+=TAU*hz(29)/SR;
+return(th(1.8*f((a(hz(41)*1.004)+b(hz(41)*.996))*.5,90+3200*ex(-t/dc),2.6+3*(dc<.05)))+.35*sn(p))*(1-ex(-t*600))*ex(-t*(3+.12/dc))}}));
+R.A=[2200,6000].map(fc=>mk(.7,c=>{const f=svf(),o=[53,56,60,63,67].flatMap(m=>[-1,1].map(j=>[saw(),hz(m)*(1+j*.006*(1+c*.3))]));return t=>th(2.4*f(o.reduce((a,[s,q])=>a+s(q),0)/8,150+fc*ex(-t*16),3))*ex(-t*5)*.7},2));
+const PL=4*BAR+1.5;R.P=mk(PL,c=>{const f=svf(),o=[48,56,60,63,67].flatMap(m=>[-1,1].map(j=>[saw(),hz(m)*(1+j*.0045+c*.002)]));return t=>f(o.reduce((a,[s,q])=>a+s(q),0)/8,700+1500*(.5+.5*sn(t*.9+c*2)),1.2)*M.min(1,t/1.2,(PL-t)/1.5)},2);
+R.N=mk(2,()=>rn,1,1);
+R.CH=mk(PL,c=>{const fs=[svf(),svf(),svf()],o=[53,60,65,68].map((m,j)=>[saw(),saw(),hz(m),j]);return t=>{const v=1+.006*sn(t*5.3+c*2)+.003*sn(t*3.1);
+const x=o.reduce((a,[s1,s2,f,j])=>a+s1(f*v*(1+.003*j))+s2(f*v*(1-.004*j-c*.002)),0)/8;fs[0](x,760,6);fs[1](x,1180,7);fs[2](x,2650,8);
+return(fs[0].b+fs[1].b*.6+fs[2].b*.3)*M.min(1,t/1.8,(PL-t)/1.5)*1.4}},2);
+R.D=mk(2.5,()=>{let p=0;return t=>{p+=TAU*(28+90*ex(-t*2.2))/SR;return th(1.5*sn(p))*ex(-t*1.3)*M.min(1,t*200)}});
+R.SH=mk(.12,()=>{const f=svf();return t=>(f(rn(),7500,1.8),f.b*M.min(1,t*300)*ex(-t*45))});
+R.V=ir(2.6,2.6,.6);R.Y=ir(3.6,1.6,.07);
+return CA[SR]=R}
+function setup(A,base){const SR=A.sampleRate,R=prep(SR),BF=a=>{const B=A.createBuffer(a.length,a[0].length,SR);a.forEach((x,c)=>B.copyToChannel(x,c));return B},B={};
+for(const k in R)B[k]=R[k][0]instanceof Float32Array?BF(R[k]):R[k].map(BF);
+let bag=[];const BAGS=[],keep=n=>(bag.push(n),n),
+G=(v,...to)=>{const g=keep(A.createGain());g.gain.value=v;to.forEach(n=>g.connect(n));return g},
+F=(ty,f,q,...to)=>{const n=A.createBiquadFilter();n.type=ty;n.frequency.value=f;n.Q.value=q;to.forEach(x=>n.connect(x));return n},
+SH=(k,...to)=>{const w=A.createWaveShaper(),c=new Float32Array(1024);for(let i=0;i<1024;i++)c[i]=th(k*(i/511.5-1))/th(k);w.curve=c;w.oversample='2x';to.forEach(x=>w.connect(x));return w},
+O=(ty,f,...to)=>{const o=A.createOscillator();o.type=ty;o.frequency.value=f;o.start(base);o.stop(base+LEN);to.forEach(x=>o.connect(x));return o},
+comp=A.createDynamicsCompressor();
+comp.threshold.value=-10;comp.knee.value=8;comp.ratio.value=2.5;comp.attack.value=.004;comp.release.value=.15;
+comp.connect(G(.72,SH(1.3,G(.93,A.destination))));
+const RV=A.createConvolver();RV.buffer=B.V;RV.connect(G(.4,comp));
+const duck=G(1,comp),rumG=G(0,duck),RUM=A.createConvolver();RUM.buffer=B.Y;RUM.connect(F('highpass',38,.7,F('lowpass',170,.9,SH(3,rumG))));
+const DL=A.createDelay(2),D2=A.createDelay(2),mg=A.createChannelMerger(2);DL.delayTime.value=3*ST;D2.delayTime.value=3*ST;
+const fb=G(.42,DL),dt=F('lowpass',2800,.7,F('highpass',260,.7,fb,D2,G(.4,RV)));DL.connect(dt);DL.connect(mg,0,0);D2.connect(mg,0,1);mg.connect(G(.55,comp));
+const dHP=F('highpass',20,.7,comp),dLP=F('lowpass',2e4,.7,dHP),DR=G(1,dLP),
+bLP=F('lowpass',400,1.6,duck),BS=G(1,bLP),pLP=F('lowpass',800,.8,duck,G(.45,RV)),
+subG=G(0,duck),drG=G(0,comp),drLP=F('lowpass',150,1.2,drG),nzG=G(0,comp,RV),
+nz=A.createBufferSource();
+O('sine',hz(29),subG);O('sawtooth',hz(29)*1.003,drLP);O('sawtooth',hz(36)*.998,G(.4,drLP));
+const prG=G(0,comp,RV),prF=F('bandpass',300,7,prG);[hz(41),hz(41)*1.003,hz(48)].forEach(f=>O('sawtooth',f,prF));
+const AS=G(1,SH(2.5,G(.3,duck),G(.22,DL))),AC=[0,12,0,0,3,0,12,7,0,0,10,0,3,12,0,5];
+nz.buffer=B.N;nz.loop=true;nz.connect(F('bandpass',420,.8,nzG));nz.start(base);nz.stop(base+LEN);
+const hit=(b,t,v,o,r=1,pn=0,sd=0,sr=0,off=0)=>{const s=keep(A.createBufferSource()),g=G(v,o);s.buffer=b;s.playbackRate.value=r;
+let x=s;if(pn){x=keep(A.createStereoPanner());x.pan.value=pn;s.connect(x)}x.connect(g);
+sd&&g.connect(G(sd,DL));sr&&g.connect(G(sr,RV));s.start(t,off);return g};
+const lng=(f)=>{const sv=bag;bag=[];const s=f(),n=bag;bag=sv;s.onended=()=>n.forEach(x=>x.disconnect())},
+lh=(b,t,v,o,off)=>lng(()=>{const s=A.createBufferSource(),g=G(v,o);s.buffer=b;s.connect(g);bag.push(s);s.start(t,off);return s});
+const L=(a,c,x)=>a+(c-a)*M.min(1,M.max(0,x)),
+bf=x=>x<16?350:x<24?L(350,900,(x-16)/8):x<40?L(900,1250,(x-24)/16):x<56?1350:x<72?1350+2900*((x-56)/16)**2:x<80?500:x<104?3300:x<112?4300:L(4300,300,(x-112)/8),
+dl=x=>x<8?180+900*(x/8)**2:x>=72&&x<80?260:2e4,
+dh=x=>x>=66&&x<=72?20+700*((x-66)/6)**2:20,
+rg=x=>(x<8?.3:x<16?.45:x<72?.7:x<80?.5:x<112?.85:.6)*.4,
+pl=x=>x<8?600:x<72?1e3:x<80?400+3600*((x-72)/8)**2:x<112?5e3:L(4e3,500,(x-112)/8),
+dg=x=>x<8?.05+.1*x/8:x<16?.1:x<24?.06:x<72?.03:x<80?.12:x<112?.03:.18*L(1,0,(x-112)/8),
+dlf=x=>x>=72&&x<80?150+600*((x-72)/8)**2:150,
+ng=x=>x<8?.07:x<56?.02:x<72?L(.02,.1,(x-56)/16):x<80?.12:x<112?.03:.07,
+pf=x=>x<56?300:x<80?300*2**((x-56)/8):300,pg=x=>x<56||x>=80?0:.025+.13*((x-56)/24)**2,
+sg=x=>{const s=sec(x|0);return GR(s)?.2:s==6?.14:s==9?.2*L(1,0,(x-112)/8):s==0?.1*x/8:0};
+function bar(b,t){const s=sec(b),T=i=>t+i*ST,e=t+BAR,
+au=(p,f)=>{p.setValueAtTime(f(b),t);p.linearRampToValueAtTime(f(b+1),e)};
+au(bLP.frequency,bf);au(dLP.frequency,dl);au(dHP.frequency,dh);au(rumG.gain,rg);au(pLP.frequency,pl);au(drG.gain,dg);au(drLP.frequency,dlf);au(nzG.gain,ng);au(subG.gain,sg);au(prF.frequency,pf);au(prG.gain,pg);
+if(b%4==0&&[0,6,8,9].includes(s))lh(B.P,t,[.2,,,,,,.32,,.3,.4][s],pLP,0);
+if(b%4==0&&[3,6,9].includes(s))lh(B.CH,t,[,,,.13,,,.32,,,.3][s],pLP,0);
+const rs={20:4,64:8,76:4,100:4}[b];rs&&lh(B.U,t,.42,comp,(8-rs)*BAR);
+if(s==7&&b>=88||s==8)for(let i=0;i<16;i++){if(i%4==0&&i!=8)continue;const tt=T(i)+(i%2?ST*.06:0),o=keep(A.createOscillator()),f=keep(A.createBiquadFilter()),g=G(0,AS),ac=AC[i]>6,c0=350+(b-88)*45;
+o.type='square';o.frequency.value=hz(41+AC[i]);f.Q.value=11;f.frequency.setValueAtTime(c0*(ac?5:2.6),tt);f.frequency.setTargetAtTime(c0,tt,.035);
+g.gain.setValueAtTime(ac?.17:.1,tt);g.gain.setTargetAtTime(0,tt+ST*.55,.025);o.connect(f);f.connect(g);o.start(tt);o.stop(tt+ST*1.4)}
+for(const[i,y,v,p]of ev(b)){const tt=T(i)+(i%2==1&&y<3?ST*.09:0),pn=(hs(b*16+i+y)-.5)*.6;
+switch(y){
+case 0:{const g=hit(s==7||s==8?B.J:B.K,tt,v*.7,DR);g.connect(G(.9,RUM));duck.gain.setTargetAtTime(.15,tt,.004);duck.gain.setTargetAtTime(1,tt+.04,.09);break}
+case 1:hit(B.H,tt,v*1.5,DR,i%4==2?1:1.06,pn);break;
+case 2:hit(B.O,tt,v*1.2,DR,1,-pn,0,.05);break;
+case 3:hit(B.C,tt,v*.7,DR,1,0,0,.25);break;
+case 4:hit(B.R,tt,v*.6,DR,1,.3);break;
+case 5:hit(B.M,tt,v*.3,DR,p<0?p<-1?.35:.5:[1,1.19,1.5,.84][p],pn*1.5,.3,.2);break;
+case 6:hit(B.S,tt,v*.5,DR,1+p*.25,0,0,.15);break;
+case 7:hit(B.T,tt,v*.4,DR,1+p*.09,pn*.4);break;
+case 8:hit(B.B,tt,v*.28,comp,[1.335,1.587,2][p]/(s==9||s==6?2:s?1:4),[-.5,0,.5][p],.35,.3);break;
+case 9:hit(B.Z,tt,v*.35,comp,2**(-p/8),pn,.4,.1);break;
+case 10:hit(B.L[p],tt,v*.4,BS);break;
+case 11:hit(B.A[p],tt,v*.8,comp,i%1?1.5:1,0,.35,.2);break;
+case 12:hit(B.X,tt,v*.3,comp,1,0,0,.2);break;
+case 13:hit(B.W,tt,v*.35,comp,1,0,0,.3);break;
+case 14:hit(B.Q,tt,v*.5,DR,1+p*.6,pn,0,.15);break;
+case 15:hit(B.SH,tt+(i%2?ST*.12:0),v*.5,DR,1,-pn*1.4);break;
+case 16:hit(B.D,tt,v*.6,duck)}}}
+function sched(b){bag=[];
+if(b>2&&BAGS[b-3]){BAGS[b-3].forEach(n=>n.disconnect());BAGS[b-3]=0}
+BAGS[b]=bag;bar(b,base+b*BAR)}
+bag=[];sched.out=comp;return sched}
+function live(A,from=0){const base=A.currentTime+.15-from,sched=setup(A,base);let b=M.max(0,M.ceil(from/BAR-.001));
+const tick=()=>{while(b<BARS&&base+b*BAR<A.currentTime+1.2)sched(b++)};tick();const iv=setInterval(tick,100);
+return{base,stop(){clearInterval(iv);sched.out.disconnect()}}}
+function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sched=setup(A,0);sched(0);
+for(let b=1;b<BARS;b++)A.suspend(((b*BAR-.5)*SR/128|0)*128/SR).then(()=>{sched(b);A.resume()});
+return A.startRendering()}
+return{live,render,prep,ev,sec,SEC,HOPS,BPM,BAR,ST,BARS,LEN}})();</script>
+<script>const $=i=>document.getElementById(i),cv=$('c'),gl=cv.getContext('webgl2',{antialias:false,alpha:false,powerPreference:'high-performance'}),QS=new URLSearchParams(location.search);
+const M=Math,PI=M.PI,BAR=SONG.BAR,ST=SONG.ST,cl=(x,a=0,b=1)=>M.min(b,M.max(a,x)),sm=x=>(x=cl(x),x*x*(3-2*x)),mx=(a,b,x)=>a+(b-a)*x,
+CR=(P,u)=>{const n=P.length-1,f=cl(u)*n,i=M.min(n-1,f|0),x=f-i,a=P[M.max(i-1,0)],b=P[i],c=P[i+1],d=P[M.min(i+2,n)];
+return b.map((_,k)=>.5*(2*b[k]+(c[k]-a[k])*x+(2*a[k]-5*b[k]+4*c[k]-d[k])*x*x+(3*b[k]-a[k]-3*c[k]+d[k])*x*x*x))},
+orb=(c,r,a,y)=>[c[0]+M.cos(a)*r,c[1]+y,c[2]+M.sin(a)*r],add=(a,b)=>a.map((v,i)=>v+b[i]);
+const FL=gl.getExtension('EXT_color_buffer_float'),IF=FL?gl.RGBA16F:gl.RGBA8,TY=FL?gl.HALF_FLOAT:gl.UNSIGNED_BYTE;
+const VS='#version 300 es\nvoid main(){gl_Position=vec4(vec2(gl_VertexID&1,gl_VertexID>>1)*4.-1.,0,1);}',H3='#version 300 es\n';
+function prog(vs,fs){const p=gl.createProgram();[[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]].forEach(([t,s])=>{const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);gl.attachShader(p,x);p.s=(p.s||[]).concat(x)});gl.linkProgram(p);p.u={};return p}
+const SCENE="precision highp float;precision highp sampler3D;uniform vec3 uR,uC,uD;uniform float uT,uB,uA;uniform vec4 uF,uE,uX,uY,uL[4],uP[6];uniform sampler3D uN;out vec4 o;\n#define PI 3.1415927\nvec3 ro,rd;mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}vec4 nz(vec3 p){return texture(uN,p*.0625);}float fbm(vec3 p){return nz(p).r*.55+nz(p*2.03+.37).g*.3+nz(p*4.1+.71).b*.15;}float h1(float n){return fract(sin(n*12.9898+4.1)*43758.5453);}vec3 h3(vec3 p){p=fract(p*vec3(.1031,.103,.0973));p+=dot(p,p.yxz+33.33);return fract((p.xxy+p.yxx)*p.zyx);}float sat(float x){return clamp(x,0.,1.);}vec2 U(vec2 a,vec2 b){return a.x<b.x?a:b;}float smin(float a,float b,float k){float h=sat(.5+.5*(b-a)/k);return mix(b,a,h)-k*h*(1.-h);}float smax(float a,float b,float k){return-smin(-a,-b,k);}float sBox(vec3 p,vec3 b,float r){vec3 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.)-r;}float sCap(vec3 p,vec3 a,vec3 b,float r){vec3 pa=p-a,ba=b-a;return length(pa-ba*sat(dot(pa,ba)/dot(ba,ba)))-r;}float sCyl(vec3 p,float r,float h){vec2 d=abs(vec2(length(p.xz),p.y))-vec2(r,h);return min(max(d.x,d.y),0.)+length(max(d,0.));}float sEll(vec3 p,vec3 r){float k0=length(p/r),k1=length(p/(r*r));return k0*(k0-1.)/max(k1,1e-5);}float sTor(vec3 p,vec2 t){return length(vec2(length(p.xz)-t.x,p.y))-t.y;}vec3 pmod(vec3 p,float n,out float id){float a=atan(p.z,p.x),s=2.*PI/n;id=floor(a/s+.5);a-=id*s;return vec3(cos(a),0,sin(a))*length(p.xz)+vec3(0,p.y,0);}vec3 SPK=vec3(.55,.75,1.3),AMB=vec3(1.,.48,.14);vec2 map(vec3 p);void keyl(vec3 p,out vec3 l,out vec3 c,out float dl);float den(vec3 p);vec3 emi(vec3 p,vec3 n,float m);void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp);vec3 sky(vec3 d);vec3 amb(vec3 p,vec3 n);float vis(vec3 p,vec3 l,float dl);vec3 vem(vec3 p,float t);float mtub(vec3 p,vec3 a,vec3 d,vec3 u,vec3 v){p-=a;float h=dot(p,d);vec3 q=p-d*h;float r=length(q);if(r>1.4)return r-.62;vec2 z=vec2(dot(q,u),dot(q,v))/max(r,1e-4),z2=vec2(z.x*z.x-z.y*z.y,2.*z.x*z.y),z4=vec2(z2.x*z2.x-z2.y*z2.y,2.*z2.x*z2.y),z8=vec2(z4.x*z4.x-z4.y*z4.y,2.*z4.x*z4.y),z12=vec2(z8.x*z4.x-z8.y*z4.y,z8.x*z4.y+z8.y*z4.x);return r-.55-.04*(z12.x*z.x-z12.y*z.y)*(.6+.4*cos(h*24.));}\n#if S==0\n#define STEPS 96\n#define FAR 60.\n#define VS 16\n#define VFAR 40.\nvec3 AP[6],SP[6],HP[6],P1,P2,CA,CB;mat3 MR;void init(){float c=cos(uY.w),s=sin(uY.w),c2=cos(uY.w*.6+.4),s2=sin(uY.w*.6+.4);MR=mat3(c2,-s2,0,s2,c2,0,0,0,1)*mat3(c,0,-s,0,1,0,s,0,c);float sp=max(uX.w,0.),f=1.7*(1.-exp(-sp*1.3))+.22*sp;for(int k=0;k<6;k++){float a=float(k)*PI/3.,s=k%2==0?1.:-1.;vec3 c=vec3(cos(a),0,sin(a));AP[k]=c*1.3+vec3(0,.24*s,0);vec3 dr=normalize(c+vec3(0,.65*s,0));SP[k]=AP[k]+dr*(k==5?1.15:.95);HP[k]=SP[k]+normalize(dr+vec3(0,-.5*s,.3))*.55;}P1=mix(HP[5]+vec3(2.5,3,1.5),HP[5]+normalize(HP[5])*.35,uX.y);P2=mix(SP[1]+vec3(-2,-2.5,2.5),SP[1]+normalize(SP[1])*.75,uX.z);if(uX.w>0.){vec3 ax=normalize(vec3(-.7,.3,.65));for(int k=0;k<6;k++){float s=k<3?1.:-1.;vec3 cc=k<3?vec3(.65,0,.65):vec3(-.65,0,-.65);mat2 m=rot(s*f*.9);vec3 q;q=AP[k]-cc;q.xy*=m;AP[k]=q+cc+ax*s*f*1.6;q=SP[k]-cc;q.xy*=m;SP[k]=q+cc+ax*s*f*1.6;q=HP[k]-cc;q.xy*=m;HP[k]=q+cc+ax*s*f*1.6;}vec3 q=P1-vec3(-.65,0,-.65);q.xy*=rot(-f*.9);P1=q+vec3(-.65,0,-.65)-ax*f*1.6;q=P2-vec3(.65,0,.65);q.xy*=rot(f*.9);P2=q+vec3(.65,0,.65)+ax*f*1.6;}CA=(AP[0]+AP[1]+AP[2])/3.;CB=(AP[3]+AP[4]+AP[5])/3.;}vec3 mloc(vec3 p){return MR*(p-uY.xyz);}vec2 phos(vec3 p,vec3 c,float on){vec3 q=p-c;if(length(q)>1.)return vec2(length(q)-.7,3);float d=length(q)-.3;for(int i=0;i<4;i++){vec3 t=normalize(vec3(i<2?1:-1,i%2==0?1:-1,i==0||i==3?1:-1));d=min(d,min(length(q-t*.42)-.17,sCap(q,vec3(0),t*.42,.06)));}return vec2(d,on>0.?3.:1.);}vec2 mol(vec3 p){vec2 r=vec2(1e9,0);bool br=uX.w>0.;int k0=0,k1=6;if(!br){float d=length(p);if(d>3.)return vec2(d-2.7,2);}else{float a=length(p-CA),b=length(p-CB);if(min(a,b)>2.9)return vec2(min(a,b)-2.6,2);k0=a<b?0:3;k1=k0+3;}for(int k=k0;k<k1;k++){vec3 a=AP[k],b=AP[(k+1)%6];float da=length(p-a);if(da>1.75){r=U(r,vec2(da-1.6,2));continue;}r=U(r,vec2(da-(k==0?.36:.43),k==0?1.:2.));if(!(br&&(k==2||k==5)))r=U(r,vec2(sCap(p,a,b,.085),1.));if(k>0)r=U(r,vec2(min(sCap(p,a,SP[k],.075),length(p-SP[k])-(k==5?.4:.31)),k==5?2.:1.));}return r;}vec2 env(vec3 p){float d=mtub(p,vec3(-9,-5,-14),vec3(.958,.239,.144),vec3(-.15,0,.99),vec3(.24,-.97,.04));d=min(d,mtub(p,vec3(8,7,-20),vec3(.284,-.189,.94),vec3(.957,0,-.289),vec3(.055,.982,.181)));vec3 c=floor(p/8.),q=p-c*8.-4.,h=h3(c);float rb=1e9;if(h.x>.4&&length(c*8.+4.-uY.xyz)>5.5&&length(c*8.+4.-uC)>4.5){q-=(h-.5)*4.;q.xz*=rot(h.y*6.);rb=smin(length(q)-.45-.05*nz(q*5.).r,length(q-vec3(.32,.3,0))-.3,.12);}vec3 bq=abs(p-c*8.-4.);rb=min(rb,4.-max(bq.x,max(bq.y,bq.z))+1.2);return U(vec2(d,4),vec2(rb,5));}vec2 map(vec3 p){vec2 r=env(p);vec3 q=mloc(p);r=U(r,mol(q));if(uX.y>0.)r=U(r,phos(q,P1,uX.y));if(uX.z>0.)r=U(r,phos(q,P2,uX.z));return r;}vec3 KD=normalize(vec3(-.45,.25,-1.));void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){l=KD;c=AMB*1.3*uX.x;dl=12.;}float vis(vec3 p,vec3 l,float dl){return 1.;}float den(vec3 p){return .005+.02*sat(fbm(p*.22+vec3(0,0,uT*.03))+.15);}vec3 vem(vec3 p,float t){return vec3(0);}vec3 sky(vec3 d){float g=max(dot(d,KD),0.);return AMB*(pow(g,24.)*.25+pow(g,400.)*4.)*uX.x+vec3(.003,.005,.01);}vec3 amb(vec3 p,vec3 n){return vec3(.02,.035,.06)*(n.y*.5+.6)+vec3(.12,.18,.3)*uX.x*sat(dot(n,normalize(vec3(.4,1,.6))));}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){if(m<1.5){al=vec3(.75,.78,.82);sp=vec3(1,.6,0);}else if(m<2.5){al=vec3(.86,.8,.68)*(.85+.15*nz(mloc(p)*6.).r);sp=vec3(.06,.25,.15);}else if(m<3.5){al=vec3(.9,.55,.25);sp=vec3(.5,.3,0);}else if(m<4.5){al=vec3(.5,.45,.42);sp=vec3(.04,.4,.3);}else{al=vec3(.55,.5,.45);sp=vec3(.04,.5,.2);}}vec3 emi(vec3 p,vec3 n,float m){float k=uE.x*.6+.6;return m>2.5&&m<3.5?AMB*vec3(1.6,1.2,1)*k*2.:vec3(0);}\n#endif\n#if S==1\n#define STEPS 90\n#define FAR 160.\n#define VS 16\n#define VFAR 120.\nvoid init(){}float mito(vec3 p,float L,float R,out float st){p.y+=.016*p.x*p.x*(12./L);vec3 q=vec3(max(abs(p.x)-L,0.),p.y,p.z*1.15);float d=length(q)-R;st=0.;if(d>2.5)return d*.8-.4;st=sin(p.x*1.7+2.*fbm(p*.3));return d+.22*fbm(p*.35)+.05*nz(p*1.3).r-.06*sat(.35-nz(p*2.2).a)*uX.w;}float ST;vec2 map(vec3 p){if(uX.x>.5){p.xz*=rot(uY.x);vec3 c=floor(p/36.),q=p-c*36.-18.,h=h3(c);q-=(h-.5)*10.;q.xz*=rot(h.x*6.3);q.xy*=rot(h.y*2.-1.);float st,d=mito(q,7.+3.*h.z,2.6,st);ST=st;vec3 bq=abs(p-c*36.-18.);return vec2(min(d,18.-max(bq.x,max(bq.y,bq.z))+1.),0);}float st,d=mito(p,12.,4.5,st);ST=st;float s2,d2=mito((p-vec3(-30,-12,-40)).zyx,9.,3.4,s2);if(d2<d)ST=s2*.6;d=min(d,d2);float mt=mtub(p,vec3(0,-6.6,-1),vec3(.995,0,.0995),vec3(0,1,0),vec3(-.0995,0,.995));vec3 q=p-vec3(30,10,-55);q.xy*=rot(.5);float s3,d3=mito(q,10.,3.8,s3);if(d3<d)ST=s3*.5;d=min(d,d3);return U(vec2(d,0),vec2(mt,1));}void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){l=normalize(vec3(.3,1,.4));c=vec3(.25,.35,.5)*.9;dl=30.;}float vis(vec3 p,vec3 l,float dl){return 1.;}float den(vec3 p){return .012+.03*sat(fbm(p*.07+uT*.01));}vec3 vem(vec3 p,float t){float d=map(p).x;return AMB*exp(-max(d,0.)*(uX.x>.5?.35:.28))*(uX.y*.32+uX.z*.8)*(1.+uE.x*.25);}vec3 sky(vec3 d){return vec3(.006,.01,.018)+AMB*.03*uX.z;}vec3 amb(vec3 p,vec3 n){return vec3(.03,.045,.07)*(n.y*.5+.5);}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){al=m>.5?vec3(.7,.68,.62):vec3(.62,.5,.46);sp=m>.5?vec3(.05,.3,.1):vec3(.04,.18,.6);}vec3 emi(vec3 p,vec3 n,float m){if(m>.5)return vec3(0);float g=smoothstep(-.3,.9,ST),f=pow(sat(-dot(n,rd)),.6);return AMB*vec3(1,.85,.7)*(uX.y*mix(.18,1.3,g*g)*(.3+.7*f)+uX.z*2.*g)*(.85+.3*uE.x)*mix(.4,1.,sat(length(p-ro)/18.));}\n#endif\n#if S==2\n#define STEPS 96\n#define FAR 40.\n#define VS 20\n#define VFAR 30.\nvoid init(){}float heads(vec3 p,float y){vec2 a=p.xz/vec2(.56,.97),i1=floor(a+.5),i2=floor(a)+.5;vec2 d1=(a-i1)*vec2(.56,.97),d2=(a-i2)*vec2(.56,.97);vec2 dd=dot(d1,d1)<dot(d2,d2)?d1:d2;vec2 id=dot(d1,d1)<dot(d2,d2)?i1:i2;return length(vec3(dd.x,p.y-y-.05*sin(uT*2.+id.x*1.7+id.y*2.3),dd.y))-.25;}float bil(vec3 p,float y0,float y1){float c=abs(p.y-(y0+y1)*.5)-(y0-y1)*.5+.12;return smin(c,min(heads(p,y0),heads(p,y1)),.1);}vec2 map(vec3 p){float r=length(p.xz);float m1=max(bil(p,0.,-1.1),1.45-r);float id;vec3 q=pmod(p,16.,id);q.y+=.55;q.xz*=1.;float st=sCap(q,vec3(1.3,-.65,-.3),vec3(1.3,.65,.3),.13);float m2=max(bil(p,-3.4,-4.5),1.15-r);vec3 q2=pmod(p,8.,id);float ch=sCap(q2,vec3(1.08,-3.2,0),vec3(1.08,-4.7,.15),.2);vec2 res=U(vec2(min(m1,m2),0),vec2(st,1));return U(res,vec2(ch,2));}void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){l=vec3(0,-1,0);c=AMB*3.*uX.x;dl=12.;}float vis(vec3 p,vec3 l,float dl){float r=length(p.xz);return p.y<-4.6?1.:p.y<-1.?smoothstep(1.1,.8,r):smoothstep(1.,.7,r)*.9;}float den(vec3 p){return .04+.05*fbm(p*.5+vec3(0,uT*.1,0));}vec3 vem(vec3 p,float t){return p.y<-1.2&&p.y>-3.3?AMB*.04*uX.y:vec3(0);}vec3 sky(vec3 d){return AMB*1.5*uX.x*sat(-d.y);}vec3 amb(vec3 p,vec3 n){return vec3(.02,.035,.06)*(n.y*.5+.5)+AMB*.25*uX.x*exp(-max(length(p.xz)-1.,0.)*1.8)*sat(.5-n.y);}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){if(m<.5){al=vec3(.7,.55,.5);sp=vec3(.05,.15,.7);}else if(m<1.5){al=vec3(.8,.75,.66);sp=vec3(.05,.3,.2);}else{al=vec3(.8,.82,.86);sp=vec3(1,.25,0);}}vec3 emi(vec3 p,vec3 n,float m){return vec3(0);}\n#endif\n#if S==3\n#define STEPS 100\n#define FAR 70.\n#define VS 18\n#define VFAR 50.\n#define PZ 4.\n#define RT 7.\nvoid init(){}float wav(vec2 xy,float k){return .45*nz(vec3(xy*.18,k*1.7)).r;}float gid(vec3 p){float k=floor(p.z/PZ+.5);return floor((p.z-wav(p.xy,k))/PZ);}vec3 lamp(float g){return vec3(sin(g*2.1)*.8,3.3+.6*sin(g*1.7),(g+.5)*PZ);}float rim(float y,float k){return .7+.55*sin(y*.42+k*2.3)+.25*nz(vec3(y*.35,k*1.3,0)).g;}vec2 map(vec3 p){float wall=(RT+.7*fbm(p*.2)-length(p.xy*vec2(1,.8)))*.8;float k=floor(p.z/PZ+.5),s=mod(k,2.)*2.-1.,lz=p.z-k*PZ-wav(p.xy,k),e=rim(p.y,k)-s*p.x;float th=.2+.26*exp(-e*e*5.)+.03*nz(p*1.6).r-.035*sat(.3-nz(p*2.).a);float pl=length(vec2(min(e,0.),lz))-th;float yi=floor(p.y/.62+.5);vec3 kp=vec3(e+.72,p.y-yi*.62,abs(lz)-.22);float sk=sCap(kp,vec3(.5,0,-.04),vec3(.05,0,0),.06);vec3 hp=kp;hp.yz*=rot(uX.x*uT*12.+yi);float hd=min(min(length(hp*vec3(1,1,1.25))-.17,length(hp-vec3(0,.13,.08))-.07),sk);vec2 res=U(vec2(min(wall,pl),0),vec2(hd,1));float g=floor(p.z/PZ);vec3 h=h3(vec3(g,7,3)),L=lamp(g);vec2 tc=vec2((h.x-.5)*8.,(g+.5)*PZ+(h.y-.5)*1.4);float tb=length(vec2(length(p.xz-L.xz),max(L.y+.3-p.y,0.)))-.2-.05*sin(p.y*5.+g);vec2 tc2=vec2((h.z-.5)*8.,(g+.5)*PZ-(h.y-.5)*1.4);tb=min(tb,length(vec2(length(p.xz-tc2),max(p.y+2.9,0.)))-.34);res=U(res,vec2(tb,0));float ld=length(p-L)-.4;res=U(res,vec2(ld,2));return res;}void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){vec3 d=lamp(gid(p))-p;dl=length(d);l=d/dl;c=mix(AMB,vec3(1,.82,.6),uX.x*.7)*uX.y*20./(1.+dl*dl*.35);}float occ(vec3 p){float k=floor(p.z/PZ+.5),s=mod(k,2.)*2.-1.,e=rim(p.y,k)-s*p.x,pl=length(vec2(min(e,0.),p.z-k*PZ-.2))-.4;vec3 L=lamp(floor(p.z/PZ));return min(pl,length(vec2(length(p.xz-L.xz),max(L.y+.3-p.y,0.)))-.2);}float vis(vec3 p,vec3 l,float dl){float r=1.,t=.35;for(int i=0;i<4;i++){if(t>dl)break;r=min(r,sat(5.*occ(p+l*t)/t));t*=2.;}return r;}float den(vec3 p){return .024+.045*sat(fbm(p*.3+vec3(0,uT*.05,0))+.1);}vec3 vem(vec3 p,float t){return vec3(0);}vec3 sky(vec3 d){return AMB*.02;}vec3 amb(vec3 p,vec3 n){return vec3(.01,.014,.022)*(.6+.4*n.y)+AMB*.012*(1.+uX.x*2.);}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){if(m<.5){al=vec3(.66,.5,.44)*(.8+.3*nz(p*.8).g);sp=vec3(.045,.2,.75);}else if(m<1.5){al=vec3(.85,.86,.9);sp=vec3(1,.25,0);}else{al=vec3(1);sp=vec3(0,1,0);}}vec3 emi(vec3 p,vec3 n,float m){if(m>1.5)return mix(AMB,vec3(1,.9,.75),uX.x)*uX.y*6.;if(m>.5)return AMB*vec3(1,.9,.8)*uX.z*(1.5+uE.x*2.);return AMB*uX.x*.6*pow(sat(nz(p*.5+vec3(0,0,-uT*.8)).r*2.+.2),3.)*(.6+.6*uE.x);}\n#endif\n#if S==4\n#define STEPS 96\n#define FAR 50.\n#define VS 16\n#define VFAR 30.\nvoid init(){}float hel(vec3 p){return .035*sin(p.x*10.)*sin(p.z*10.+p.y*2.);}vec2 map(vec3 p){float mem=abs(p.y)-.6-.06*nz(p*2.2).r;vec2 r=vec2(mem,0);float b1=sBox(p-vec3(-2.1,-2.6,0),vec3(4.6,3.8,1.6),.5);if(b1>.6)r=U(r,vec2(b1-.3,1));else{float c1=sBox(p-vec3(-3.4,0,0),vec3(3.1,.8,.72),.4)+hel(p);c1=smin(c1,sCap(p,vec3(.5,-.4,0),vec3(1.1,-4.6,0),.95)+.12*nz(p*1.2).g,.5);c1=smin(c1,length(p-vec3(1.2,-4.9,.1))-1.05,.4);float lh=sCap(p,vec3(-6.2,-.95,.55),vec3(-.2,-.95,.55),.15);float fs=1e9;for(int i=0;i<7;i++){float u=float(i)/6.;vec3 c=mix(vec3(1.15,-4.8,1.05),vec3(.45,-.75,.88),u);vec3 q=p-c;q.xy*=rot(float(i));q.yz*=rot(.7);fs=min(fs,sBox(q,vec3(.11),.03));}r=U(r,vec2(min(c1,lh),1));r=U(r,vec2(fs,3));}float b3=length(p-vec3(6.5,-1,0))-3.4;if(b3>.6)r=U(r,vec2(b3-.3,1));else{float c3=smin(sCap(p,vec3(5.6,-2.4,0),vec3(5.6,.9,0),.95),sCap(p,vec3(7.4,-2.4,0),vec3(7.4,.9,0),.95),.4);c3=smin(c3,min(length(p-vec3(5.4,-2.6,.2))-1.2,length(p-vec3(7.6,-2.6,-.2))-1.2),.3)+hel(p);float rk=min(length(p-vec3(5.9,1.6,.5))-.45,length(p-vec3(7.1,1.6,-.45))-.45);r=U(r,vec2(c3,1));r=U(r,vec2(rk,2));}float b2=length(p-vec3(3.3,-1.6,0))-1.7;if(b2>.5)r=U(r,vec2(b2-.2,1));else r=U(r,vec2(smin(sBox(p-vec3(3.3,-.8,0),vec3(.5,.55,.5),.2),length(p-vec3(3.4,-2.,.1))-.72,.25)+hel(p),2));r=U(r,vec2(length(p-uY.xyz)-.48,2));float b4=length(p-vec3(12.1,0,0))-2.6;if(b4>.6)r=U(r,vec2(b4-.3,1));else{float c4=sBox(p-vec3(12,-.3,0),vec3(1.1,1.25,.95),.45)+hel(p);c4=smin(c4,length(p-vec3(12.3,1.25,.3))-.62,.3);r=U(r,vec2(c4,1));}return r;}float occ(vec3 p){return min(min(abs(p.y)-.6,min(sBox(p-vec3(-3.4,0,0),vec3(3.1,.8,.72),.4),sCap(p,vec3(.5,-.4,0),vec3(1.1,-4.6,0),1.))),min(length(p-vec3(6.5,-1,0))-2.,sBox(p-vec3(12,-.3,0),vec3(1.1,1.25,.95),.45)));}void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){l=normalize(vec3(-.3,1,-.5));c=AMB*(.2+.6*uX.x);dl=10.;}float vis(vec3 p,vec3 l,float dl){float r=1.,t=.3;for(int i=0;i<4;i++){r=min(r,sat(5.*occ(p+l*t)/t));t*=2.1;}return r;}float den(vec3 p){return(p.y>.6?.02+.06*uX.x:.02)*(.6+.8*fbm(p*.4+vec3(0,uT*.06,0)));}vec3 vem(vec3 p,float t){vec3 a=uL[1].xyz,b=uL[0].xyz,pa=p-a,ba=b-a;float h=sat(dot(pa,ba)/max(dot(ba,ba),1e-4));vec3 q=pa-ba*h;q+=(nz(vec3(h*6.,uT*20.,0)).rgb)*.25*sin(h*PI);float d=length(q);return SPK*.25*exp(-d*d*60.)*exp(-uX.z*9.)*step(.001,uL[0].w);}vec3 sky(vec3 d){return mix(vec3(.006,.012,.02),AMB*(.03+.12*uX.x),sat(d.y*2.+.5));}vec3 amb(vec3 p,vec3 n){return mix(vec3(.01,.02,.035),AMB*(.02+.1*uX.x),sat(n.y*.5+.5));}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){if(m<.5){al=vec3(.62,.5,.45);sp=vec3(.045,.2,.6);}else if(m<1.5){al=vec3(.78,.8,.84);sp=vec3(1,.22,0);}else if(m<2.5){al=vec3(.88,.82,.7);sp=vec3(.06,.3,.15);}else{al=vec3(.5,.45,.4);sp=vec3(1,.2,0);}}vec3 emi(vec3 p,vec3 n,float m){vec3 e=vec3(0);float d=length(p-uL[0].xyz);e+=SPK*uL[0].w*.6*exp(-d*(m<.5?2.5:3.5));if(m>2.5){float u=sat((p.y+4.8)/4.05)*6.,g=exp(-abs(u-uX.y)*2.);e+=SPK*(g*3.+.08);}if(m>1.5&&m<2.5&&length(p-uY.xyz)<.6)e+=AMB*vec3(1,.6,.4)*(.6+uY.w*3.);if(m<.5&&p.y>0.)e+=AMB*.12*uX.x*(.5+.5*nz(p*.7+uT*.1).g);return e;}\n#endif\n#if S==5\n#define STEPS 96\n#define FAR 60.\n#define VS 18\n#define VFAR 40.\nvoid init(){}float cx(float z){return 3.*sin(z*.07)+1.5*sin(z*.023+1.);}vec2 map(vec3 p){vec3 q=p;q.x-=cx(p.z);float bul=.3*nz(vec3(q.xz*.12,0)).r+uX.x*.08*sin(uT*7.+q.z);float fl=q.y+1.7+bul-.07*nz(p*2.4).r,ce=1.7+bul-q.y-.07*nz(p*2.4+5.).r;float g=floor(p.z/9.),hx=h1(g)*2.-1.;vec2 pc=vec2(sign(hx)*(2.4+abs(hx)),(g+.5)*9.);float pr=length(vec2(q.x,p.z)-pc)-.55-.35*smoothstep(.6,1.7,abs(q.y));vec3 v=q;v.z=mod(p.z,7.)-3.5;v.x-=-1.8+3.6*step(.5,h1(floor(p.z/7.)+3.));float cpx=sBox(v-vec3(0,1.6,0),vec3(.8,.5,.6),.3)+.03*sin(v.x*12.)*sin(v.z*12.);vec3 cr=p-vec3(cx(-56.),-1.7,-56.);float ring=length(cr)-3.;if(ring<.5){float id;vec3 rq=pmod(cr,12.,id);ring=min(sCap(rq,vec3(1.,-.6,0),vec3(1.,.35,0),.17),sCap(rq,vec3(.66,-.6,0),vec3(.66,.25,0),.15));ring=min(ring,sBox(cr-vec3(1.75,0,0),vec3(.4,.35,.7),.25));}vec2 r=vec2(min(min(fl,ce),pr),0);r=U(r,vec2(cpx,1));return U(r,vec2(ring,2));}void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){vec3 d=vec3(cx(p.z-6.),1.2,p.z-6.)-p;dl=length(d);l=d/dl;c=AMB*(.6+1.2*uX.x)*1.5/(1.+dl*dl*.12);}float occ(vec3 p){vec3 q=p;q.x-=cx(p.z);float g=floor(p.z/9.),hx=h1(g)*2.-1.;vec2 pc=vec2(sign(hx)*(2.4+abs(hx)),(g+.5)*9.);vec3 v=q;v.z=mod(p.z,7.)-3.5;v.x-=-1.8+3.6*step(.5,h1(floor(p.z/7.)+3.));return min(min(q.y+1.7,1.7-q.y),min(length(vec2(q.x,p.z)-pc)-.6,sBox(v-vec3(0,1.6,0),vec3(.8,.5,.6),.3)));}float vis(vec3 p,vec3 l,float dl){float r=1.,t=.3;for(int i=0;i<4;i++){if(t>dl)break;r=min(r,sat(5.*occ(p+l*t)/t));t*=2.;}return r;}float den(vec3 p){return(.02+.06*uX.x)*(.6+nz(p*.5+vec3(uT*.1,0,uT*.2)).r);}vec3 vem(vec3 p,float t){vec3 cr=p-vec3(cx(-56.),-1.4,-56.);return AMB*uX.z*1.5*exp(-dot(cr,cr)*.25)+AMB*uX.x*.06;}vec3 sky(vec3 d){return AMB*.02;}vec3 amb(vec3 p,vec3 n){return AMB*(.01+.05*uX.x)+vec3(.006,.008,.012);}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){if(m<.5){al=vec3(.64,.5,.45);sp=vec3(.045,.18,.7);}else if(m<1.5){al=vec3(.75,.77,.8);sp=vec3(1,.25,0);}else{al=vec3(.85,.86,.9);sp=vec3(1,.2,0);}}vec3 emi(vec3 p,vec3 n,float m){if(m<.5)return AMB*uX.x*.25*pow(sat(.6+nz(p*.9+vec3(0,0,uT*.3)).r),2.)*(1.+.5*uX.w);if(m<1.5)return AMB*2.*step(abs(p.y-1.05),.12)*(1.+uX.w);return AMB*uX.z*1.5*sat(1.-abs(p.y+1.4))*(.7+.3*sin(uT*9.));}\n#endif\n#if S==6\n#define STEPS 100\n#define FAR 60.\n#define VS 16\n#define VFAR 40.\nbool AM[6];void init(){for(int i=0;i<6;i++){vec3 d=uP[i].xyz-ro;float s=max(dot(d,rd),0.);AM[i]=uP[i].w>0.&&length(d-rd*s)<1.2;}}float mem(vec3 p){vec2 q=p.xz-vec2(.35,0);p.y-=uX.y*.25*exp(-dot(p.xz,p.xz)*.03)*(.8+.2*sin(uT*9.))*step(uB,80.);return max(abs(p.y)>.75?abs(p.y)-.47:abs(p.y)-.42-.05*nz(p*2.).r,1.42-length(q*vec2(.82,1.)));}vec2 rotor(vec3 p){vec3 q=p;q.xz*=rot(uA);float id;vec3 c=pmod(q,12.,id);float h=min(sCap(c,vec3(.98,-.62,0),vec3(1.,.55,.06),.16),sCap(c,vec3(.64,-.6,0),vec3(.66,.55,.04),.14));h=min(h,sCap(c,vec3(.66,.6,.04),vec3(1.,.6,.06),.11));float ft=smin(sCyl(q-vec3(0,.78,0),.55,.12)-.05,length(q-vec3(.25,1.05,.1))-.33,.15);vec3 g=q;g.xz*=rot(g.y*2.2);float cc=min(length(g.xz-vec2(.11,0))-.12,length(g.xz+vec2(.11,0))-.12);cc=max(cc,abs(q.y-2.6)-1.75);cc=smin(cc,sEll(q-vec3(.22,3.1,0),vec3(.32,.45,.25)),.15);vec2 r=U(vec2(h,1),vec2(min(ft,cc),2));return r;}float lobe(vec3 p,float a,bool b,float op){p.xz*=rot(a);p-=vec3(1.32,0,0);p.xy*=rot(-.12-op*.2);float d=(length(p/vec3(.62,1.05,.6))-1.)*.6;d=smin(d,length(p-vec3(-.1,.95,0))-.38,.2);d=smin(d,length((p-vec3(.15,-.85,0))/vec3(1,.9,1))*.9-.42,.2);d+=.012*sin(p.y*28.)*(b?1.:.4);return d;}float SITE;vec2 head(vec3 p){vec3 q=p-vec3(0,3.55,0);float a=atan(q.z,q.x),k=floor(a/(PI/3.)+.5),k2=k+sign(a/(PI/3.)-k);vec2 r=vec2(1e9,0);for(int i=0;i<2;i++){float kk=i==0?k:k2;bool b=mod(kk,2.)>.5;float an=kk*PI/3.;float op=b?.5+.5*cos(uA-an):0.;float d=lobe(q,-an,b,op);r=U(r,vec2(d,b?1.:3.));}float cap=smin(sEll(p-vec3(.2,5.05,0),vec3(.75,.32,.7)),length(p-vec3(.85,5.,.05))-.3,.2);return U(r,vec2(cap,3));}vec2 stator(vec3 p){float a=sBox(p-vec3(1.65,0,0),vec3(.42,.4,.62),.25);vec3 w=vec3(.05*sin(p.y*7.),0,.05*cos(p.y*7.));float b=1e9;for(int i=0;i<2;i++){w=-w;vec3 q=p+w;b=min(b,min(sCap(q,vec3(1.75,.3,.1),vec3(2.2,1.9,.2),.09),min(sCap(q,vec3(2.2,1.9,.2),vec3(2.15,3.8,.15),.085),sCap(q,vec3(2.15,3.8,.15),vec3(1.05,5.05,.05),.085))));}b=min(b,min(length(p-vec3(1.78,.4,.1))-.17,length(p-vec3(1.15,4.98,.05))-.16));return vec2(min(a,b),3);}vec2 atp(vec3 p,vec4 a){vec3 q=p-a.xyz;float bd=length(q)-.75;if(bd>.2)return vec2(bd,4);q.xy*=rot(a.w*3.);q.yz*=rot(a.w*2.1);float d=min(min(length(q-vec3(.38,0,0))-.12,length(q-vec3(.6,.05,0))-.12),length(q-vec3(.16,-.04,0))-.12);vec2 r=vec2(d,4);float rib=length(q-vec3(-.08,.06,0))-.15;float ad=sBox(q-vec3(-.38,.0,0),vec3(.18,.1,.04),.04);return U(r,vec2(min(rib,ad),3));}vec2 synth(vec3 p){float b=length(p-vec3(.4,2.4,0))-3.6;if(b>.3)return vec2(b,1);float br=min(sCyl(p-vec3(0,.35,0),1.4,1.05),sCap(p,vec3(0,1.,0),vec3(0,4.4,0),.65)),bh=length((p-vec3(0,3.75,0))*vec3(1,.8,1))-2.4,bs=min(sCap(p,vec3(1.7,.1,.1),vec3(2.2,1.9,.2),.75),sCap(p,vec3(2.2,1.9,.2),vec3(1.05,5.05,.05),.45));vec2 r=br>.2?vec2(br,1):rotor(p);r=U(r,bh>.2?vec2(bh,1):head(p));return U(r,bs>.2?vec2(bs,3):stator(p));}vec2 map(vec3 p){vec2 r=U(vec2(mem(p),0),synth(p));if(uX.z>0.){vec3 q=p-vec3(-2.9,0,-2.6);q.xy*=rot(.75);q.xz*=rot(2.4);q.y+=.45;r=U(r,synth(q));}for(int i=0;i<6;i++)if(AM[i])r=U(r,atp(p,uP[i]));return r;}void keyl(vec3 p,out vec3 l,out vec3 c,out float dl){vec3 d=vec3(-5,8,-7)-p;dl=length(d);l=d/dl;c=AMB*(.25+.55*uX.x);}float occ(vec3 p){return min(min(mem(p),length(p-vec3(0,3.7,0))-1.9),min(sCap(p,vec3(0,.3,0),vec3(0,3,0),.5),sCap(p,vec3(2.2,1.9,.2),vec3(2.15,3.8,.15),.15)));}float vis(vec3 p,vec3 l,float dl){float r=1.,t=.3;for(int i=0;i<4;i++){r=min(r,sat(5.*occ(p+l*t)/t));t*=2.1;}return r;}float den(vec3 p){return p.y<-.4?.05+.06*uX.y:(.012+.02*uY.y)*(.7+nz(p*.5+vec3(0,uT*.1,0)).r);}vec3 vem(vec3 p,float t){return p.y<-.45?AMB*uX.y*.25*(.6+.6*nz(p*.8+vec3(uT*.3,0,0)).g):vec3(0);}vec3 sky(vec3 d){return mix(vec3(.005,.008,.015),AMB*(.02+.04*uX.x),sat(d.y+.3))+AMB*pow(max(dot(d,normalize(vec3(-5,8,-7))),0.),20.)*uX.x*.5;}vec3 amb(vec3 p,vec3 n){return vec3(.01,.015,.025)*(n.y*.5+.5)+AMB*uX.y*.08*sat(-n.y)+AMB*.008;}void mat(vec3 p,vec3 n,float m,out vec3 al,out vec3 sp){if(m<.5){al=vec3(.6,.48,.43);sp=vec3(.045,.2,.6);}else if(m<1.5){al=vec3(.82,.84,.88);sp=vec3(1,.18,0);}else if(m<2.5){al=vec3(.75,.72,.68);sp=vec3(1,.3,0);}else if(m<3.5){al=vec3(.88,.82,.7);sp=vec3(.06,.3,.15);}else{al=vec3(1,.6,.3);sp=vec3(.5,.2,0);}}vec3 emi(vec3 p,vec3 n,float m){vec3 e=vec3(0);if(m<.5&&p.y<0.)e+=AMB*uX.y*.6;if(m>.5&&m<1.5&&p.y<.7&&length(p.xz)<1.25){vec3 q=p;q.xz*=rot(uA);float id;vec3 c=pmod(q,12.,id);float wa=atan(p.z,p.x);float ld=smoothstep(.25,.7,abs(atan(sin(wa),cos(wa))));e+=AMB*vec3(1,.7,.5)*ld*4.*exp(-dot(c-vec3(1.12,0,0),c-vec3(1.12,0,0))*30.)*(.5+uX.y);}if(m>.5&&m<1.5&&p.y>2.5){float an=uY.x*2.*PI/3.+PI/3.;vec3 s=vec3(cos(an),3.2,-sin(an))*.95;e+=vec3(1,.85,.6)*exp(-uX.w*5.)*8.*exp(-dot(p-s,p-s)*3.);}if(m>1.5&&m<2.5){vec3 q=p;q.xz*=rot(uA);e+=AMB*vec3(1.3,.9,.6)*smoothstep(.9,.98,normalize(q.xz+1e-5).x)*(1.5+3.*exp(-uX.w*6.))*step(.5,q.y);}if(m>2.5&&m<3.5&&p.y>2.5&&p.y<4.5){float a=atan(p.z,p.x)/(PI/3.);e+=AMB*.6*exp(-abs(fract(a)-.5)*14.)*exp(-(length(p.xz)-1.05)*(length(p.xz)-1.05)*20.-(p.y-3.2)*(p.y-3.2)*6.);}if(m>3.5)e+=AMB*vec3(1.4,1,.7)*3.;return e;}\n#endif\nfloat shd(vec3 p,vec3 l,float tm){float r=1.,t=.03;for(int i=0;i<16;i++){float h=map(p+l*t).x;r=min(r,8.*h/t);t+=clamp(h,.04,.7);if(r<.02||t>tm)break;}return sat(r);}float ao(vec3 p,vec3 n){float a=0.,s=1.;for(int i=1;i<5;i++){float h=.06*float(i*i);a+=(h-map(p+n*h).x)*s;s*=.6;}return sat(1.-a*.9);}vec3 nor(vec3 p,float t){vec2 e=vec2(1,-1)*(.0006+.0006*t);return normalize(e.xyy*map(p+e.xyy).x+e.yyx*map(p+e.yyx).x+e.yxy*map(p+e.yxy).x+e.xxx*map(p+e.xxx).x+1e-7);}float hg(float c,float g){return(1.-g*g)/(12.57*pow(1.+g*g-2.*g*c,1.5));}vec3 shade(vec3 p,vec3 n,float m,float t){vec3 al,sp,l,lc;float dl;mat(p,n,m,al,sp);keyl(p,l,lc,dl);if(sp.z>.3&&sp.x<.5){float e=.04,c0=nz(p*7.).b;vec3 g=vec3(nz(p*7.+vec3(e*7.,0,0)).b,nz(p*7.+vec3(0,e*7.,0)).b,nz(p*7.+vec3(0,0,e*7.)).b)-c0;n=normalize(n-(g-n*dot(g,n))*1.6);}vec3 v=-rd;float nl=dot(n,l),sh=shd(p+n*.01,l,dl),a=ao(p,n),nv=max(dot(n,v),0.);vec3 h=normalize(l+v+1e-4);float pw=2./(sp.y*sp.y+.002),spec=pow(max(dot(n,h),0.),pw)*(pw+8.)/25.;vec3 F0=mix(vec3(sp.x),al,sp.x>.5?1.:0.),F=F0+(1.-F0)*pow(sat(1.-nv),5.);float wr=sp.z>0.?sat((nl+sp.z*.6)/(1.+sp.z*.6)):max(nl,0.);vec3 dif=al*(sp.x>.5?.05:1.)*(wr*sh*lc+amb(p,n)*a);float th=sat(1.+map(p-n*.25).x/.25);dif+=al*sp.z*lc*sh*th*pow(sat(dot(v,-l)),2.)*.8+al*sp.z*AMB*.05*th;vec3 c=dif+F*spec*lc*sh*max(nl,0.);vec3 rf=reflect(rd,n);c+=F*sky(rf)*a*(sp.x>.5?1.6:.6)+F*AMB*.08*a*sat(rf.y+.5);for(int i=0;i<4;i++)if(uL[i].w>0.){vec3 d=uL[i].xyz-p;float r2=max(dot(d,d),1e-6);d*=inversesqrt(r2);float k=uL[i].w/(1.+r2*3.);vec3 hh=normalize(d+v+1e-4);c+=SPK*k*(al*(sp.x>.5?.1:1.)*max(dot(n,d),0.)+F*pow(max(dot(n,hh),0.),pw)*(pw+8.)/25.);}return c+emi(p,n,m);}void main(){vec2 q=(2.*gl_FragCoord.xy-uR.xy)/uR.y;ro=uC;vec3 f=normalize(uD-uC),r=normalize(cross(f,vec3(0,1,0))),u=cross(r,f);vec3 r2=r*cos(uF.x)+u*sin(uF.x);u=cross(r2,f);rd=normalize(f+uF.y*(q.x*r2+q.y*u));init();float t=.02,m=-1.;for(int i=0;i<STEPS;i++){vec2 h=map(ro+rd*t);if(h.x<.0004*t+.0008){m=h.y;break;}t+=h.x*.85;if(t>FAR)break;}vec3 col;if(m>=0.){vec3 p=ro+rd*t;col=shade(p,nor(p,t),m,t);}else{col=sky(rd);t=FAR;}float jt=fract(52.9829*fract(dot(gl_FragCoord.xy,vec2(.06711056,.00583715)))+uR.z*.618),tm=min(t,VFAR),dt=tm/float(VS),tr=1.;vec3 sc=vec3(0);for(int i=0;i<VS;i++){float s=(float(i)+jt)*dt;vec3 p=ro+rd*s,l,lc;float dl;keyl(p,l,lc,dl);float de=den(p);vec3 L=lc*vis(p,l,dl)*(hg(dot(rd,l),.6)+.02)+vem(p,s);sc+=tr*de*dt*L;tr*=exp(-de*dt);}col=col*tr+sc;for(int i=0;i<4;i++)if(uL[i].w>0.){vec3 d=uL[i].xyz-ro;float s=dot(d,rd);if(s>0.&&s<t){float e=length(d-rd*s);col+=SPK*uL[i].w*(.004/(e*e+.0004)+.15*exp(-e*3.));}}o=vec4(clamp(col,0.,64.),t);}\n",POST="precision highp float;precision highp sampler3D;uniform sampler2D uS0,uS1,uS2,uS3,uS4;uniform sampler3D uN;uniform vec3 uR;uniform vec2 uDir;uniform float uT;uniform vec4 uQ,uV,uF;out vec4 o;float sat(float x){return clamp(x,0.,1.);}\n#if P==0\nvoid main(){vec2 uv=gl_FragCoord.xy/uR.xy,e=uDir;vec3 c=vec3(0);for(int i=0;i<4;i++){vec2 q=uv+e*vec2(i%2==0?-1.:1.,i<2?-1.:1.);c+=texture(uS0,q).rgb+texture(uS1,q).rgb;}c*=.25;float l=dot(c,vec3(.3,.6,.1));o=vec4(c*sat((l-uV.x)/(l+.2)),1);}\n#endif\n#if P==1\nvoid main(){vec2 uv=gl_FragCoord.xy/uR.xy;vec3 c=texture(uS0,uv).rgb*.227;for(int i=1;i<5;i++){float w=i==1?.1946:i==2?.1216:i==3?.054:.0162;c+=(texture(uS0,uv+uDir*float(i)).rgb+texture(uS0,uv-uDir*float(i)).rgb)*w;}o=vec4(c,1);}\n#endif\n#if P==2\nvoid main(){vec2 uv=gl_FragCoord.xy/uR.xy;vec3 c=vec3(0);float w=0.;for(int i=-12;i<13;i++){float k=exp(-abs(float(i))*.2);c+=texture(uS0,uv+vec2(float(i)*uDir.x,0)).rgb*k;w+=k;}o=vec4(c/w,1);}\n#endif\n#if P==3\nvec3 aces(vec3 x){return clamp(x*(2.51*x+.03)/(x*(2.43*x+.59)+.14),0.,1.);}float hs(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}void main(){vec2 uv=(gl_FragCoord.xy-vec2(0,uR.z))/uR.xy,px=vec2(1,uR.x/uR.y)/1280.;vec3 n=texture(uN,vec3(uv*vec2(2.5,1.6)+vec2(0,-uT*.35),uT*.15)).rgb;uv+=n.xy*uQ.z*.011*(1.2-uv.y*.6);vec3 c=vec3(0);if(uQ.x>.02){vec2 d=vec2(cos(uQ.y),sin(uQ.y))*uQ.x*.12;float w=0.;for(int i=0;i<14;i++){float k=float(i)/13.-.5;c+=texture(uS0,uv+d*k).rgb+texture(uS1,uv+d*k).rgb;w+=1.;}c/=w;}else{float d=texture(uS0,uv).a,cc=min(uF.w*abs(d-uF.z)/max(d,.01),12.);float w=0.;for(int i=0;i<16;i++){float a=float(i)*2.39996,r=sqrt(float(i)+.5)*.25*cc;vec4 s=texture(uS0,uv+vec2(cos(a),sin(a))*r*px);float sc=min(uF.w*abs(s.a-uF.z)/max(s.a,.01),12.),k=sat(sc-r+1.);c+=s.rgb*k;w+=k;}c=c/max(w,1e-3)+texture(uS1,uv).rgb;vec2 ca=(uv-.5)*uV.w*.006;c.r=mix(c.r,texture(uS0,uv+ca).r+texture(uS1,uv+ca).r,.6);c.b=mix(c.b,texture(uS0,uv-ca).b+texture(uS1,uv-ca).b,.6);}c+=texture(uS2,uv).rgb*.55+texture(uS3,uv).rgb*.6+texture(uS4,uv).rgb*vec3(.45,.65,1.3)*.9;for(int i=0;i<3;i++){float k=float(i)*.45+.6;vec2 g=.5-(uv-.5)*k;c+=texture(uS3,g).rgb*vec3(.4,.6,1.)*(.08-float(i)*.02)*smoothstep(.75,.2,length(g-.5));}c*=uV.x;c=aces(c);float l=dot(c,vec3(.3,.6,.1));c=mix(c*vec3(.82,.97,1.12),c,smoothstep(.0,.35,l));vec2 v=uv-.5;c*=1.-dot(v,v)*.9;c=pow(c,vec3(.4545));c+=(hs(gl_FragCoord.xy+fract(uT*7.)*517.)-.5)*uV.z*(1.-l*.6);c=mix(c,vec3(1,.96,.9),uQ.w)*uV.y;o=vec4(c+(hs(gl_FragCoord.xy*1.7+uT)-.5)/255.,1);}\n#endif\n",SPRV="precision highp float;uniform vec3 uR,uC,uD;uniform vec4 uF,uE,uX,uY;uniform float uT,uB,uA;uniform int uS;out vec3 vc;out float vz;float h1(float n){return fract(sin(n*12.9898+4.1)*43758.5453);}float sat(float x){return clamp(x,0.,1.);}float cx(float z){return 3.*sin(z*.07)+1.5*sin(z*.023+1.);}vec3 AMB=vec3(1.,.48,.14),SPK=vec3(.55,.75,1.3);void main(){float i=float(gl_VertexID);vec3 h=vec3(h1(i),h1(i+.31),h1(i+.73)),h2=vec3(h1(i+.17),h1(i+.53),h1(i+.91)),p=vec3(0),c=vec3(0);float s=.03;vec3 mo=uC+mod(h*vec3(36,22,36)+vec3(.3,.1,-.2)*uT-uC+vec3(18,11,18),vec3(36,22,36))-vec3(18,11,18);if(uS==0){p=mo;c=mix(AMB,vec3(.4,.6,1),h2.x)*.05*h2.y;s=.02+.03*h2.z;if(i<400.&&uX.w>0.){float a=uX.w;vec3 d=normalize(h-.5);p=uY.xyz+d*(1.-exp(-a*(2.+3.*h2.x)))*(1.5+3.*h2.y)+vec3(0,-.2,0)*a*a;c=SPK*2.5*exp(-a*(1.2+h2.z*2.))*(.3+h2.x);s=.012;}}else if(uS==1){p=uC+(mo-uC)*3.;c=mix(AMB,vec3(.5,.6,1),h2.x)*.06*h2.y*(1.+uX.x*3.);s=.06+.1*h2.z;}else if(uS==2){if(i<1500.){p=vec3((h.x-.5)*18.,-1.25-h.y*2.05,(h.z-.5)*18.);p+=sin(uT*vec3(1.1,.7,.9)+h2*6.)*.12;c=AMB*.9*h2.x*uX.y;s=.035;}else{p=mo;c=vec3(.4,.6,1)*.04*h2.y;s=.02;}}else if(uS==3){if(i<2500.&&uX.x>0.){float k=floor(uC.z/4.+.5)+floor(h.x*9.)-6.,sg=mod(k,2.)*2.-1.,ph=fract(h.z+uT*(.25+.2*h2.x));vec3 b=vec3(sg*.9,(h.y-.5)*9.,k*4.);p=b+normalize(h2-.5+vec3(sg*.9,0,0))*ph*3.5;c=mix(AMB,vec3(1,.9,.7),h2.y)*1.8*sin(ph*3.1416)*uX.x*(1.+uE.z);s=.025;}else{p=mo;c=AMB*.12*h2.y*(.5+uX.y);s=.02+.02*h2.z;}}else if(uS==4){p=vec3(-8.+h.x*24.,.85+h.y*h.y*4.5,(h.z-.5)*9.)+sin(uT*vec3(.9,1.3,.7)+h2*6.28)*.25;c=AMB*1.4*step(h2.x,.1+uX.x*1.2)*(.5+.5*h2.y);s=.03;if(i<30.){float k=mod(i,10.),a=fract(uB)*16.-(k<4.?6.5:k<8.?10.:15.);a+=a<0.?16.:0.;p=vec3(k<4.?-4.8+k*1.1:k<8.?5.8+(k-4.)*.45:11.6+(k-8.)*.7,mix(-.4,1.7,sat(a/2.5))+a*.05,(floor(i/10.)-1.)*.45+(h.z-.5)*.3);c=AMB*3.*sat(1.-a/9.)*sat(a*4.);s=.04;}if(i>3000.){p=mo;c=vec3(.4,.6,1.)*.04*h2.y;s=.02;}}else if(uS==5){float z=uC.z-mod(h.z*70.-uT*(.5+uX.x)+uC.z,70.)+8.;p=vec3(cx(z)+(h.x-.5)*7.,(h.y-.5)*3.2,z);p+=sin(uT*(3.+uX.x*14.)*vec3(1,1.3,.8)+h2*6.28)*(.04+.12*uX.x);vec3 ce=vec3(cx(-56.),-1.2,-56.);if(i<1500.&&uX.z>0.){float an=h.x*6.28+uT*(1.+2.*h2.x),r=.6+h.y*3.;p=mix(p,ce+vec3(cos(an)*r,h2.z*1.5,sin(an)*r),uX.z);}c=AMB*1.3*step(h2.x,.08+uX.x*.9)*(.4+.6*h2.y);s=.028;}else{if(i<2000.){p=vec3((h.x-.5)*16.,-.6-h.y*3.,(h.z-.5)*16.)+sin(uT*vec3(1.2,.9,1.1)+h2*6.28)*.2;c=AMB*1.2*(.3+.7*h2.y)*uX.y;s=.03;}else if(i<2240.){float k=i-2000.,ph=fract(h.x+uT*(uB>80.?.45:.06));if(k<120.){p=mix(vec3(1.7+.9*(h.y-.5),-3.2,.9*(h.z-.5)),vec3(1.3,-.1,0),ph*ph);c=AMB*2.*sin(ph*3.14)*(.4+uX.y);}else{p=vec3(1.15+.5*(h.y-.5),.5+ph*3.,-.3+.5*(h.z-.5)+ph*(h2.x-.5)*2.);c=AMB*1.6*sin(ph*3.14)*step(80.,uB);}s=.035;}else{p=(h-.5)*vec3(18,7,18)+vec3(0,4.6,0)+sin(uT*.3+h2*6.)*.4;c=mix(AMB,vec3(1,.85,.6),h2.x)*.25*h2.y*(.2+uE.z*2.)*step(80.,uB);s=.02+.02*h2.z;}}vec3 f=normalize(uD-uC),r=normalize(cross(f,vec3(0,1,0))),u=cross(r,f),r2=r*cos(uF.x)+u*sin(uF.x);u=cross(r2,f);vec3 d=p-uC;float z=dot(d,f);vz=length(d);gl_Position=z>.08?vec4(dot(d,r2)/(z*uF.y)*uR.y/uR.x,dot(d,u)/(z*uF.y),0,1):vec4(9,9,9,1);float px=s/(z*uF.y)*uR.y*.5,cc=min(uF.w*abs(vz-uF.z)/max(vz,.01)*uR.x/1280.,24.),rr=max(px+cc,.7);gl_PointSize=rr*2.+2.;vc=c*px*px/(rr*rr)*2.*smoothstep(.08,.5,z);}\n",SPRF="precision highp float;uniform sampler2D uS0;in vec3 vc;in float vz;out vec4 o;void main(){vec2 q=gl_PointCoord*2.-1.;float r=dot(q,q);if(r>1.)discard;float d=texelFetch(uS0,ivec2(gl_FragCoord.xy),0).a;o=vec4(vc*(1.-r)*(1.-r)*smoothstep(-.2,.15,d-vz),0);}\n",
+SP=[0,1,2,3,4,5,6].map(s=>prog(VS,H3+'#define S '+s+'\n'+SCENE)),PP=[0,1,2,3].map(n=>prog(VS,H3+'#define P '+n+'\n'+POST)),SPR=prog(H3+SPRV,H3+SPRF);
+const ALL=[...SP,...PP,SPR];
+const U=(p,n)=>n in p.u?p.u[n]:p.u[n]=gl.getUniformLocation(p,n),
+uf=(p,n,v)=>{const l=U(p,n);l&&(typeof v=='number'?gl.uniform1f(l,v):gl['uniform'+(v.length>4?4:v.length)+'fv'](l,v))};
+function noiseTex(){const N=64,D=new Float32Array(N*N*N*4);let sd=7;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;
+const grad=P=>{const g=new Float32Array(P*P*P*3);for(let i=0;i<g.length;i+=3){let x,y,z,l;do{x=rnd()*2-1;y=rnd()*2-1;z=rnd()*2-1;l=x*x+y*y+z*z}while(l>1||l<.01);l=M.sqrt(l);g[i]=x/l;g[i+1]=y/l;g[i+2]=z/l}
+return(x,y,z)=>{const X=x|0,Y=y|0,Z=z|0,fx=x-X,fy=y-Y,fz=z-Z,q=t=>t*t*t*(t*(t*6-15)+10),u=q(fx),v=q(fy),w=q(fz);let r=0;
+for(let c=0;c<8;c++){const i=c&1,j=c>>1&1,k=c>>2,o=((X+i)%P+((Y+j)%P)*P+((Z+k)%P)*P*P)*3;r+=(g[o]*(fx-i)+g[o+1]*(fy-j)+g[o+2]*(fz-k))*(i?u:1-u)*(j?v:1-v)*(k?w:1-w)}return r}};
+const A=grad(16),B=grad(16),C=grad(32),FP=[];for(let i=0;i<4096;i++)FP.push([rnd(),rnd(),rnd()]);
+for(let z=0;z<N;z++)for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(x+y*N+z*N*N)*4,X=x/4,Y=y/4,Z=z/4,cx=X|0,cy=Y|0,cz=Z|0;let m=9;
+D[o]=A(X,Y,Z)*1.6;D[o+1]=B(X,Y,Z)*1.6;D[o+2]=C(x/2,y/2,z/2)*1.6;
+for(let k=-1;k<2;k++)for(let j=-1;j<2;j++)for(let i=-1;i<2;i++){const a=cx+i,b=cy+j,c=cz+k,f=FP[(a+16)%16+(b+16)%16*16+(c+16)%16*256],dx=a+f[0]-X,dy=b+f[1]-Y,dz=c+f[2]-Z;m=M.min(m,dx*dx+dy*dy+dz*dz)}
+D[o+3]=M.sqrt(m)}
+const t=gl.createTexture();gl.activeTexture(gl.TEXTURE7);gl.bindTexture(gl.TEXTURE_3D,t);gl.texImage3D(gl.TEXTURE_3D,0,gl.RGBA16F,N,N,N,0,gl.RGBA,gl.FLOAT,D);
+for(const k of[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_3D,k,gl.LINEAR);
+for(const k of[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T,gl.TEXTURE_WRAP_R])gl.texParameteri(gl.TEXTURE_3D,k,gl.REPEAT);gl.activeTexture(gl.TEXTURE0)}
+let W,H,BW,BH,BY,q=1,RT={};
+function rt(w,h){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,IF,w,h,0,gl.RGBA,TY,null);
+for(const k of[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR);
+for(const k of[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE);
+const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);return{t,f,w,h}}
+function size(){const d=M.min(devicePixelRatio||1,2);cv.width=innerWidth*d|0;cv.height=innerHeight*d|0;BW=cv.width;BH=M.min(cv.height,BW/2.39|0);BY=(cv.height-BH)/2|0;
+W=M.round(M.min(BW,1152)*q);H=M.max(1,M.round(W*BH/BW));
+for(const k in RT){gl.deleteTexture(RT[k].t);gl.deleteFramebuffer(RT[k].f)}
+const w4=M.max(1,W>>2),h4=M.max(1,H>>2);RT={S:rt(W,H),P:rt(W,H),A:rt(w4,h4),B:rt(w4,h4),C:rt(M.max(1,W>>3),M.max(1,H>>3)),D:rt(M.max(1,W>>3),M.max(1,H>>3)),E:rt(w4,h4),F:rt(w4,h4)};
+const bar=(innerHeight-innerWidth/2.39)/2;$('cp').style.bottom=$('hd').style.bottom=M.max(14,bar*.3)+'px';}
+const EV={};for(let b=0;b<SONG.BARS;b++)for(const[i,y,v,p]of SONG.ev(b))(EV[y]=EV[y]||[]).push([(b*16+i)*ST,v,p]);
+const last=(y,t)=>{const a=EV[y]||[];let lo=0,hi=a.length-1,r=null;while(lo<=hi){const m=lo+hi>>1;a[m][0]<=t?(r=a[m],lo=m+1):hi=m-1}return r},
+env=(y,t,d)=>{const e=last(y,t);return e&&t-e[0]<d*8?e[1]*M.exp(-(t-e[0])/d):0},
+cnt=(y,t)=>{const a=EV[y]||[];let lo=0,hi=a.length;while(lo<hi){const m=lo+hi>>1;a[m][0]<=t?lo=m+1:hi=m}return lo};
+const PR=b=>b<40?0:b<56?.35*(b-40)/16:b<72?.35+.55*sm((b-56)/16):b<80?.9+.1*(b-72)/8:b<112?.45+.55*M.exp(-(b-80)*1.2):.1+.35*(1-sm((b-112)/8));
+const ROT=t=>{const b=t/BAR;if(b<80)return PI/3+(b>76?.025*M.sin(t*95)*(b-76)/4:0);const s=(t-80*BAR)/ST,i=M.floor(s),f=s-i;return PI/3+(i+1-(1-cl(f/.35))**3)*PI/6};
+const FES=k=>[mx(1.15,.45,k/6),mx(-4.8,-.75,k/6),mx(1.05,.88,k/6)+.1],QS0=[.35,-.3,.9],QS1=[5.4,-.2,.95],RK=[5.9,1.6,1.],CY0=[7.2,1.95,.7],CY1=[11.5,1.95,.7],CU=[12.3,1.25,1.],O2=[12.1,-.4,1.05];
+function chain(t){const b=t/BAR,s=(b-M.floor(b))*16;let pos,prev,cy,cg=0,fi=-9;
+cy=s<12?CY0.map((v,k)=>mx(CY1[k],v,sm(s/8))):s<14?CY0.map((v,k)=>mx(v,CY1[k],sm((s-12)/2))):CY1;
+const h=SONG.HOPS;let k=0;while(k<10&&h[k+1]<=s)k++;const hs=h[k],age=(s-hs)*ST;
+const at=j=>j<7?FES(j):j==7?QS1:j==8?RK:j==9?cy:CU;
+pos=at(k);prev=k?at(k-1):[1.6,-5.6,1.2];
+if(k==7)pos=QS0.map((v,i)=>mx(v,QS1[i],sm((s-8)/2)));
+if(k==9){pos=add(cy,[0,0,.45]);cg=1}
+if(k==10&&s>15){prev=CU;pos=O2}
+if(k<7)fi=s;
+return{pos,prev,cy,cg,fi,age:k==10&&s>15?(s-15)*ST:age}}
+const MC=t=>[.3*M.sin(t*.21),.2*M.sin(t*.17),-.06*t],cz=b=>2-(b-24)*2.1,cxc=z=>-4.1*M.cos(PI*z/4),lum=z=>3*M.sin(z*.07)+1.5*M.sin(z*.023+1),
+SPL=12*BAR,ZF=b=>-50.5*sm((b-56)/16.5);
+const SHOTS=[
+[0,0,(u,b,t)=>{const c=MC(t),d=mx(13,5.6,sm(u));return[orb(c,d,.6+u*.9,mx(2.6,.8,sm(u))),c,0,.5,d,4]}],
+[8,0,(u,b,t)=>{const c=MC(t),d=mx(5.6,4.3,sm(u));return[orb(c,d,1.5+u*.7,.8-u*.6),c,.05,.5,d,5]}],
+[12,0,(u,b,t)=>{const c=MC(t),d=4.3+u*4.5,sh=.15*M.exp(-(t-SPL)*3);return[add(orb(c,d,2.2+u*.6,.2+u*1.6),[M.sin(t*41)*sh,M.sin(t*37)*sh,0]),add(c,[-u*u*3,u*u*1.5,-u*u*6]),-.04,.5,d,4]}],
+[16,1,u=>{const s=sm(u);return[CR([[-38,20,34],[-20,9,26],[-2,5,16],[7,2.2,5.6]],s),CR([[0,0,0],[0,0,0],[2,0,0],[5,0,1.5]],s),-.1+u*.15,.55,M.max(4,30*(1-s)),2]}],
+[21,2,u=>{const y=mx(4.5,-8.6,u**1.6);return[[.25,y,.15],[.3,y-6,.26],u*2.6,.62,3,3]}],
+[24,3,(u,b,t)=>{const z=cz(b),y=.85*M.sin((b-24)*.35);return[[cxc(z),y,z],[cxc(z-5)*.8,y*.4+.35,z-5],.12*M.sin(PI*z/4),.6,6,5]}],
+[40,4,u=>[CR([[3.6,-5.8,5],[3.2,-3.5,4.6],[2.6,-1.4,4.3]],u),CR([[.9,-4.4,.8],[.7,-2.6,.8],[.6,-1,.6]],u),.05,.5,4.2,6]],
+[44,4,u=>{const x=mx(-1,8.5,sm(u));return[[x,mx(1.25,1.6,u),5.2],[x+2.2,0,0],-.03,.5,5.3,5]}],
+[48,4,u=>[CR([[7.5,3.7,4.3],[10,3,3.7],[13.5,2.5,4]],u),CR([[7.5,1.6,.3],[10,1.7,.4],[12.2,.8,.3]],u),.04,.5,3.8,6]],
+[52,4,u=>{const s=sm(u);return[CR([[14,1.5,6],[9,3.6,10],[3,5.5,13]],s),[mx(11,4,s),0,0],0,.55,mx(6,13,s),3]}],
+[56,5,(u,b,t)=>{const z=ZF(b),e=sm((b-67)/4.5),sh=.03*PR(b);return[[lum(z)+M.sin(t*31)*sh,.15*M.sin(t*.7)+M.sin(t*27)*sh-e*.3,z],[lum(z-6),-.2-1.5*e,z-6],.06*M.sin(z*.07),.6,6,4]}],
+[72,6,u=>{const s=sm(u);return[orb([0,0,0],mx(10,7.5,s),.9+u*.25,mx(1,1.8,u)),[0,2.5,0],0,.55,8,3]}],
+[76,6,u=>{const s=sm(u);return[CR([[5.2,1,3.6],[4,3,3.4],[3.3,5.4,3]],s),CR([[0,2,0],[0,3,0],[0,3.9,0]],s),.03,.5,4.5,5]}],
+[80,6,(u,b,t)=>[orb([0,0,0],3.4,.6-(t-80*BAR)*.5,1.5),[0,.7,0],0,.55,3.4,7]],
+[84,6,u=>[orb([0,0,0],6.5,1.8+u*1.2,3.8),[0,3.2,0],-.05,.5,6.8,5]],
+[88,6,u=>[orb([0,0,0],2.9,3.2+u*.6,1.25),[0,3.6,0],.08,.62,3.4,5]],
+[92,6,u=>[orb([0,0,0],1.4,u*1.6,10.5),[0,4.2,0],u*.8,.5,5.6,6]],
+[96,6,u=>[orb([0,0,0],mx(7,10,u),4.5+u*2,mx(5,2,u)),[0,2.6,0],0,.5,8,4]],
+[100,6,u=>{const s=sm(u);return[CR([[8,3,8],[9,5,11],[8,7,14]],s),[-1.4,2,-1.3],0,.5,14,3]}],
+[104,3,(u,b,t)=>{const z=-60-(b-104)*3,y=-.4+(b-104)*.22;return[[cxc(z),y,z],[cxc(z-5)*.7,y*.3,z-5],.15*M.sin(PI*z/4),.62,7,4]}],
+[112,1,u=>{const s=sm(u);return[[0,mx(4,30,s),mx(26,140,s)],[0,0,-40],0,.55,40,0]}],
+[120,1,()=>[[0,30,140],[0,0,-40],0,.55,40,0]]];
+const CUTS=[[16,.5,.2],[21,1.3,0],[24,2.1,.7],[40,-.4,.1],[44,.3,0],[48,-2.8,0],[52,.1,0],[56,2.7,.2],[72,.2,0],[76,1.4,0],[80,1.57,1],[84,0,.25],[88,-1.4,.2],[92,1.6,.3],[96,3,.2],[100,.4,.15],[104,1.,.5],[112,-1.1,.2]];
+const CAP=[[1,6,'Glucose','C₆H₁₂O₆ · fuel drifts into the cell'],[8,4,'Glycolysis','two phosphates spent to crack the ring'],[12.25,3.5,'2 × Pyruvate','three carbons each, bound for the mitochondrion'],
+[17,4,'Mitochondrion','the cristae shine through the outer membrane'],[21.25,2.6,'Double membrane','porin · import channel'],[25,6,'Cristae','the folded inner membrane, lit by its own respiration'],
+[40.25,3.5,'Complex I','NADH hands two electrons down seven iron–sulphur clusters'],[44.25,3.5,'Ubiquinone → Complex III','the electron rides Q through the lipid'],[48.25,2,'Cytochrome c','a small courier on the far side'],
+[50.5,3,'Complex IV','½O₂ + 2H⁺ + 2e⁻ → H₂O'],[57,6,'Proton gradient','every hop pumps protons into the lumen'],[66,4,'Pressure','Δp approaching 200 mV'],
+[72.5,5,'ATP synthase','F₀ in the membrane · F₁ in the matrix'],[80.25,4,'Rotor engaged','12 c-subunits · one 30° step per sixteenth'],
+[92.25,3.5,'α₃β₃','three catalytic sites · one ATP per beat'],[100.25,3.5,'Dimers','rows of synthases bend the cristae'],[104.25,4,'ATP','released into the matrix'],[112.5,4,'The cell at work','']];
+let capI=-1;
+function captions(b){let k=-1;CAP.forEach((c,i)=>{if(b>=c[0]&&b<c[0]+c[1])k=i});if(k!=capI){capI=k;const e=$('cp');
+if(k<0)e.style.opacity=0;else{e.innerHTML='<b>'+CAP[k][2]+'</b><i>'+CAP[k][3]+'</i>';e.style.opacity=1}}
+const hd=$('hd');if(b>40&&b<117){hd.style.opacity=1;const n=cnt(8,b*BAR)-0;hd.textContent='Δp '+String(M.round(205*PR(b))).padStart(3,'0')+' mV   ATP '+String(b>=80?n:0).padStart(6,'0')}else hd.style.opacity=0}
+const L=new Float32Array(16),PA=new Float32Array(24);
+function state(t){const b=t/BAR;let si=0;while(si<SHOTS.length-2&&b>=SHOTS[si+1][0])si++;
+const[b0,sc,cam]=SHOTS[si],u=cl((b-b0)/(SHOTS[si+1][0]-b0)),k=env(0,t,.12);let[p,ta,roll,fov,foc,ap]=cam(u,b,t);
+if(b>=80&&b<112)p=add(p,[M.sin(t*53)*.03*k,M.cos(t*47)*.03*k,0]);
+const hh=env(1,t,.05),st=M.max(env(11,t,.25),env(12,t,.6),env(8,t,.2)),P=PR(b);
+let X=[0,0,0,0],Y=[0,0,0,0],ex=1,sh=0;L.fill(0);PA.fill(0);
+if(sc==0){const c=MC(t),sa=t-SPL;X=[sm(b/4),sm(b-8),sm(b-10),b>=12?sa:-1];Y=[...c,t*.12];ex=1.1+sm((b-14.5)/1.5)*1.6;
+if(b>=12){const f=M.exp(-sa*3);L.set([c[0]+.6,c[1],c[2]+.6,4*f,c[0]-.6,c[1],c[2]-.6,4*f])}
+for(const[bb,j]of[[9,0],[11,1]])if(b>=bb&&b<bb+1)L.set([c[0],c[1]+.6,c[2],2*M.exp(-(b-bb)*BAR*4)],8)}
+if(sc==1){if(b<112){X=[0,mx(.6,.9,sm((b-16)/3))*mx(1,.6,sm((b-19)/2)),.2,1];ex=1.2}else{X=[1,mx(1.3,.2,sm((b-112)/8)),mx(.5,0,sm((b-112)/7)),1];Y=[t*.02,0,0,0];ex=1.2}}
+if(sc==2){X=[mx(.6,1.3,sm((b-21)/2.5)),1,0,0];ex=1.05-sm((b-23.2)/.5)*.35+sm((b-23.75)/.25)*.6}
+if(sc==3){X=b<104?[0,.75+.3*st,0,0]:[1,1.15,1+env(8,t,.3),0];ex=b<104?1.35:1.1}
+if(sc==4){const c=chain(t);X=[P,c.fi,c.age,0];Y=[...c.cy,c.cg];L.set([...c.pos,1.2+1.5*M.exp(-c.age*12),...c.prev,0]);
+if(c.prev==CU)L.set([...O2,3*M.exp(-c.age*5)],8);ex=1.15}
+if(sc==5){X=[P,sm((b-60)/12),sm((b-66)/5),k];ex=1.1+P*.3;sh=sm((b-62)/10)*.9}
+if(sc==6){const n=M.floor((t-80*BAR)/(BAR/4)),on=b>=80;X=[on?.6:1.6,on?.5:P,b>=100?1:0,on?(t-80*BAR)%(BAR/4):9];Y=[on?((n%3)+3)%3:0,b<80?sm((b-74)/6):.2,0,0];ex=b<80?1.15:1.2;
+sh=b<80?sm((b-74)/5.5)*(b<79.75?1:0):0;
+if(on)for(let i=0;i<6;i++){const m=n-i,a=t-80*BAR-m*BAR/4;const an=PI/3+(m%3)*2*PI/3,r=1.9+2.2*a+.3*a*a;if(m<0||r>6)continue;
+PA.set([M.cos(an)*r,3+.5*a-.1*a*a,M.sin(an)*r,a+.01],i*4)}
+if(on){const an=PI/3+(n%3)*2*PI/3,f=M.exp(-((t-80*BAR)%(BAR/4))*8);L.set([M.cos(an)*1.9,3.1,M.sin(an)*1.9,2*f])}}
+let wh=0,wa=0,fl=0;for(const[cb,a,f]of CUTS){const d=t-cb*BAR,w=M.exp(-M.abs(d)/.08);if(w>wh){wh=w;wa=a}fl=M.max(fl,f*M.exp(-M.abs(d)*(d<0?30:4)))}
+const fade=sm(b/1.5)*(1-sm((b-118)/2));
+return{b,sc,p,ta,roll,fov,foc,ap,X,Y,k,hh,st,P,ex:ex*(1+.12*k*(b>=80&&b<112)),sh,wh:wh*.9,wa,fl,fade,A:ROT(t)}}
+function pass(p,dst,tx){const w=dst?dst.w:BW,h=dst?dst.h:BH;gl.bindFramebuffer(gl.FRAMEBUFFER,dst?dst.f:null);gl.viewport(0,dst?0:BY,w,h);gl.useProgram(p);
+tx.forEach((x,i)=>{gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,x.t);gl.uniform1i(U(p,'uS'+i),i)});uf(p,'uR',[w,h,FR]);uf(p,'uT',TT)}
+let FR=0,TT=0;
+function draw(t){const s=state(t),{X,Y}=s,cam=[s.roll,s.fov,s.foc,s.ap];TT=t;FR++;
+const prm=p=>{uf(p,'uC',s.p);uf(p,'uD',s.ta);uf(p,'uF',cam);uf(p,'uE',[s.k,s.hh,s.st,s.P]);uf(p,'uX',X);uf(p,'uY',Y);uf(p,'uB',s.b);uf(p,'uA',s.A)};
+const p=SP[s.sc];pass(p,RT.S,[]);prm(p);gl.uniform4fv(U(p,'uL'),L);gl.uniform4fv(U(p,'uP'),PA);gl.drawArrays(gl.TRIANGLES,0,3);
+pass(SPR,RT.P,[RT.S]);prm(SPR);gl.uniform1i(U(SPR,'uS'),s.sc);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);gl.drawArrays(gl.POINTS,0,s.sc==5?5000:3200);gl.disable(gl.BLEND);
+const bp=(pr,dst,src,dx,dy,thr)=>{pass(pr,dst,src);uf(pr,'uDir',[dx,dy]);thr!=null&&uf(pr,'uV',[thr,0,0,0]);gl.drawArrays(gl.TRIANGLES,0,3)};
+bp(PP[0],RT.A,[RT.S,RT.P],1/W,1/H,1.);bp(PP[1],RT.B,[RT.A],1/RT.A.w,0);bp(PP[1],RT.A,[RT.B],0,1/RT.A.h);
+bp(PP[1],RT.D,[RT.A],2/RT.A.w,0);bp(PP[1],RT.C,[RT.D],0,2/RT.A.h);
+bp(PP[2],RT.E,[RT.A],2.5/RT.A.w,0);bp(PP[2],RT.F,[RT.E],9/RT.A.w,0);
+gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,cv.width,cv.height);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);
+const f=PP[3];pass(f,null,[RT.S,RT.P,RT.A,RT.C,RT.F]);uf(f,'uQ',[s.wh,s.wa,s.sh,s.fl]);uf(f,'uV',[s.ex,s.fade*(PLAY?1:.55),.045,1+s.wh*4+s.sh*2]);uf(f,'uF',cam);uf(f,'uR',[BW,BH,BY]);gl.drawArrays(gl.TRIANGLES,0,3);
+return s}
+noiseTex();ALL.forEach(p=>{gl.useProgram(p);const l=U(p,'uN');l&&gl.uniform1i(l,7)});
+ALL.forEach(p=>{if(!gl.getProgramParameter(p,gl.LINK_STATUS))p.s.forEach(x=>gl.getShaderParameter(x,gl.COMPILE_STATUS)||console.error(gl.getShaderInfoLog(x)))});
+size();addEventListener('resize',size);
+gl.bindFramebuffer(gl.FRAMEBUFFER,RT.S.f);gl.viewport(0,0,W,H);for(const p of SP){gl.useProgram(p);for(let i=0;i<2;i++)gl.drawArrays(gl.TRIANGLES,0,3)}
+gl.bindFramebuffer(gl.FRAMEBUFFER,RT.P.f);gl.useProgram(SPR);gl.drawArrays(gl.POINTS,0,1);gl.bindFramebuffer(gl.FRAMEBUFFER,RT.A.f);for(const p of PP){gl.useProgram(p);gl.drawArrays(gl.TRIANGLES,0,3)}gl.finish();
+let actx,song,PLAY=0,t0=0,qa=[];
+const start=async()=>{if(PLAY)return;PLAY=1;$('ti').style.opacity=0;cv.style.cursor='none';
+actx=actx||new AudioContext();await actx.resume();const from=+(QS.get('t')||0);song=SONG.live(actx,from)};
+addEventListener('click',start);addEventListener('keydown',e=>{if(e.key==' '||e.key=='Enter')start();if(e.key=='f')document.documentElement.requestFullscreen?.()});
+setTimeout(()=>{try{actx=new AudioContext();SONG.prep(actx.sampleRate)}catch(e){}},50);
+let lt=performance.now();
+function loop(now){requestAnimationFrame(loop);if(PLAY&&song&&actx.currentTime-song.base>SONG.LEN)return;
+const dt=now-lt;lt=now;
+qa.push(dt);if(qa.length>40){const a=qa.reduce((x,y)=>x+y)/qa.length;qa=[];const nq=a>36?M.max(.5,q*.85):a<19?M.min(1,q*1.08):q;if(M.abs(nq-q)>.02){q=nq;size()}}
+let t;if(PLAY&&song){t=actx.currentTime-song.base;if(t<0)t=0}else t=72.6*BAR+(now*.00025)%(3*BAR);
+const s=draw(t);
+if(PLAY){captions(s.b);$('en').style.opacity=s.b>117.5?1:0}}
+requestAnimationFrame(loop);
+</script>
+</body></html>

@@ -1,0 +1,380 @@
+// READING FRAME — picture. Everything on screen is atoms: instanced, ray-cast spheres (tens of thousands per frame),
+// positioned in JS every frame from procedural models, then AO -> thin-lens DOF -> bloom/aberration/tone.
+// Units are nanometres. The audio clock (SONG) drives everything; SONG.rd(bar) is the shared reading head.
+const $=i=>document.getElementById(i);
+const cv=$("c"),gl=cv.getContext("webgl2",{antialias:false,alpha:false,powerPreference:"high-performance"});
+const EXF=gl.getExtension("EXT_color_buffer_float");gl.getExtension("OES_texture_float_linear");
+const {sin,cos,sqrt,abs,min,max,exp,floor,PI,log,tan,round,atan2}=Math,TAU=2*PI;
+const cl=(x,a=0,b=1)=>x<a?a:x>b?b:x,mix=(a,b,t)=>a+(b-a)*t,ss=(a,b,x)=>(x=cl((x-a)/(b-a)),x*x*(3-2*x));
+const ez=x=>(x=cl(x),x<.5?4*x*x*x:1-(-2*x+2)**3/2),back=x=>(x=cl(x)-1,1+2.6*x*x*x+1.6*x*x);
+const L3=(a,b,t)=>[mix(a[0],b[0],t),mix(a[1],b[1],t),mix(a[2],b[2],t)];
+const add=(a,b,s=1)=>[a[0]+b[0]*s,a[1]+b[1]*s,a[2]+b[2]*s],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const crs=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>sqrt(dot(a,a)),nrm=a=>mul(a,1/(len(a)||1)),lc=(a,s,b,t)=>[a[0]*s+b[0]*t,a[1]*s+b[1]*t,a[2]*s+b[2]*t];
+const rot=(k,a)=>{const c=cos(a),s=sin(a),t=1-c,[x,y,z]=k;return[[t*x*x+c,t*x*y+s*z,t*x*z-s*y],[t*x*y-s*z,t*y*y+c,t*y*z+s*x],[t*x*z+s*y,t*y*z-s*x,t*z*z+c]]};
+const ID3=[[1,0,0],[0,1,0],[0,0,1]];
+let sd=11;const rr=()=>(sd=sd*16807%2147483647)/2147483647,hash=n=>(n=sin(n*127.1+311.7)*43758.5453,n-floor(n));
+const wob=(x,y,z,s)=>sin(x*s+1.3*sin(y*s*.7))*sin(y*s+1.7*sin(z*s*.6))*sin(z*s+2.1*sin(x*s*.8));
+// key-frame interpolation: K=[[bar,v0,v1,...],...] eased between neighbours
+const kf=(K,b)=>{let i=0;while(i<K.length-2&&b>K[i+1][0])i++;const A=K[i],B=K[i+1],t=ez((b-A[0])/(B[0]-A[0]));return A.slice(1).map((v,j)=>mix(v,B[j+1],t))};
+const SG=SONG,BAR=SG.BAR,DNA=SG.DNA,AA=SG.AA,RNA=DNA.split("T").join("U"),COMP={A:"T",T:"A",G:"C",C:"G"};
+// fluorophore palette (linear HDR)
+const DAPI=[.2,.38,1],MCH=[1,.13,.34],GFP=[.22,1,.3],CYN=[.1,.8,1],YEL=[1,.72,.12],ORA=[1,.38,.06],TEAL=[.06,1,.72],VIO=[.5,.28,1],WHT=[.8,.86,1],PNK=[1,.42,.62];
+const BC={A:MCH,T:YEL,U:YEL,G:CYN,C:ORA};
+// amino-acid classes: hydrophobic / small / polar / + / -
+const AC=a=>"AVLIMFWC".includes(a)?YEL:"GP".includes(a)?WHT:"KRH".includes(a)?DAPI:"DE".includes(a)?MCH:CYN;
+const ASZ=a=>.26+.035*"GASCTPDNVEQILMHKFRYW".indexOf(a)*.55;
+// ---------------- atom buffers ----------------
+const MA=120000,MD_=90000,AB=new Float32Array(MA*8),DB=new Float32Array(MD_*8);let na=0,nd=0;
+const put=(x,y,z,r,c,e=0)=>{if(r>.01&&na<MA){const o=na++*8;AB[o]=x;AB[o+1]=y;AB[o+2]=z;AB[o+3]=r;AB[o+4]=c[0];AB[o+5]=c[1];AB[o+6]=c[2];AB[o+7]=e}};
+const pv=(p,r,c,e)=>put(p[0],p[1],p[2],r,c,e);
+const dot_=(x,y,z,r,c,e)=>{if(nd<MD_){const o=nd++*8;DB[o]=x;DB[o+1]=y;DB[o+2]=z;DB[o+3]=r;DB[o+4]=c[0];DB[o+5]=c[1];DB[o+6]=c[2];DB[o+7]=e}};
+// rejection-sampled, minimum-distance packed atom clouds inside an implicit shape
+function pack(N,bb,test,dm,col){const out=[],G=new Map(),K=(i,j,k)=>i*73856093^j*19349663^k*83492791;let n=0,tries=0;
+ while(n<N&&tries++<N*160){const x=mix(bb[0],bb[3],rr()),y=mix(bb[1],bb[4],rr()),z=mix(bb[2],bb[5],rr());if(!test(x,y,z))continue;
+  const gi=floor(x/dm),gj=floor(y/dm),gk=floor(z/dm);let ok=1;
+  for(let a=-1;a<2&&ok;a++)for(let b=-1;b<2&&ok;b++)for(let c=-1;c<2&&ok;c++){const L=G.get(K(gi+a,gj+b,gk+c));if(L)for(const q of L)if((q[0]-x)**2+(q[1]-y)**2+(q[2]-z)**2<dm*dm){ok=0;break}}
+  if(!ok)continue;const k=K(gi,gj,gk);G.has(k)||G.set(k,[]);G.get(k).push([x,y,z]);const c=col(x,y,z);out.push(x,y,z,dm*(.6+.14*rr()),c[0],c[1],c[2],c[3]||0);n++}
+ return new Float32Array(out)}
+// copy a template into the frame buffer with a transform (o + X*x + Y*y + Z*z); optional tint, radius scale, cut
+function stamp(T,o,R,s,rs,tint,te,cut){const[X,Y,Z]=R;for(let i=0;i<T.length;i+=8){const a=T[i]*s,b=T[i+1]*s,c=T[i+2]*s,x=o[0]+X[0]*a+Y[0]*b+Z[0]*c,y=o[1]+X[1]*a+Y[1]*b+Z[1]*c,z=o[2]+X[2]*a+Y[2]*b+Z[2]*c;
+ if(cut&&cut(x,y,z))continue;if(na>=MA)return;const r=T[i+3]*s*rs;if(r<.01)continue;const q=na++*8;AB[q]=x;AB[q+1]=y;AB[q+2]=z;AB[q+3]=r;
+ if(tint){const w=.75+.5*(T[i+4]-.5)*.5;AB[q+4]=tint[0]*w;AB[q+5]=tint[1]*w;AB[q+6]=tint[2]*w;AB[q+7]=te}else{AB[q+4]=T[i+4];AB[q+5]=T[i+5];AB[q+6]=T[i+6];AB[q+7]=te==null?T[i+7]:te}}}
+const two=(a,b,f)=>(x,y,z)=>{const v=wob(x,y,z,.55)*.5+.5>f?b:a,k=.8+.4*rr();return[v[0]*k,v[1]*k,v[2]*k,.05]};
+// ---------------- molecular templates ----------------
+let HIST,POL,HEL,RIBO,TRNA,NUP,MRNP,BAR_;
+function templates(){
+ HIST=pack(900,[-4.4,-3.4,-4.4,4.4,3.4,4.4],(x,y,z)=>{const d=max(sqrt(x*x+z*z)-3.3,abs(y)-2.7)+.45*wob(x,y,z,1.1);return d<0&&d>-1.1},.6,(x,y,z)=>atan2(z,x)*y>0?MCH:PNK);
+ POL=pack(4000,[-9,-8,-8,9,8,2],(x,y,z)=>{let d=(sqrt((x/8.4)**2+(y/7.2)**2+(z/7.4)**2)-1)*7+.9*wob(x,y,z,.42);d=max(d,2.7-sqrt(y*y+z*z));d=max(d,1.6-sqrt((x+1.5)**2+(y-3.5-z*.2)**2)*(y>1?1:9));return d<0&&(d>-1.5||z>.15)&&z<1.3},.6,two(MCH,[.78,.26,.5],.62));
+ HEL=pack(200,[-1.8,-1.8,-1.8,1.8,1.8,1.8],(x,y,z)=>{const d=sqrt(x*x+y*y+z*z)-1.5-.25*wob(x,y,z,1.6);return d<0&&d>-.9},.52,()=>[...ORA,.15]);
+ RIBO=pack(9000,[-15,-12,-12,15,19,2.2],(x,y,z)=>{
+  const s=(sqrt((x/12.5)**2+((y+5.5)/5.6)**2+(z/9)**2)-1)*6,l=(sqrt((x/14)**2+((y-6.5)/8.6)**2+((z+.5)/11)**2)-1)*8.5;
+  let d=min(s,l)+.8*wob(x,y,z,.33);
+  d=max(d,1.35-sqrt((y+1.2)**2+z*z));
+  d=max(d,-max(max(abs(x)-6.4,abs(y-2.6)-3.9),-4.3-z));
+  const tq=cl((y-5.5)/12),tx=mix(.6,-1,tq),tz=mix(.4,-3,tq);d=max(d,1.35-sqrt((x-tx)**2+(z-tz)**2)+(y<5?9:0));if(y>5&&y<18)d=max(d,-max(abs(x-tx)-1.05,tz-z));
+  return d<0&&(d>-1.6||z>1)&&z<2},.6,(x,y,z)=>y>-1.2+wob(x,y,z,.3)?two(DAPI,MCH,.6)(x,y,z):two([.3,.62,1],ORA,.64)(x,y,z));
+ const seg=(x,y,z,a,b,r)=>{const ab=sub(b,a),ap=sub([x,y,z],a),t=cl(dot(ap,ab)/dot(ab,ab));return len(sub(ap,mul(ab,t)))-r};
+ const E1=[1.2,4.6,-1.4],E2=[-.7,6.3,.7];
+ TRNA=pack(400,[-2.5,-1,-3.5,3,8,2.5],(x,y,z)=>min(min(seg(x,y,z,[0,0,0],E1,.8),seg(x,y,z,E1,E2,.8)),len(sub([x,y,z],E1))-1.25)<0,.48,(x,y,z)=>y<1.2?[1,.95,.55,.35]:[...YEL,.08]);
+ NUP=pack(700,[-3.4,-4,-4.5,3.4,4,4.5],(x,y,z)=>{const d=(sqrt((x/3)**2+(y/3.6)**2+(z/4)**2)-1)*3.2+.5*wob(x,y,z,1);return d<0&&d>-1.2},.62,()=>[rr(),0,0,0]);
+ MRNP=pack(260,[-2.2,-2.2,-2.2,2.2,2.2,2.2],(x,y,z)=>{const d=sqrt(x*x+y*y+z*z)-1.9-.3*wob(x,y,z,1.4);return d<0&&d>-.9},.52,()=>[rr(),0,0,0]);
+}
+// ---------------- chromatin: nucleosomes on a solenoid, coiled on an arc ----------------
+const NJ=26,CLa=[],NUCC=[],NUCF=[],NUCM=[],PHI=1.65*TAU,Rw=4.6,Hw=3.4;let iF=0,NB=0,CL,PX,FN,WW,CENT;
+function chromatin(){
+ const Rl=34,fax=u=>[Rl*sin(u/Rl),u*.22,Rl*(1-cos(u/Rl))];let pE=null,pT=null;
+ for(let j=0;j<NJ;j++){const u=(j-NJ/2)*1.85,a=fax(u),tA=nrm(sub(fax(u+.05),fax(u-.05))),nA=nrm(crs(tA,[0,1,0])),bA=crs(nA,tA),ps=j*TAU/6+.3;
+  const e1=lc(nA,cos(ps),bA,sin(ps)),n=lc(nA,-sin(ps),bA,cos(ps)),e2=crs(n,e1),c=add(a,e1,8.6);
+  const W=q=>{const f=-PHI/2+q*PHI/146;return add(add(add(c,e1,Rw*cos(f)),e2,Rw*sin(f)),n,(q/146-.5)*Hw)},TW=q=>nrm(sub(W(q+.5),W(q-.5)));
+  const p0=W(0),t0=TW(0);
+  if(!pE){for(let q=60;q>0;q--)CLa.push(add(add(p0,t0,-q*.34),[0,1,0],-.004*q*q))}
+  else{const d=len(sub(p0,pE)),m=d*1.15,nL=max(4,round(d*1.3/.34));
+   for(let q=1;q<=nL;q++){const s=q/(nL+1),s2=s*s,s3=s2*s;CLa.push(add(add(add(mul(pE,2*s3-3*s2+1),pT,m*(s3-2*s2+s)),p0,-2*s3+3*s2),t0,m*(s3-s2)))}}
+  if(j==13)iF=CLa.length-4;
+  NUCM[j]=CLa.length+73;for(let q=0;q<147;q++)CLa.push(W(q));NUCC[j]=c;NUCF[j]=[e1,n,e2];pE=W(146);pT=TW(146)}
+ for(let q=1;q<70;q++)CLa.push(add(add(pE,pT,q*.34),[0,1,0],.004*q*q));
+ NB=CLa.length;CL=new Float32Array(NB*3);PX=new Float32Array(NB*3);FN=new Float32Array(NB*3);WW=new Float32Array(NB);
+ const o=CLa[iF];CENT=[0,0,0];CLa.forEach((p,i)=>{for(let k=0;k<3;k++){CL[i*3+k]=p[k]-o[k];CENT[k]+=(p[k]-o[k])/NB}});
+ NUCC.forEach((c,j)=>NUCC[j]=sub(c,o))}
+const letter=i=>{const k=i-iF;return k>=0&&k<717?DNA[k]:"ACGT"[floor(hash(i*.731)*4)]};
+// ---------------- fold target: the GFP beta-barrel ----------------
+// strands [first,last residue (1-based), slot around the barrel]; real GFP order around the can is 1-2-3-11-10-7-8-9-4-5-6
+const STR=[[12,22,0],[26,37,1],[41,48,2],[92,100,8],[105,115,9],[118,127,10],[144,153,5],[160,170,6],[176,187,7],[199,208,4],[217,226,3]];
+const HB=[],NR=238,TGT=[],SSt=new Int8Array(NR),SEG=new Int8Array(NR).fill(-1),UNF=[],LNB=[];
+function foldTarget(){
+ const Rb=1.85,tl=.6,rise=.55;
+ STR.forEach(([s,e,sl],k)=>{const n=e-s+1,dr=sl%2?-1:1;for(let m=0;m<n;m++){const j=s-1+m,h=(m-(n-1)/2)*rise*cos(tl)*dr,th=sl*TAU/11+h*tan(tl)/Rb,r=Rb+(m%2?.13:-.13);TGT[j]=[r*cos(th),h,r*sin(th)];SSt[j]=1;SEG[j]=k}});
+ for(let m=0;m<16;m++){const j=56+m,th=m*1.745;TGT[j]=[.5*cos(th),(7.5-m)*.25,.5*sin(th)];SSt[j]=2;SEG[j]=11}
+ const rad=p=>{const l=sqrt(p[0]*p[0]+p[2]*p[2]);return l<.3?[1,0,0]:[p[0]/l,0,p[2]/l]};
+ for(let j=0;j<NR;){if(TGT[j]){j++;continue}let e=j;while(e<NR&&!TGT[e])e++;const n=e-j;
+  if(j==0||e==NR){const a=j==0?e:j-1,P=TGT[a],R=rad(P),sg=j==0?-1:1;for(let q=0;q<n;q++){const jj=j==0?e-1-q:j+q,k=q+1;TGT[jj]=[P[0]+R[0]*k*.32+.3*sin(k*.9),P[1]-k*.42,P[2]+R[2]*k*.32+.3*cos(k*.9)];LNB[jj]=[SEG[a],SEG[a]]}}
+  else{const P0=TGT[j-1],P1=TGT[e],cap=(P0[1]+P1[1])>0?1:-1,g=.7+n*.09,C0=add(add(P0,rad(P0),g*.8),[0,cap*g,0]),C1=add(add(P1,rad(P1),g*.8),[0,cap*g,0]);
+   for(let q=0;q<n;q++){const u=(q+1)/(n+1),v=1-u;TGT[j+q]=add(add(add(mul(P0,v*v*v),C0,3*v*v*u),C1,3*v*u*u),P1,u*u*u);LNB[j+q]=[SEG[j-1],SEG[e]]}}
+  j=e}
+ // the chain as released from the ribosome: a persistent random coil
+ let p=[0,0,0],d=[1,0,0];for(let j=0;j<NR;j++){d=nrm(add(d,[rr()-.5,rr()-.5,rr()-.5],1.3));p=add(p,d,.62);UNF.push(p)}
+ STR.forEach(([s,e,sl],k)=>{for(let j=s-1;j<e;j++){let bi=-1,bd=1.3;STR.forEach(([s2,e2,sl2])=>{if((sl2-sl+11)%11==1||(sl-sl2+11)%11==1)for(let i=s2-1;i<e2;i++){const d=len(sub(TGT[i],TGT[j]));if(d<bd){bd=d;bi=i}}});if(bi>=0&&(j%2))HB.push([j,bi,max(sl,STR.find(z=>z[0]-1<=bi&&z[1]>bi)[2])])}});
+ const c=UNF.reduce((a,q)=>add(a,q,1/NR),[0,0,0]);UNF.forEach((q,j)=>UNF[j]=sub(q,c))}
+// ---------------- the cell (for the final pull-back) ----------------
+const CC=[-7200,-2600,2600];
+function cellDots(){const out=[];
+ for(let n=0;out.length<36000*5;n++){const x=(rr()*2-1)*16000,y=(rr()*2-1)*5200,z=(rr()*2-1)*13000,ph=atan2(z,x),rl=sqrt((x/14000)**2+(z/11000)**2)/(1+.16*sin(3*ph+1)+.09*sin(5*ph+2)+.05*sin(9*ph));
+  if(rl>1||abs(y)>4200*(1.05-rl*rl)*(.5+.5*rr()))continue;const nu=(x/5200)**2+(y/2800)**2+(z/4300)**2;
+  if(nu<1){if(wob(x,y,z,.0016)+.4*wob(x,y,z,.004)>-.15*rr())out.push(x,y,z,0,rr())}else if(rr()<.5+.5*(1-rl))out.push(x,y,z,rr()<.12?2:1,rr())}
+ return new Float32Array(out)}
+let CELL;
+// ---------------- GL ----------------
+const VQ="void main(){gl_Position=vec4(vec2(gl_VertexID&1,gl_VertexID>>1)*4.-1.,0,1);}";
+function prog(fs,vs=VQ){const p=gl.createProgram();[[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]].forEach(([t,s])=>{const o=gl.createShader(t);gl.shaderSource(o,"#version 300 es\nprecision highp float;\n"+s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));gl.attachShader(p,o)});
+ gl.linkProgram(p);const U={},n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);U[a.name]=gl.getUniformLocation(p,a.name)}return{p,U}}
+const PA=prog("$ATOMF$","$ATOMV$"),PO=prog("$AOF$"),PD=prog("$DOFF$"),PF=prog("$FINF$");
+const qb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,qb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+function vao(){const v=gl.createVertexArray(),ib=gl.createBuffer();gl.bindVertexArray(v);gl.bindBuffer(gl.ARRAY_BUFFER,qb);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+ gl.bindBuffer(gl.ARRAY_BUFFER,ib);for(let k=1;k<3;k++){gl.enableVertexAttribArray(k);gl.vertexAttribPointer(k,4,gl.FLOAT,false,32,(k-1)*16);gl.vertexAttribDivisor(k,1)}gl.bindVertexArray(null);return[v,ib]}
+const[VA,IA]=vao(),[VD,ID]=vao(),EV=gl.createVertexArray();
+let W=0,H=0,SCL=1,tS,tA,fS,fA,rb,PG=0;const tD=[],fD=[];
+function mk(mip){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texStorage2D(gl.TEXTURE_2D,mip?8:1,EXF?gl.RGBA16F:gl.RGBA8,W,H);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,mip?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+ const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);return[t,f]}
+function resize(){const d=min(devicePixelRatio||1,2),w=round(min(innerWidth*d,2048)*SCL),h=round(w*innerHeight/innerWidth);if(w==W&&h==H)return;W=w;H=h;cv.width=W;cv.height=H;
+ [tS,tA,...tD].forEach(t=>t&&gl.deleteTexture(t));[tS,fS]=mk(0);rb&&gl.deleteRenderbuffer(rb);rb=gl.createRenderbuffer();gl.bindRenderbuffer(gl.RENDERBUFFER,rb);
+ gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT24,W,H);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,rb);[tA,fA]=mk(0);for(const i of[0,1])[tD[i],fD[i]]=mk(1)}
+const look=(e,t,u)=>{const z=nrm(sub(e,t)),x=nrm(crs(u,z)),y=crs(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1])};
+const persp=(f,a,n,fa)=>{const t=1/tan(f/2);return new Float32Array([t/a,0,0,0,0,t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0])};
+const uf=(p,o)=>{for(const k in o){const l=p.U[k],v=o[k];if(l)v.length>4?gl.uniformMatrix4fv(l,false,v):gl["uniform"+(v.length||1)+"fv"](l,v.length?v:[v])}};
+function pass(p,f,t,o){gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.viewport(0,0,W,H);gl.useProgram(p.p);gl.bindTexture(gl.TEXTURE_2D,t);uf(p,o);gl.bindVertexArray(EV);gl.drawArrays(gl.TRIANGLES,0,3)}
+function render(c,tm){
+ const d=len(sub(c.e,c.t)),Vm=Vm_=look(c.e,c.t,c.u||[0,1,0]),Pm=Pm_=persp(c.fov,W/H,max(.03,d*.003),d*40+600),k=H/1080;
+ gl.bindFramebuffer(gl.FRAMEBUFFER,fS);gl.viewport(0,0,W,H);gl.clearColor(0,0,0,20);gl.clear(16640);gl.enable(gl.DEPTH_TEST);gl.useProgram(PA.p);
+ uf(PA,{V:Vm,P:Pm,R:[W,H],FZ:c.F,SEC:c.sec,DC:c.dc,MD:0});
+ gl.bindVertexArray(VA);gl.bindBuffer(gl.ARRAY_BUFFER,IA);gl.bufferData(gl.ARRAY_BUFFER,AB.subarray(0,na*8),gl.DYNAMIC_DRAW);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,na);
+ if(nd){uf(PA,{MD:1});gl.enable(gl.BLEND);gl.blendFuncSeparate(1,1,0,1);gl.depthMask(false);gl.bindVertexArray(VD);gl.bindBuffer(gl.ARRAY_BUFFER,ID);gl.bufferData(gl.ARRAY_BUFFER,DB.subarray(0,nd*8),gl.DYNAMIC_DRAW);
+  gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,nd);gl.depthMask(true);gl.disable(gl.BLEND)}
+ gl.disable(gl.DEPTH_TEST);
+ pass(PO,fA,tS,{R:[W,H],AO:c.ao,T:tm,BG:c.bg});PG^=1;gl.useProgram(PD.p);gl.uniform1i(PD.U.Hs,1);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,tD[PG^1]);gl.activeTexture(gl.TEXTURE0);
+ pass(PD,fD[PG],tA,{R:[W,H],F:c.F,AP:c.ap*k,MX:22*k,MB:c.mb});
+ gl.bindTexture(gl.TEXTURE_2D,tD[PG]);gl.generateMipmap(gl.TEXTURE_2D);
+ const v=pj(Pm,pj(Vm,[...c.lr,1]));pass(PF,null,tD[PG],{R:[W,H],T:tm,EX:c.ex,FL:c.fl,FD:c.fd,CA:c.ca,BL:c.bl,SC:c.sc,GR:.035,LR:[v[0]/v[3]*.5+.5,v[1]/v[3]*.5+.5,v[3]>0?c.ls:0]})}
+const pj=(M,p)=>[0,1,2,3].map(i=>M[i]*p[0]+M[4+i]*p[1]+M[8+i]*p[2]+M[12+i]*p[3]);
+// ---------------- shared: drifting out-of-focus particles (ions, metabolites) ----------------
+function dust(c,n,box,r,tm){for(let i=0;i<n;i++){const p=[hash(i)*box+tm*.3,hash(i+.5)*box+tm*.17,hash(i+.25)*box-tm*.2].map((v,k)=>c.e[k]+((v-c.e[k])%box+box*1.5)%box-box/2);
+ put(p[0],p[1],p[2],r*(.5+hash(i+.7)),[DAPI,MCH,YEL,CYN][i%4],.3)}}
+// ---------------- scene A: chromatin -> unspool -> transcription (bars 0-40) ----------------
+let _p=[0,0,0],_t=[0,0,0],_n=[0,0,0],_b=[0,0,0];
+let _rs=1;const hp=(th,r,t,o,R,c,e)=>{const C=cos(th)*r,S=sin(th)*r;R*=_rs;put(_p[0]+_n[0]*C+_b[0]*S+_t[0]*t+o[0],_p[1]+_n[1]*C+_b[1]*S+_t[1]*t+o[1],_p[2]+_n[2]*C+_b[2]*S+_t[2]*t+o[2],R,c,e)};
+const BB1=[.22,.42,1],BB2=[.48,.32,1],SG1=[.35,.55,1],SG2=[.6,.45,1],Z0=[0,0,0];
+const pp=b=>b<24?0:SG.rd(min(b,39.999)).p;
+function frameAt(i){const o=i*3;_p=[PX[o],PX[o+1],PX[o+2]];const a=min(NB-1,i+1),z=max(0,i-1);_t=nrm([PX[a*3]-PX[z*3],PX[a*3+1]-PX[z*3+1],PX[a*3+2]-PX[z*3+2]]);_n=[FN[o],FN[o+1],FN[o+2]];_b=crs(_t,_n)}
+function sceneA(b,tm,c){
+ const Wd=b<16?-99:(b-16)*30+(b-16)**2*.8,dr=b<16?0:16*ss(16,21,b)+(b-16)*2.2,Dy=-dr*.5,Dz=-dr*.9;
+ for(let i=0;i<NB;i++){const o=i*3,w=ss(0,1,(Wd-abs(i-iF))/70),j=.25*(1-w);WW[i]=w;
+  const cx=CL[o]+j*sin(i*.013+tm*.7),cy=CL[o+1]+Dy+j*sin(i*.011+1.3+tm*.5),cz=CL[o+2]+Dz+j*sin(i*.017+2+tm*.6);
+  PX[o]=mix(cx,(i-iF)*.34,w);PX[o+1]=mix(cy,.35*sin(i*.021+tm*.5),w);PX[o+2]=mix(cz,.35*sin(i*.017+tm*.4+1),w)}
+ // parallel-transport frames (twist-free, so the helix never flips)
+ let N=[0,1,0];for(let i=0;i<NB;i++){const a=min(NB-1,i+1),z=max(0,i-1),T=nrm([PX[a*3]-PX[z*3],PX[a*3+1]-PX[z*3+1],PX[a*3+2]-PX[z*3+2]]);N=nrm(sub(N,mul(T,dot(N,T))));FN[i*3]=N[0];FN[i*3+1]=N[1];FN[i*3+2]=N[2]}
+ const P=pp(b),ip=iF+P,arr=ez(ss(20,24,b)),xp=P*.34,open=ss(23.5,25,b),far=b>=24,tw=i=>i*.5984+(far?2.2*ss(ip+40,ip+14,i):0);
+ const D1=[0,0,0],D2=[0,0,0];
+ for(let i=0;i<NB;i++){const dd=far?(PX[i*3]-c.t[0])**2+(PX[i*3+1]-c.t[1])**2+(PX[i*3+2]-c.t[2])**2:0;if(dd>4900)continue;_rs=1-ss(2500,4900,dd);
+  frameAt(i);const a=tw(i),L=letter(i),o=open*ss(ip+17,ip+12,i)*ss(ip-13,ip-8,i);
+  D1[1]=o*1.7;D1[2]=o*1.5;D2[1]=-o*.9;D2[2]=-o*.5;const wv=WW[i],e=(b<16?.1:.05)+wv*(1-wv)*2.4;
+  hp(a,.92,0,D1,.34,BB1,e);hp(a+.45,.68,.12,D1,.28,SG1,e);hp(a+.8,.55,0,D1,.3,BC[L],e+.12);
+  hp(a+2.4,.92,0,D2,.34,BB2,e);hp(a+1.95,.68,-.12,D2,.28,SG2,e);hp(a+1.6,.55,0,D2,.3,BC[COMP[L]],e+.12)}
+ // histone octamers leave as their DNA unwraps
+ for(let j=0;j<NJ;j++){const uw=WW[NUCM[j]];if(uw>.95)continue;const m=NUCM[j]*3,cc=[NUCC[j][0],NUCC[j][1]+Dy,NUCC[j][2]+Dz],ed=[hash(j)-.5,hash(j+.3)+.2,hash(j+.6)-.5];
+  const jt=.25*(1-uw),pc=add(add(cc,ed,uw*26),[jt*sin(NUCM[j]*.013+tm*.7),jt*sin(NUCM[j]*.011+1.3+tm*.5),jt*sin(NUCM[j]*.017+2+tm*.6)]);
+  const dh=far?len(sub(pc,c.t)):0;if(dh>90)continue;const hs_=(1-ss(.15,.8,uw))*(1-ss(60,90,dh));stamp(HIST,pc,NUCF[j],1,hs_,null,b<16?.15:.08);stamp(MRNP,add(pc,NUCF[j][0],5.6),NUCF[j],.55,hs_,YEL,.15)}_rs=1;
+ if(b<18)for(const[ox,oy,oz,ra,cc]of[[-34,20,-46,2.1,VIO],[44,-26,-64,-1.3,DAPI]]){const cr=cos(ra),sr=sin(ra),fd=1-ss(15,18,b);for(let i=0;i<NB;i+=2){const o=i*3,x=CL[o],z=CL[o+2],y=CL[o+1]+.3*sin(i*.011+tm*.5);
+  for(const sg of[0,2.4]){const a=i*.5984+sg,X=x*cr-z*sr+ox,Z=x*sr+z*cr+oz;put(X+cos(a)*.9,y+oy+sin(a)*.9,Z,.42*fd,cc,.1)}}}
+ if(b<20)for(let i=0;i<5000;i++){const u=i/5000*TAU*7,r=60+40*sin(u*.37),p=[r*cos(u)*1.5+30*sin(u*2.3),40*sin(u*.5)+20*cos(u*3.1),r*sin(u)-80+25*sin(u*1.7)];dot_(p[0]-20,p[1]+Dy,p[2]-60+Dz,1.6,DAPI,.5*(1-ss(16,20,b)))}
+ if(b<20)return;
+ // polymerase + helicase ride in; the bubble opens; the messenger peels away
+ const pc=L3([xp-26,26,-34],[xp,.3,-.4],arr),hc=L3([xp+30,-20,-30],[xp+4.9,0,0],arr);
+ stamp(POL,pc,ID3,1,ss(20,21.5,b),null,.06);
+ const rh=rot([1,0,0],tm*2.4);for(let k=0;k<6;k++){const an=tm*2.4+k*PI/3;stamp(HEL,add(hc,[0,cos(an)*2.95,sin(an)*2.95]),rh,1,ss(20,21.5,b),null,.15)}
+ // general transcription factors settle on the promoter just upstream of the start site
+ for(let g=0;g<3;g++){const k=ez(ss(18.5+g,20.5+g,b)),q=L3([-30+g*9,30-g*6,-20+g*12],[-4.5-g*2.6,1.4+(g%2)*.6,-.6],k);if(len(sub(q,c.t))<70)stamp(MRNP,add(q,[0,.3*sin(tm+g),0]),rot([0,1,0],g+tm*.1*(1-k)),1.1+g*.15,ss(18.5+g,19.5+g,b),[VIO,CYN,ORA][g],.12)}
+ // nucleotide triphosphates stream into the active site, one per 16th: each arrives on its note
+ if(b>=24&&b<40)for(let k=floor(P)+1;k<P+7;k++){const u=k-P,i=iF+k;if(k>255)break;frameAt(i);const a=tw(i),C=cos(a)*.92,S=sin(a)*.92,dst=[_p[0]+_n[0]*C+_b[0]*S,_p[1]+_n[1]*C+_b[1]*S,_p[2]+_n[2]*C+_b[2]*S];
+  const q=add(dst,[5*sin(k*2.1)+u*.6,4+3*cos(k*1.3)+u*.7,4+u*1.1],ez(u/7)*1.25),cB=BC[RNA[k]];pv(q,.3,cB,.7);put(q[0]+.35,q[1]+.2,q[2],.2,WHT,.5);put(q[0]+.6,q[1]+.35,q[2]+.1,.2,WHT,.5)}
+ if(b>=24){frameAt(floor(ip));const a=tw(floor(ip)),y=_p[1]+_n[1]*cos(a)*.92+_b[1]*sin(a)*.92;frameBox(_p[0]-.45,_p[0]+.45,y-.6,y+.7,_p[2]+2.4,.6+1.4*exp(-(P%1)*6))}
+ for(let n=0;n<P+1&&b>=24;n++){const i=iF+n,k=P-n,ex=max(0,k-8);frameAt(i);const a=tw(i),C=cos(a)*.92,S=sin(a)*.92;
+  let p=[_p[0]+_n[0]*C+_b[0]*S,_p[1]+_n[1]*C+_b[1]*S,_p[2]+_n[2]*C+_b[2]*S];const wg=min(ex/22,1)*1.5;
+  p=add(p,[-.08*ex+wg*sin(n*.23+tm*.9),.46*ex+wg*.5*sin(n*.19+1+tm*.7),.2*ex+wg*sin(n*.15+2-tm*.8)]);
+  const dq=len(sub(p,c.t));if(dq>85)continue;const sc=cl(k*1.5)*(1-ss(60,85,dq)),h=ss(8,14,k),Cb=cos(a+.8)*.55,Sb=sin(a+.8)*.55;
+  const bb=L3([_p[0]+_n[0]*Cb+_b[0]*Sb,_p[1]+_n[1]*Cb+_b[1]*Sb,_p[2]+_n[2]*Cb+_b[2]*Sb],add(p,[cos(n*1.3)*.55,0,sin(n*1.3)*.55]),h);
+  pv(bb,.3*sc,BC[RNA[n]],.25);
+  pv(p,.36*sc,TEAL,.25+(k<1?1.5*(1-k):0))}
+}
+const cam0=b=>{const d=mix(150,44,ez(b/16)),th=.7+b*.06,ph=.32+.15*sin(b*.2),t=L3(CENT,Z0,ss(6,16,b));return{t,e:add(t,[sin(th)*cos(ph)*d,sin(ph)*d,cos(th)*cos(ph)*d])}};
+const KT=[[16,-3,8,26,0],[24,-7,4.5,18,0],[28,-5,2.6,11,0],[32,4,3,13,0],[34,-9,6,20,0],[36,-6,6,22,0],[40,-4,10,26,40]];
+const cam1=b=>{const P=pp(b),k=kf(KT,b),ty=k[3],ex=ty/.46,tg=[P*.34+1.5-(ty?(8+ex)*.34+.08*ex:0),1.2+ty,ty*.43];return{t:tg,e:add(tg,[k[0]+2*sin(b*.31),k[1]+sin(b*.23),k[2]])}};
+// ---------------- scene B: the nuclear pore (bars 40-48) ----------------
+let MEM;const Rp=13,hm=3.4;
+function membrane(){const o=[],L=(x,y,z)=>{const lab=rr()<.05;o.push(x,y,z,.62,...(lab?ORA:[.17+.06*rr(),.09,.035]),lab?.5:0)};
+ for(let r=Rp+hm;r<66;r+=1.12){const n=floor(TAU*r/1.12);for(let k=0;k<n;k++){const t=k/n*TAU+r*.37;L(r*cos(t),r*sin(t),hm);L(r*cos(t+.03),r*sin(t+.03),-hm)}}
+ for(let be=-PI/2;be<PI/2;be+=1.12/hm){const r=Rp+hm-hm*cos(be),n=floor(TAU*r/1.12);for(let k=0;k<n;k++){const t=k/n*TAU;L(r*cos(t),r*sin(t),hm*sin(be))}}
+ MEM=new Float32Array(o)}
+const mzx=(n,tm,z)=>{const w=1+max(0,abs(z)-9)*.14;return[1.1*w*sin(n*.09+tm*.6),1.1*w*cos(n*.07+tm*.5)]};
+function sceneB(b,tm,c){
+ const P=SG.rd(b).p;
+ for(let i=0;i<MEM.length;i+=8){const x=MEM[i],y=MEM[i+1],r=sqrt(x*x+y*y),z=MEM[i+2]+.5*sin(r*.16-tm*.8)*ss(Rp+4,Rp+12,r);put(x,y,z,MEM[i+3]*(1-ss(52,66,r)),[MEM[i+4],MEM[i+5],MEM[i+6]],MEM[i+7])}
+ for(let s=0;s<8;s++){const th=s*PI/4+.2,R=[[cos(th),sin(th),0],[-sin(th),cos(th),0],[0,0,1]],rd=R[0];
+  stamp(NUP,[(Rp-.6)*rd[0],(Rp-.6)*rd[1],0],R,1.05,1,MCH,.08);
+  for(const zz of[6.8,-6.8])stamp(NUP,[(Rp+2.4)*rd[0],(Rp+2.4)*rd[1],zz],R,.85,1,VIO,.08);
+  for(let q=0;q<22;q++){const w=sin(tm*.8+q*.25+s)*q*.09,rr_=Rp+2.4+q*.12;put(rr_*rd[0]+R[1][0]*w,rr_*rd[1]+R[1][1]*w,8.5+q*.85,.55,DAPI,.1)}
+  for(let q=0;q<25;q++){const u=q/24,r=mix(Rp+2.4,6,u)+3*sin(u*PI);put(r*rd[0],r*rd[1],mix(-7.5,-26,u),.52,DAPI,.12)}}
+ for(let k=0;k<48;k++){const t=k/48*TAU;put(6*cos(t),6*sin(t),-26,.62,DAPI,.15)}
+ // peripheral heterochromatin hugs the inner membrane, with a clear channel under each pore (as in real nuclei)
+ for(const[ox,oy,ra]of[[-34,-10,.4],[30,24,2.5],[8,-40,4.4]])for(let i=0;i<NB;i+=2){const o=i*3,x=CL[o]*1.3+ox,y=CL[o+2]*1.3+oy,z=-15-CL[o+1]*.35+3*sin(x*.05+ra);if(x*x+y*y<380)continue;
+  for(const sg of[0,2.4]){const a=i*.5984+sg;put(x+cos(a+ra)*.9,y+sin(a+ra)*.9,z+sin(a)*.6,.42,DAPI,.12)}}
+ // FG-repeat mesh: wiggling chains that part around the messenger and the camera
+ for(let ch=0;ch<40;ch++){const th=ch/40*TAU+.1,z0=-4+(ch%5)*2;for(let q=0;q<13;q++){const r=Rp-3.2-q*.75,w=sin(tm*1.3+q*.5+ch)*q*.12;
+  let p=[r*cos(th)-sin(th)*w,r*sin(th)+cos(th)*w,z0+sin(tm*1.1+q*.4+ch*.7)*q*.1];
+  const m=mzx(P-p[2]/.62,tm,p[2]),dm=[p[0]-m[0],p[1]-m[1],0],l=len(dm);if(l<2.6)p=add(p,dm,(2.6-l)/(l||1));
+  const dc=sub(p,c.e),lc_=len(dc);if(lc_<3)p=add(p,dc,(3-lc_)/(lc_||1));put(p[0],p[1],p[2],.42,[.85,.72,.22],.12)}}
+ for(let k=0;k<6;k++){const z=30-((tm*2.4+k*11)%60),th=k*1.05+.4,r=Rp-4.2+3*ss(9,0,abs(z));if(len(sub([r*cos(th),r*sin(th),z],c.e))>4)stamp(MRNP,[r*cos(th),r*sin(th),z],rot([0,0,1],th+tm),1.15,1-ss(24,30,abs(z)),k%2?YEL:CYN,.2)}
+ // the messenger, 5' end first, with its cap-binding complex and export receptors
+ for(let n=max(0,floor(P-45/.62));n<min(256,P+80/.62);n++){const z=(P-n)*.62,m=mzx(n,tm,z);put(m[0],m[1],z,.36,TEAL,.2);
+  put(m[0]+.5*cos(n*1.4),m[1]+.5*sin(n*1.4),z,.3,BC[RNA[n]],.25);
+  if(n==0)stamp(MRNP,[m[0],m[1],z+1.8],ID3,1,1,MCH,.2);if(n%48==24)stamp(MRNP,[m[0]+1.6,m[1],z],ID3,.9,1,ORA,.15)}
+}
+const KP=[[40,0,0,-8,9,-6,-40],[43,0,0,-2,7,-4,-30],[45.5,0,0,10,3.6,1.5,-4],[47,0,0,22,2.6,1.2,12],[48,0,0,26,6,5,14]];
+// the reading frame made visible: a bracket of light the bases slide into
+const frameBox=(x0,x1,y0,y1,z,I)=>{for(let i=0;i<32;i++){const u=i/8,sd=u|0,f=u%1,X=sd%2?(sd==1?x1:x0):mix(x0,x1,sd?1-f:f),Y=sd%2?mix(y0,y1,sd==1?f:1-f):sd?y1:y0;dot_(X,Y,z,.15,[.6,1,.7],I)}};
+// ---------------- scene C: translation (bars 48-72) ----------------
+const TUN=[[.6,5.6,.4],[.2,9,-.6],[-.5,12.5,-1.8],[-1,16.5,-3]];const TL=[0];for(let i=1;i<4;i++)TL[i]=TL[i-1]+len(sub(TUN[i],TUN[i-1]));
+const tun=s=>{let i=0;while(i<2&&s>TL[i+1])i++;return L3(TUN[i],TUN[i+1],cl((s-TL[i])/(TL[i+1]-TL[i])))};
+const mpath=x=>{const e=max(0,abs(x)-12);return[x,-1.2-.0045*e*e,-.022*e*e]};
+const dirv=(j,t)=>nrm([.9*sin(j*.47+sin(j*.11)*2.5+t*.5),.75+.6*sin(j*.31+t*.4),.45+.9*sin(j*.23+1.3-t*.45)]);
+let CH=[];
+const SCN="GASCTPVDNEQILMHKFRYW";
+function residue(p,j,q,as,e,tint,cutf){const a=AA[j];if(!a||(cutf&&cutf(p)))return;const gl_=j>=64&&j<67,col=gl_?GFP:tint||AC(a),ee=gl_?e+.5:e,t=nrm(q),s=nrm(crs(t,[.3,.2,1])),u=crs(s,t),sd_=j%2?1:-1;
+ pv(p,.3*as,col,ee);pv(add(p,t,-.2*as),.22*as,WHT,e*.5);pv(add(p,t,.2*as),.22*as,WHT,e*.5);pv(add(add(p,t,.22*as),u,.3*as),.2*as,MCH,e);
+ const n=(SCN.indexOf(a)+2)/4|0;for(let m=0;m<n;m++)pv(add(add(p,s,sd_*(.36+.24*m)*as),u,(m%2?.16:-.12)*as),(.24+.04*(m==n-1))*as,col,ee)}
+function sceneC(b,tm,c){
+ const R0=SG.rd(min(b,71.999)),p=min(R0.p,714),cc=p/3,ci=floor(cc),fr=cc-ci,cA=ci-1+(R0.r>16?fr:ez(fr/.3)),pS=cA*3;
+ // ribosomes: the main one in cutaway, two more on the same messenger (a polysome)
+ const rk=R0.r>16?0:.07*sin(PI*cl(fr/.3)),cr=cos(rk),sr=sin(rk);for(let i=0;i<RIBO.length;i+=8){let x=RIBO[i],y=RIBO[i+1],z=RIBO[i+2];if(y<-1.4+.6*sin(x*.4)){const X=x*cr-z*sr;z=x*sr+z*cr;x=X}else y+=28*(1-ez(ss(48,49.6,b)));put(x,y,z,RIBO[i+3],[RIBO[i+4],RIBO[i+5],RIBO[i+6]],RIBO[i+7])}
+ for(const x of[46,-48]){const m=mpath(x),tg=nrm(sub(mpath(x+1),mpath(x-1))),R=[tg,[0,1,0],nrm(crs(tg,[0,1,0]))];stamp(RIBO,add(m,[0,1.2,0]),R,1,1,null,.02,(X,Y,Z)=>Z>m[2]+2.5)}
+ for(let i=0;i<7;i++){const ph=hash(i)*TAU+tm*.05,r=26+hash(i+.4)*20;stamp(TRNA,[r*cos(ph),hash(i+.2)*30-6,-12-r*.6*sin(ph)],rot(nrm([hash(i+.1),1,hash(i+.3)]),tm*.3+i),.95,1,null,.05)}
+ // messenger
+ for(let n=max(0,floor(pS-110));n<min(717,pS+110);n++){const x=(n-pS)*.62+1.6,m=mpath(x),w=ss(12,30,abs(x))*.8;
+  const q=[m[0],m[1]+w*sin(n*.2+tm),m[2]+w*cos(n*.17+tm*.8)];pv(q,.34,TEAL,.18);put(q[0],q[1]+.48,q[2]+.12,.28,BC[RNA[n]],n>=192&&n<201?.9:.22)}
+ // tRNAs: dock at A, shift to P and E with the messenger, leave
+ for(let k=ci-4;k<=ci+1;k++){if(k<0||k>237)continue;const q=cc-k;if(q<0||q>3.7)continue;
+  const x=(3*k+1-pS)*.62+1.6,cd=[x,-.35,0],dk=ez(ss(.15,.85,q)),lv=ez((q-3)/.6),
+   pos=add(L3(add(cd,[7,10,13]),cd,dk),[-5,7,10],lv),R=rot(nrm([1,.4,.3]),(1-dk)*1.6+lv*1.2),sc=ss(0,.25,q)*(1-ss(3.2,3.7,q));
+  stamp(TRNA,pos,R,.95,sc,null,(k>=64&&k<67?.4:.08)+(q<.18&&R0.r<32?1.2*(1-q/.18):0));
+  if(q<.75)stamp(MRNP,add(pos,[R[1][0]*4.6+1.7,R[1][1]*4.6-.4,R[1][2]*4.6+1.6],ss(.45,.75,q)*5),R,1.05,sc*(1-ss(.5,.75,q)),VIO,.1);
+  if(q<1.25&&AA[k]){const tip=add(pos,[R[0][0]*-.7+R[1][0]*6.3+R[2][0]*.7,R[0][1]*-.7+R[1][1]*6.3+R[2][1]*.7,R[0][2]*-.7+R[1][2]*6.3+R[2][2]*.7]);
+   residue(L3(tip,TUN[0],ss(.95,1.25,q)),k,[0,1,0],sc,.3)}}
+ frameBox(1.2,3.25,-2.1,.5,2.1,R0.r>16?.5:1+1.5*exp(-fr*9));
+ // nascent chain: through the exit tunnel, then a writhing random coil
+ const nres=cc-1.25;CH=[];let pr=null;
+ for(let j=floor(nres);j>=0;j--){const a=nres-j,s=a*.52;let P;
+  if(s<TL[3])P=add(tun(s),[.12*sin(j+tm*2),.1*sin(j*1.3+tm*1.7),.12*cos(j+tm*1.9)]);
+  else if(!pr)P=add(TUN[3],dirv(j,tm),s-TL[3]);else P=add(pr,dirv(j,tm),.6);
+  if(s>=TL[3])pr=P;CH[j]=P;residue(P,j,dirv(j,tm),1,.12)}
+ for(let j=0;j+1<=nres;j++){const A=CH[j],B=CH[j+1];if(A&&B)pv(L3(A,B,.5),.24,WHT,.05)}
+}
+const KC=[[48,0,4,0,-18,6,40],[52,1.5,2,0,6,3,14],[56,0,6,0,-14,8,26],[60,1.8,1.5,0,4,2,11],[63,0,10,0,10,6,30],[66,0,16,4,-12,10,46],[72,0,28,8,-22,16,84]];
+// ---------------- scene D: fold, ignition, pull-back to the cell (bars 72-100) ----------------
+const SNP=k=>SG.SNAP[k]-72;
+const segE=(k,f)=>k<0?1:k==11?back(ss(11.7,12.1,f)):back(ss(SNP(STR[k][2]),SNP(STR[k][2])+.32,f));
+const rainbow=u=>[.5+.5*cos(TAU*(u*.8+.55)),.5+.5*cos(TAU*(u*.8+.88)),.5+.5*cos(TAU*(u*.8+.2))];
+const FP=[];
+function sceneD(b,tm,c){
+ const f=b-72,ig=ss(84,84.3,b),as=f<3?1:f<12?mix(1,.42,ss(3,5,f)):mix(.42,1.18,ss(12,13.6,f)),rib=ss(4,5,f)*(1-ss(13.5,15,f)*.6);
+ const ve=nrm(sub(c.e,c.t)),ck=mix(9,-.1,ss(85,86.6,b)),cut=b>85?q=>dot(q,ve)>ck&&abs(q[1])<4.5:null,dpb=len(sub(c.e,c.t));
+ for(let j=0;j<NR;j++){const col=ez(ss(0,3.5,f-j/NR*1.3)),U=add(UNF[j],[sin(j*.7+tm*1.1),sin(j*.5+1+tm*.9),sin(j*.3+2+tm)],1-col),T=TGT[j];
+  const M=add(mul(T,1.45),[sin(j*1.7+tm*1.3),sin(j*2.3+1+tm*1.1),sin(j*1.1+2+tm*.9)],.55);let p=L3(U,M,col);
+  const e2=SEG[j]>=0?segE(SEG[j],f):min(segE(LNB[j][0],f),segE(LNB[j][1],f));
+  p=add(L3(p,T,e2),[sin(j*3+tm*9),sin(j*5+tm*8),sin(j*7+tm*7)],.025);FP[j]=p}
+ if(dpb<2500){
+  for(let j=0;j<NR;j++){const p=FP[j],r=len([p[0],0,p[2]]),gw=ig*exp(-r*r/1.6)*.3,gc=ig>0?L3(AC(AA[j]),GFP,ig*.75):null;
+   const sk=SEG[j]>=0&&SEG[j]<11?b-SG.SNAP[STR[SEG[j]][2]]:-1;residue(p,j,sub(FP[min(NR-1,j+1)],FP[max(0,j-1)]),as*(j>=64&&j<67?1-ig*.8:1),.1+gw+(sk>0?1.6*exp(-sk*5):0),gc,j>=56&&j<72?null:cut)}
+  // ribbon diagram: a Catmull-Rom backbone, flat across the sheet, arrow heads on strands
+  if(rib>0)for(let j=0;j<NR-1;j++){const P0=FP[max(0,j-1)],P1=FP[j],P2=FP[j+1],P3=FP[min(NR-1,j+2)],sg=SEG[j],e2=sg>=0?segE(sg,f):0;
+   let w=(SSt[j]==1?.78:SSt[j]==2?.62:.1)*e2*rib+.1*rib;if(SSt[j]==1&&SSt[j+2]!=1)w*=1.7*(SSt[j+1]==1?1:.2);
+   const col=L3(rainbow(j/NR),GFP,ig*.85);
+   for(let u=0;u<4;u++){const t=u/4,t2=t*t,t3=t2*t,Q=[0,1,2].map(i=>.5*(2*P1[i]+(-P0[i]+P2[i])*t+(2*P0[i]-5*P1[i]+4*P2[i]-P3[i])*t2+(-P0[i]+3*P1[i]-3*P2[i]+P3[i])*t3));
+    if(cut&&j<56|j>71&&cut(Q))continue;const Wd=nrm(crs(sub(P2,P1),rad3(Q)));for(let m=-2;m<=2;m++)put(Q[0]+Wd[0]*w*m/2,Q[1]+Wd[1]*w*m/2,Q[2]+Wd[2]*w*m/2,.13,col,.15+ig*.4)}}}
+ // solvent: water is squeezed out of the core as the chain collapses
+ if(f<15)for(let i=0;i<600;i++){const u=hash(i)*2-1,ph=hash(i+.3)*TAU,s_=sqrt(1-u*u),r=2+hash(i+.6)*12,ex=r<7?ss(.5,4,f)*(7-r)*1.4:0,R=r+ex,q=[R*s_*cos(ph)+.15*sin(tm*17+i),R*u+.15*sin(tm*19+i*2),R*s_*sin(ph)+.15*sin(tm*23+i*3)];
+  if(!cut||!cut(q))put(q[0],q[1],q[2],.16*(1-ss(13,15,f)),[.35,.6,1],.25)}
+ // backbone hydrogen bonds: a ladder of light flashes as each strand zips onto its neighbour
+ if(dpb<400)for(const[j,i,k]of HB){const t0=SG.SNAP[k],e=b-t0;if(e<0)continue;const A=FP[j],B=FP[i],m=L3(A,B,.5);if(cut&&cut(m))continue;dot_(m[0],m[1],m[2],.5+.7*exp(-e*3),[.7,1,.8],(.35+3*exp(-e*4))*(1-ig*.5))}
+ // the chromophore lights
+ // ...as the real thing: Ser65-Tyr66-Gly67 cyclise into p-hydroxybenzylidene-imidazolinone (phenol ring, bridge, five-ring)
+ if(ig>0&&dpb<300){const R=rot([0,1,0],tm*.4),at=(x,y,r,e)=>{const q=[x*R[0][0]+y*R[1][0],x*R[0][1]+y*R[1][1]-.4,x*R[0][2]+y*R[1][2]];put(q[0],q[1],q[2],r*ig,GFP,e)};
+  for(let k=0;k<6;k++)at(-.95+.42*cos(k*PI/3),.42*sin(k*PI/3),.17,1.1);at(-1.79,0,.15,.9);
+  for(let k=0;k<5;k++)at(.72+.36*cos(k*1.2566+PI),.36*sin(k*1.2566+PI),.17,1.1);at(-.18,.22,.15,1.1);at(1.12,.5,.14,.9);at(.92,-.62,.14,.9)}
+ if(ig>0)dot_(0,-.4,0,max(3,dpb*.09),GFP,ig*(.5+.15*sin(tm*TAU*124/60))*(1+ss(88,91,b)));
+ if(b>=83.8&&b<89)for(let i=0;i<90;i++){const ph=(tm*1.6+hash(i))%1,dir=nrm([hash(i+.1)-.5,hash(i+.2)-.5,hash(i+.3)-.5]),inb=i<30,len_=inb?(1-ph)*22:ph*26,q=inb?add(add([0,-.4,0],ve,-8),[dir[0]*3,dir[1]*3,dir[2]*3],1-ph):[0,-.4,0];
+  const P=inb?add(q,nrm(add(ve,[-.3,.5,.2])),len_):add(q,dir,len_);if(b>=84||inb)for(let k=0;k<4;k++){const d2=inb?nrm(add(ve,[-.3,.5,.2])):dir;dot_(P[0]-d2[0]*k*.35,P[1]-d2[1]*k*.35,P[2]-d2[2]*k*.35,.22,inb?[.25,.55,1]:GFP,(inb?1:ig)*1.4*(1-k/4))}}
+ // neighbours and the whole cell, seen through the diffraction limit
+ if(b>=88){const pr=min(140,max(2.2,dpb*.03)),fi=ss(88,89.5,b);
+  if(b>=92)dot_(0,0,0,pr*1.3,GFP,(1-ss(103,104,b))*2*ss(92,95,b));for(let i=0;i<700;i++){const r=40+hash(i)*2200,u=hash(i+.3)*2-1,ph=hash(i+.6)*TAU,s=sqrt(1-u*u);dot_(r*s*cos(ph),r*u*.4,r*s*sin(ph),pr,GFP,1.3*fi*ss(30,300,dpb)*(1-ss(99,102.5,b+hash(i*.91)*2)))}
+  const cf=ss(400,3000,dpb);if(cf>0)for(const[ox,oz,ra,st,iv]of[[0,0,0,5,1],[31e3,7e3,2.2,15,.55],[-27e3,-13e3,4.1,15,.5],[5e3,-29e3,1,20,.4],[-9e3,27e3,5.3,20,.4]]){const cr=cos(ra),sr=sin(ra);for(let i=0;i<CELL.length;i+=st){const g=CELL[i+3],x=CELL[i],z=CELL[i+2];{const tb=98.2+3.6*hash(i*.37+ox),bl=1-ss(tb,tb+.12,b);if(bl>0)dot_(CC[0]+ox+x*cr-z*sr,CC[1]+CELL[i+1]-(ox?900:0),CC[2]+oz+x*sr+z*cr,pr*(.8+.5*CELL[i+4]),[DAPI,GFP,MCH][g],bl*cf*iv*[1.3,1.1,1.6][g]*(.5+CELL[i+4])*(ox?2.2:1))}}}}
+}
+const rad3=q=>{const l=sqrt(q[0]*q[0]+q[2]*q[2])||1;return[q[0]/l,0,q[2]/l]};
+// ---------------- timeline: camera + post per bar ----------------
+const C0=()=>({mb:0,lr:[0,-.4,0],ls:0,e:[0,0,40],t:[0,0,0],u:[0,1,0],fov:.75,F:40,ap:24,dc:0,sec:0,ex:.85,fl:0,fd:1,ca:.014,bl:.5,sc:1,bg:[.012,.03,.09],ao:.5});
+function scene(b,tm){
+ const c=C0();na=nd=0;
+ if(b<40){
+  let v=b<16?cam0(b):b<24?(()=>{const A=cam0(b),B=cam1(b),k=ez((b-16)/8);return{e:L3(A.e,B.e,k),t:L3(A.t,B.t,k)}})():cam1(b);c.e=v.e;c.t=v.t;
+  const d=len(sub(c.e,c.t));c.F=d*(b<4?mix(.3,1,ss(.5,3.5,b)):1+.22*sin((b-4)*PI/6)*ss(4,6,b)*(1-ss(13,16,b)));c.ap=b<16?mix(34,22,b/16):b<24?16:20;c.dc=1-ss(10,20,b)*.95;c.sec=b<20?.7:0;c.fov=b<16?.7:.8;c.ao=b<16?1.2:.45;
+  c.sc=b<0?1:ss(0,1.5,b);c.fd=1-ss(39.6,40,b);c.ex=b<16?.8:.9;
+  sceneA(b,tm,c);dust(c,b<16?250:400,b<16?220:70,b<16?.9:.3,tm)}
+ else if(b<48){const k=kf(KP,b);c.t=k.slice(0,3);c.e=k.slice(3);c.e[0]+=sin(b*.7)*.5;c.F=len(sub(c.e,c.t))*(b>44&&b<47?.55:1);c.ap=26;c.fov=.95;c.sc=ss(40,41.2,b);c.fl=ss(47.7,48,b)*.75;c.bg=[.06,.03,.01];c.ao=.6;
+  sceneB(b,tm,c);dust(c,350,70,.3,tm)}
+ else if(b<72){const k=kf(KC,b),sh=ss(64,71.8,b)**2*.25;c.t=k.slice(0,3);c.e=add(k.slice(3),[sin(tm*31)*sh,sin(tm*37)*sh,0]);c.t=add(c.t,[sin(b*.4)*.6,0,0]);
+  c.F=len(sub(c.e,c.t));c.ap=b<64?22:16;c.fl=(1-ss(48,48.4,b))*.75;c.fd=b>71.85?0:1;c.fov=.8;c.bg=[.02,.02,.08];c.ao=.6;
+  if(b>=60&&b<61)c.ex=1.1+.3*(1-ss(60,61,b));
+  sceneC(b,tm,c);dust(c,400,90,.3,tm)}
+ else{const f=b-72,pb=ez2(ss(88,96.5,b)),d=b<88?(f<4?mix(48,20,ez(f/4)):f<12?mix(20,15,ez((f-4)/8)):mix(15,11,ez((f-12)/4))):exp(mix(log(11),log(52000),pb));
+  let sp=0;SG.SNAP.forEach(x=>{if(b>=x)sp=max(sp,exp(-(b-x)*7))});const th=.4+f*.22-ss(84,88,b)*.6+sp*.03,ph=.35+.2*sin(f*.3)+ss(84,88,b)*.25,dir=nrm(L3([sin(th)*cos(ph),sin(ph),cos(th)*cos(ph)],[0,.985,.17],ss(.15,.85,pb)));
+  c.t=L3([0,0,0],CC,ss(log(300),log(30000),log(d)));c.e=add(c.t,dir,d*(1-sp*.05));c.u=nrm(L3([0,1,0],[0,0,-1],ss(.25,.85,pb)));c.F=d;c.ap=b<88?20:mix(20,1.5,ss(88,90,b));c.fov=.75;
+  c.fl=(1-ss(72,72.4,b))*.8+(1-ss(84,84.6,b))*ss(83.9,84,b)*.7;c.bg=b<84?[.02,.02,.06]:mul([.01,.06,.02],1-ss(99,102,b));c.bl=.5+ig_(b)*.12;c.fd=1;c.ao=.4;
+  if(b>=88){c.sec=0;c.ao=.4}
+  c.ls=ig_(b)*(b<88?.3:.45*(1-ss(89,92,b)));sceneD(b,tm,c);if(b<88)dust(c,300,60,.25,tm)}
+ c.mb=b>=44&&b<47.5?.35*ss(44,45,b):b>=66&&b<71.85?.2+.45*ss(66,71.5,b):b>=88&&b<95?.4*ss(88,89,b)*(1-ss(93,95,b)):0;
+ const kb=b>=8&&b<92&&!(b>=40&&b<48)&&!(b>=70&&b<72),pu=kb?exp(-(b*4%1)*7):0;c.ex*=1+.07*pu;c.bl+=.12*pu;
+ return c}
+const ig_=b=>ss(84,84.3,b),ez2=x=>x<.5?8*x**4:1-8*(1-x)**4;
+// ---------------- overlay: microscope HUD, the reading ticker, captions, scale bar ----------------
+const hd=$("hd"),sqE=$("sq"),cp=$("cp"),en=$("en"),chs=[...$("ch").children],sbD=$("sb").firstChild,sbS=$("sb").lastChild;let last={},Vm_,Pm_;const tl=[$("tN"),$("tC")],yh=$("yh"),zf=$("zf"),zl=$("zl");
+const set=(el,k,v,h)=>{if(last[k]!==v){last[k]=v;h?el.innerHTML=v:el.textContent=v}};
+const CAP=[[1.5,6,"chromatin","147 base pairs around every nucleosome"],[8.5,4,"","one gene · 717 letters · somewhere in two metres of DNA"],[16.5,4,"unspool","the double helix, two nanometres wide"],[24.5,5,"transcription","RNA polymerase reads the template strand"],
+ [40.5,4,"export","through the nuclear pore, five-prime end first"],[48.5,5,"translation","the ribosome reads three bases at a time"],[53.5,4,"","each codon calls one tRNA · each tRNA brings one amino acid"],[57.5,2.4,"","near real time · a cell manages five or six a second"],[66.2,3.4,"","faster"],[36.5,3,"","the messenger grows, five-prime end first"],[44.2,2.6,"","a gel of FG repeats lets only escorted cargo through"],[60,3.5,"S65 · Y66 · G67","the codons that will become the light"],
+ [72.3,3.2,"fold","238 amino acids find one shape"],[76.2,3,"","β-strands zip into a can"],[84.2,3.6,"488 nm in · 509 nm out","the chromophore matures inside its can"],[89,4,"","one molecule among millions"],[93,3.4,"","every green point is a gene, read"]];
+function overlay(b,tm,c){
+ const on=b>=0;hd.style.opacity=$("ch").style.opacity=sqE.style.opacity=$("sb").style.opacity=$("spw").style.opacity=$("zs").style.opacity=on&&b<96.5?1:0;en.style.opacity=b>=96.6?1:0;
+ const mm=floor(max(0,tm)/60),sc=(max(0,tm)%60).toFixed(2).padStart(5,"0");
+ const ac=b<3.5&&b>=0?["ACQUIRE ▸ CH1 405 nm DAPI","Z-STACK 64 PLANES · 0.12 µm","FOCUS LOCK …","FOCUS LOCK ✓"][min(3,floor(b))]:"";set($("lg"),"lg",ac.slice(0,floor((b%1)*60)));
+ set(hd,"h",`CONFOCAL · 100× / NA 1.45 OIL\nPINHOLE 1.0 AU · ${b<40?"405":b<72?"561":"488"} nm\nZ ${(c.e[1]/1000).toFixed(3)} µm   T ${mm}:${sc}\nBAR ${String(max(0,b)+1|0).padStart(3,"0")}.${(max(0,b)%1*4|0)+1}   124 BPM`);
+ const chOn=[b<40||b>=88,b>=84,b>=20&&b<72];chs.forEach((e,i)=>e.className=chOn[i]?"on":"");
+ // caption
+ let ct="",cs="",co=0;for(const[a,d,h,p]of CAP)if(b>=a&&b<a+d){ct=h;cs=p;co=min(ss(a,a+.4,b),1-ss(a+d-.6,a+d,b))}
+ if(b>=71.84&&b<72){ct="UAA · STOP";cs="release";co=1}
+ set(cp.firstChild,"ct",ct);set(cp.lastChild,"cs",cs);cp.style.opacity=co;
+ // the reading ticker — what you see is what you hear
+ const R=SG.rd(b);let s="";
+ if(R.m==1){const k=floor(R.p),T=i=>i<0?" ":COMP[DNA[i]],U=i=>i<0||i>k?" ":RNA[i];let a="",m="";
+  for(let i=k-12;i<=k+8;i++){const w=i==k?"u":i<k-6||i>k+4?"s":"";a+=w?`<${w}>${T(i)}</${w}>`:T(i);m+=w?`<${w}>${U(i)}</${w}>`:U(i)}
+  s=`<em>3′ template  </em>${a}<em>  5′</em>\n<em>5′ mRNA      </em>${m}<em>  3′</em>\n<em>nt ${k+1} / 717 · 8.3 nt/s</em>`}
+ else if(R.m==2){const k=floor(R.p);let a="";for(let i=k-10;i<=k+10;i++){const ch=i<0?"·":RNA[i]||" ";a+=i==k?`<u>${ch}</u>`:abs(i-k)>6?`<s>${ch}</s>`:ch}s=`<em>cytoplasm ▲  </em>${a}<em>  ▼ nucleus</em>\n<em>nuclear pore complex · 5′ cap leads</em>`}
+ else if(R.m==3){const k=min(716,floor(R.p)),co_=floor(k/3);let a="",m="";
+  for(let q=co_-2;q<=co_+2;q++){if(q<0||q>238){a+="    ";m+="    ";continue}const cd=RNA.slice(q*3,q*3+3);
+   a+=q==co_?[...cd].map((x,i)=>q*3+i==k?`<u>${x}</u>`:x).join("")+" ":`<s>${cd}</s> `;m+=q==co_?` <u>${AA[q]=="*"?"■":AA[q]}</u>  `:` <s>${AA[q]=="*"?"■":AA[q]}</s>  `}
+  s=`<em>mRNA  </em>${a}\n<em>tRNA  </em>${m}\n<em>codon ${co_+1} / 239 · ${(R.r/16*2.76).toFixed(1)} aa/s · ${R.r>16?"×"+R.r/16+" ":""}${co_>=64&&co_<67?"chromophore":"A-site"}</em>`}
+ else if(b>=72&&b<88){const f=b-72;let k=-1;SG.SNAP.forEach((x,i)=>{if(b>=x)k=i});
+  if(f<4)s=`<em>hydrophobic collapse</em>\n${AA.slice(0,238).slice(floor(f*60),floor(f*60)+24)}`;
+  else if(k>=0&&b<84){const st=STR.find(z=>z[2]==k),nm=STR.indexOf(st)+1;s=`<u>β${nm}</u>  <em>${st[0]}–${st[1]}</em>  ${AA.slice(st[0]-1,st[1])}\n${"●".repeat(k+1)}${"○".repeat(10-k)}\n<em>eleven strands close the can</em>`}
+  else if(b>=84)s=`<u>S65 Y66 G67</u> → <em>p-hydroxybenzylidene-imidazolinone</em>\n<em>λex 395 / 475 nm · λem 509 nm</em>`}
+ else if(b>=88&&b<96){const k=floor(R.p);s=`<em>…${RNA.slice(max(0,k-14),k)}</em><u>${RNA[k]||""}</u><em>  3′</em>\n<em>magnification</em> ×${round(4e6/max(1,len(sub(c.e,c.t)))).toLocaleString("en")}\n<em>green fluorescent protein · 26.9 kDa · Aequorea victoria</em>`}
+ set(sqE,"s",s,1);
+ {const v=pj(Pm_,pj(Vm_,[0,0,0,1])),o=b>=92.5&&b<99.5?min(ss(92.5,93.5,b),1-ss(98.5,99.5,b)):0;yh.style.opacity=v[3]>0?o:0;yh.style.left=(v[0]/v[3]*.5+.5)*100+"%";yh.style.top=(.5-v[1]/v[3]*.5)*100+"%"}
+ [["N",0],["C",237]].forEach(([l,j],i)=>{const q=FP[j]&&b>=72.3&&b<85,v=q?pj(Pm_,pj(Vm_,[...FP[j],1])):[0,0,0,-1],e=tl[i];e.style.opacity=v[3]>0?min(ss(72.3,73,b),1-ss(84,85,b)):0;if(v[3]>0){e.style.left=(v[0]/v[3]*.5+.5)*100+"%";e.style.top=(.5-v[1]/v[3]*.5)*100+"%"}});
+ // focal plane indicator (z-stack slider)
+ zf.style.top=(50-cl((c.F/len(sub(c.e,c.t))-1)*90,-45,45))+"%";set(zl,"zf",(c.F*.001).toFixed(4)+" µm");
+ // scale bar from the real projection
+ const wpp=2*c.F*tan(c.fov/2)/innerHeight;let Lb=1;for(const v of[.5,1,2,5,10,20,50,100,200,500,1e3,2e3,5e3,1e4])if(v/wpp<180)Lb=v;
+ sbD.style.width=round(Lb/wpp)+"px";set(sbS,"sb",Lb<1e3?Lb+" nm":Lb/1e3+" µm")}
+// ---------------- run ----------------
+let A=null,S=null,T0=performance.now(),started=0,fq=[],lastR=0;
+const qs=new URLSearchParams(location.search),FROM=+qs.get("t")||0;
+function frame(){const tnow=performance.now();fq.push(tnow);if(fq.length>40)fq.shift();
+ if(fq.length>30&&tnow-lastR>1500){const ms=(fq[fq.length-1]-fq[0])/(fq.length-1);if(ms>26&&SCL>.45){SCL*=.86;lastR=tnow}else if(ms<15&&SCL<1){SCL=min(1,SCL*1.08);lastR=tnow}}
+ resize();const tm=S?A.currentTime-S.base-(A.outputLatency||A.baseLatency||0):-2+(tnow-T0)/9e4,b=min(tm/BAR,105);
+ const c=scene(b,tm);render(c,tm);overlay(b,tm,c);spectrum(b);requestAnimationFrame(frame)}
+let AN,FB;const spc=$("sp").getContext("2d"),wl=n=>{const h=270-n*270/31;return`hsl(${h},100%,60%)`};
+function spectrum(b){if(!AN)return;AN.getByteFrequencyData(FB);spc.clearRect(0,0,192,64);for(let n=0;n<32;n++){let v=0;const a=floor(2*1.21**n),z=floor(2*1.21**(n+1))+1;for(let i=a;i<z;i++)v=max(v,FB[i]);v=v/255;spc.fillStyle=wl(n);spc.globalAlpha=.85;spc.fillRect(n*6,64-v*56,4,v*56)}}
+function start(){if(started)return;started=1;$("ti").style.opacity=0;A=new AudioContext();A.resume().then(()=>{S=SG.live(A,FROM);AN=A.createAnalyser();AN.fftSize=2048;AN.smoothingTimeConstant=.7;FB=new Uint8Array(1024);S.out.connect(AN)})}
+addEventListener("click",start);addEventListener("keydown",e=>{if(e.key=="f")document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();else if(e.key==" "||e.key=="Enter")start()});
+const zz=$("en").querySelectorAll(".z");zz[0].textContent=AA.slice(0,238);zz[1].textContent=RNA;
+templates();chromatin();foldTarget();membrane();CELL=cellDots();resize();requestAnimationFrame(frame);

@@ -27,6 +27,9 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 | [The Meadow Counts](demos/meadow-counts-64k) | 64k | IDM: warm 70s school film, 88 BPM boom-bap, silent-film intertitles |
 | [RECURSOR](demos/recursor-64k) | 64k | IDM: 170 BPM acid drill'n'bass, 4D and hyperbolic geometry |
 | [PLEASE ASSEMBLE](demos/please-assemble-64k) | 64k | IDM: TTS announcer, impossible objects, 7/8 and 5/4 |
+| [PROTON MOTIVE](demos/proton-motive-64k) | 64k | Techno: 134 BPM warehouse, inside a mitochondrion, ATP synthase on the drop |
+| [READING FRAME](demos/reading-frame-64k) | 64k | Techno: 124 BPM progressive, the GFP gene transcribed and folded, the arpeggio is the DNA |
+| [CLEAVE](demos/cleave-64k) | 64k | Techno: dub to peak-time, cell division under seven microscopes, GPU reaction-diffusion |
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 

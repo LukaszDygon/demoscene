@@ -1,0 +1,47 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>READING FRAME</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:pointer;color:#dfe9ff}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.o{position:fixed;pointer-events:none;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;text-shadow:0 0 4px #000,0 0 12px #000;transition:opacity .6s}
+.d{font-family:"Helvetica Neue",Helvetica,Arial,"Segoe UI","DejaVu Sans",sans-serif;font-weight:200}
+#ti{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#ti h1,#en h2{margin:0;font-size:min(9vw,92px);letter-spacing:.32em;font-weight:200;padding-left:.32em;color:#fff;text-shadow:0 0 18px #3f8cff,0 0 50px #1a5cff}
+#ti h1 i,#en h2 i{font-style:normal;color:#6bff8e;text-shadow:0 0 18px #2bff6a,0 0 50px #12c94a}
+#ti p,#en p{margin:.6em 0;font-size:min(3.2vw,14px);letter-spacing:.42em;opacity:.8}
+#ti .k{margin-top:3.2em;border:1px solid #6bff8e;color:#6bff8e;padding:.6em 1.4em;letter-spacing:.3em;animation:bl 2.2s ease-in-out infinite}
+#ti .w{font-size:min(2.6vw,10px);opacity:.45;margin-top:2.6em}
+@keyframes bl{50%{opacity:.35}}
+#hd{top:16px;left:18px;font-size:min(2.4vw,11px);letter-spacing:.16em;line-height:1.75;opacity:.75;white-space:pre}
+#ch{top:16px;right:18px;font-size:min(2.4vw,11px);letter-spacing:.2em;text-align:right;line-height:1.75}
+#ch b{display:block;font-weight:400;opacity:.22;transition:opacity .4s}
+#ch b.on{opacity:1}
+#cp{left:0;right:0;top:38%;text-align:center;opacity:0}
+#cp h3{margin:0;font-size:min(7vw,54px);letter-spacing:.5em;padding-left:.5em;font-weight:200;color:#fff}
+#cp p{margin:.9em 0 0;font-size:min(3vw,13px);letter-spacing:.35em;opacity:.75}
+#sq{left:0;right:0;bottom:9%;text-align:center;font-size:min(3.6vw,19px);letter-spacing:.32em;white-space:pre;line-height:1.7}
+#sq u{text-decoration:none;color:#fff;font-weight:700;text-shadow:0 0 8px currentColor,0 0 20px currentColor}
+#sq s{text-decoration:none;opacity:.35}
+#sq em{font-style:normal;font-size:.7em;opacity:.6;letter-spacing:.25em}
+#sb{right:22px;bottom:22px;font-size:min(2.4vw,11px);letter-spacing:.15em;text-align:center}
+#sb div{height:3px;background:#fff;margin-bottom:6px;box-shadow:0 0 6px #fff}
+#spw{left:18px;bottom:20px;font-size:min(2vw,9px);letter-spacing:.18em;opacity:.7}
+#spw canvas{display:block;width:144px;height:48px;margin-bottom:5px}
+#zs{right:24px;top:30%;height:40%;width:1px;background:linear-gradient(#fff0,#ffffff70,#fff0)}
+#zf{position:absolute;left:-7px;width:15px;height:1px;background:#6bff8e;box-shadow:0 0 6px #6bff8e;transition:top .1s}
+#zl{position:absolute;right:14px;top:-1.6em;font-size:min(2vw,9px);letter-spacing:.15em;opacity:.6;white-space:nowrap}
+#yh{opacity:0;font-size:min(2vw,10px);letter-spacing:.2em;color:#6bff8e;white-space:nowrap}
+#yh b{position:absolute;left:-14px;top:-14px;width:26px;height:26px;border:1px solid #6bff8e;border-radius:50%;box-shadow:0 0 8px #2bff6a}
+#yh span{position:absolute;left:22px;top:-26px}
+#lg{top:100px;left:18px;font-size:min(2.4vw,11px);letter-spacing:.16em;color:#6bff8e}
+.tm{opacity:0;font-size:min(2vw,10px);letter-spacing:.2em;color:#fff;transform:translate(10px,-50%)}
+.tm:before{content:"";display:inline-block;width:6px;height:6px;border:1px solid #fff;border-radius:50%;margin:0 8px 0 -14px}
+#en{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity 3s}
+#en .z{font-size:min(2vw,9px);letter-spacing:.12em;opacity:.5;max-width:min(88vw,900px);word-break:break-all;line-height:1.6;margin-top:2.2em}
+</style></head><body><canvas id=c></canvas>
+<div class=o id=hd></div><div class=o id=ch><b style=color:#5b8cff>DAPI 405</b><b style=color:#6bff8e>GFP 488</b><b style=color:#ff4f8a>mCherry 561</b></div>
+<div class="o d" id=cp><h3></h3><p></p></div><div class=o id=sq></div><div class=o id=spw><canvas id=sp width=192 height=64></canvas><span>SPECTRAL DETECTOR · 410–695 nm</span></div><div class=o id=lg></div><div class="o tm" id=tN>N-terminus</div><div class="o tm" id=tC>C-terminus</div><div class=o id=yh><b></b><span>GFP · 1 of 10⁶ · you are here</span></div><div class=o id=zs><i id=zf></i><span id=zl></span></div><div class=o id=sb><div></div><span></span></div>
+<div class="o d" id=en><h2>READING <i>FRAME</i></h2><p>717 bases &middot; 238 amino acids &middot; one photon at 509 nm</p><p>a 64k intro &middot; 124 bpm &middot; mmxxvi &middot; no samples, no textures, one gene</p><p class=z></p><p class=z style=opacity:.25></p></div>
+<div class="o d" id=ti><h1>READING <i>FRAME</i></h1><p>DNA &rarr; RNA &rarr; protein &rarr; light</p><p class=k>[ click ] begin transcription</p><p class=w>sound on &middot; f = fullscreen</p></div>
+<script>/*MUSIC*/</script>
+<script>/*MAIN*/</script>
+</body></html>
