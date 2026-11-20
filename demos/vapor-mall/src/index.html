@@ -1,0 +1,49 @@
+<!doctype html><html lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>ＶＡＰＯＲ ＭＡＬＬ</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:pointer}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.o{position:fixed;pointer-events:none;color:#fff;text-shadow:0 0 6px #000,0 0 18px #2a0838,2px 2px 0 #2a0838}
+.jm{font-family:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"MS PMincho","Noto Serif CJK JP","Noto Serif JP",serif}
+.jg{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans CJK JP","Noto Sans JP",sans-serif}
+.lg{font-family:Futura,"Century Gothic","Avant Garde","URW Gothic","Trebuchet MS",sans-serif}
+.sc{font-family:"Snell Roundhand","Brush Script MT","Segoe Script","URW Chancery L",cursive}
+.mo{font-family:"VCR OSD Mono","OCR A Std","OCR A Extended","Lucida Console","Courier New",monospace}
+.ch{background:linear-gradient(180deg,#fff 0%,#ffe3fb 36%,#ff71ce 50%,#5b1a78 53%,#b967ff 72%,#01cdfe 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(3px 3px 0 #2b0b45) drop-shadow(0 0 14px rgba(255,113,206,.75))}
+#ti{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 2s;background:radial-gradient(ellipse at center,rgba(20,0,40,.15),rgba(20,0,40,.55))}
+#ti .w{font-size:min(4vw,28px);letter-spacing:.6em;color:#05ffa1;margin-left:.6em}
+#ti h1{margin:.15em 0 0;font-size:min(10.5vw,124px);font-weight:700;letter-spacing:.06em;font-style:italic;white-space:nowrap}
+#ti .sc{font-size:min(7vw,58px);color:#ff71ce;margin-top:-.35em;transform:rotate(-6deg)}
+#ti .v{position:absolute;right:5vw;top:10vh;writing-mode:vertical-rl;font-size:min(5vw,40px);letter-spacing:.35em;color:#01cdfe}
+#ti .vl{position:absolute;left:5vw;bottom:10vh;writing-mode:vertical-rl;font-size:min(3vw,20px);letter-spacing:.4em;color:#fffb96}
+#ti .s{font-size:min(3.2vw,22px);letter-spacing:.35em;margin-top:1.4em}
+#ti .k{margin-top:3em;font-size:min(3vw,17px);letter-spacing:.4em;animation:bl 1.4s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+#cp{left:0;right:0;bottom:11%;text-align:center;opacity:0;transition:opacity .9s}
+#cp .n{font-size:min(3vw,17px);letter-spacing:.7em;color:#01cdfe;margin-left:.7em}
+#cp .t{font-size:min(10vw,70px);font-weight:700;letter-spacing:.18em;margin:.05em 0 .05em .18em}
+#cp .e{font-size:min(3.2vw,19px);letter-spacing:.8em;color:#ffc4ee;margin-left:.8em}
+#osd{inset:0;font-size:min(2.4vw,14px);color:#eafff7;opacity:0;transition:opacity 1.5s;letter-spacing:.06em}
+#osd div{position:absolute;line-height:1.5}
+#osd .r{color:#ff3b6b;animation:bl 1s steps(2) infinite}
+#sfx{font-size:min(8vw,60px);font-weight:900;color:#fffb96;opacity:0;-webkit-text-stroke:2px #ff2f9a;text-shadow:3px 3px 0 #2a0838,0 0 20px #ff71ce}
+#en{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 3s;text-align:center}
+#en h2{margin:0;font-size:min(9vw,96px);font-style:italic;letter-spacing:.06em}
+#en .a{font-size:min(6vw,44px);letter-spacing:.25em;margin-top:.4em}
+#en .b{font-size:min(3.2vw,20px);letter-spacing:.3em;margin-top:1em;color:#ffd6f3}
+#en .c{font-size:min(2.6vw,14px);letter-spacing:.7em;margin-top:2.5em;color:#01cdfe}
+</style></head><body><canvas id=c></canvas>
+<div class=o id=ti><div class="w jg">ようこそ</div><h1 class="jm ch">ＶＡＰＯＲ ＭＡＬＬ</h1><div class="sc">aesthetic dreams</div>
+<div class="v jm">ヴェイパー・モール</div><div class="vl jg">営業中・午前三時</div>
+<div class="s jm">夢のショッピング体験 · a dream shopping experience</div><div class="k lg">▶ 入店する · CLICK TO ENTER</div></div>
+<div class=o id=cp></div>
+<div class="o mo" id=osd><div style="left:3vw;top:3vh"><span class=r>● REC</span>&nbsp; PLAY ▶<br>SP 標準</div>
+<div style="right:3vw;top:3vh;text-align:right"><span id=ob></span><br>FPV ◢◤ CH 5.8G</div>
+<div style="left:3vw;bottom:4vh"><span id=oa></span><br><span id=ov></span></div>
+<div style="right:3vw;bottom:4vh;text-align:right">1995年11月20日 午前3:14<br><span id=ot></span></div>
+<div style="left:50%;top:50%;transform:translate(-50%,-50%);opacity:.7">— ◇ —</div></div>
+<div class="o jg" id=sfx></div>
+<div class=o id=en><h2 class="jm ch">ＶＡＰＯＲ ＭＡＬＬ</h2><div class="a jm">ありがとうございました</div><div class="b jm">またのご来店を心よりお待ちしております</div>
+<div class="c lg">THANK YOU FOR SHOPPING · 閉店 · 64K · 2026</div></div>
+<script>/*MUSIC*/</script>
+<script>/*MAIN*/</script>
+</body></html>

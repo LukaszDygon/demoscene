@@ -19,18 +19,21 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 
 | Demo | Budget | Notes |
 |---|---|---|
+| [Vapor Mall](demos/vapor-mall) | 64k | FPV flight through a vaporwave mall into a giant's pocket |
 | [Descensus](demos/descensus) | 64k | Deep-sea descent, raymarched |
+| [KAIJU](demos/kaiju-16k) | 16k | Neon city at night with a raymarched monster, one shader |
+| [The Tapestry](demos/the-tapestry-64k) | 64k | Medieval siege embroidered on a living tapestry |
 | [The Meadow Counts](demos/meadow-counts-64k) | 64k | IDM: warm 70s school film, 88 BPM boom-bap, silent-film intertitles |
 | [RECURSOR](demos/recursor-64k) | 64k | IDM: 170 BPM acid drill'n'bass, 4D and hyperbolic geometry |
 | [PLEASE ASSEMBLE](demos/please-assemble-64k) | 64k | IDM: TTS announcer, impossible objects, 7/8 and 5/4 |
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 
-Each shipped file is named after the model and effort level that built it, e.g. `kaiju16k.opus-5.5-high.html` or `ka-boom-16k.haiku-5.5-medium.html`. The label was taken from the Claude Code session logs.
+Each shipped file is named after the model and effort level that built it, e.g. `kaiju-16k.opus-5.5-medium.html` or `ka-boom-16k.haiku-5.5-medium.html`. The label was taken from the Claude Code session logs.
 
 ## The skill
 
-`skill/demoscene-intro/` is a Claude Code skill for making new intros from your own art direction. It covers the spec, the pitfalls and the checking scripts (byte budget, click-to-sound, audio levels, camera clearance). The last four demos were made with it. To install it:
+`skill/demoscene-intro/` is a Claude Code skill for making new intros from your own art direction. It covers the spec, the pitfalls and the checking scripts (byte budget, click-to-sound, audio levels, camera clearance). All the Opus 5.5 · medium demos were made with it. To install it:
 
 ```bash
 cp -r skill/demoscene-intro ~/.claude/skills/
