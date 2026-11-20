@@ -23,7 +23,7 @@ function meadow(L){return{S:1,L,c:[s(L*.07)*.6,2.4+.15*s(L*.4),10+L*2.2],f:[s(L*
 function state(t){const b=t/BAR;let r;
  if(b<4)r={S:0,L:t,c:[0,0,0],f:[0,0,1],P:[(t/(BEAT*2))%1,1-ss(B(3.5),B(3.95),t),0,0],D:[0,.1,1],pal:PAL.gold,mo:0};
  else if(b<12)r=meadow(t-B(4));
- else if(b<22)r={S:2,L:t-B(12),c:[0,0,0],f:[0,0,1],P:[0,0,0,0],D:[0,.1,1],pal:PAL.gold,mo:0};
+ else if(b<22)r={S:2,L:t-B(12),c:[0,0,0],f:[0,0,1],P:[ss(17,17.3,b)*(1-ss(17.8,18.05,b)),ss(18.05,18.3,b)*(1-ss(18.8,19.1,b)),0,0],D:[0,.1,1],pal:PAL.gold,mo:0};
  else if(b<32){const L=t-B(22),k=ss(B(28.5),B(32),t);
   r={S:3,L,c:[s(L*.08)*2,5.2+k*4.5,L*2.4],f:[s(L*.06)*.2,-.16-.14*k,1],P:[ss(B(26.6),B(28.8),t),0,0,0],D:nrm([.22,.33,1]),pal:PAL.hex,mo:1,bm:b<28?1:0}}
  else if(b<44){const L=t-B(32),k=ss(B(33),B(40.5),t),pu=ss(B(32.6),B(34.6),t)*.55-ss(B(36),B(38.5),t)*.4+ss(B(39),B(40.6),t)*.5-ss(B(42.6),B(43.9),t)*.3;
@@ -113,7 +113,7 @@ function text(t,started,wall,st,M){const W=tcv.width,H=tcv.height,u=H/720,ops=[]
    if(n>0&&a>0)ops.push(['#type',str,n,a,n<str.length||s(t*9)>0])}
   // educational-film diagrams
   const fa=(x,y)=>+(ss(x,x+.5,b)*(1-ss(y-.5,y,b))).toFixed(2),r2=v=>+v.toFixed(2);
-  if(b>14.4&&b<19)ops.push(['#gold',fa(14.4,19),r2(ss(14.8,16,b)),r2(ss(16.9,18.3,b))]);
+  if(b>14.4&&b<19.2)ops.push(['#gold',fa(14.4,19.2),r2(ss(14.8,16,b)),r2(ss(17.05,17.8,b)),r2(ss(18.1,18.8,b))]);
   if(b>24.2&&b<28.4)ops.push(['#hex',fa(24.2,28.4),r2(ss(24.4,26,b))]);
   if(b>34.2&&b<39)ops.push(['#fold',fa(34.2,39),r2(ss(34.6,37.6,b))]);
   if(b>53.4&&b<56){const n=Math.max(0,Math.min(SONG.CNT,Math.floor((b-53.5)*8)+1)),pts=[];
@@ -144,7 +144,7 @@ function fig(op,W,H,u){const[k,a]=op,cx=W-180*u,cy=175*u,TAU=2*PI,small={it:1,a:
   pl([[cx+R*Math.cos(e),cy+R*Math.sin(e)],[cx,cy],[cx+R*Math.cos(e+g),cy+R*Math.sin(e+g)]]);
   c2.beginPath();c2.arc(cx,cy,R*.35,e+g,e,false);c2.stroke();
   txt((137.5*op[2]).toFixed(1)+'°',cx-R*.15,cy+R*.62,20*u,{a});txt('fig. 2 — the golden angle',cx,cy+R+34*u,16*u,small);
-  if(op[3]>0){txt(Math.round(34*op[3])+'  one way',cx,cy+R+66*u,20*u,{a});txt(Math.round(55*op[3])+'  the other',cx,cy+R+94*u,20*u,{a})}}
+  if(op[3]>0)txt(Math.round(34*op[3])+'  one way',cx,cy+R+66*u,20*u,{a});if(op[4]>0)txt(Math.round(55*op[4])+'  the other',cx,cy+R+94*u,20*u,{a})}
  if(k=='#hex'){const r=26*u,n=Math.min(7,Math.floor(op[2]*7.99));
   for(let i=0;i<n;i++){const ox=i?cx+Math.cos(i*PI/3)*r*1.732:cx,oy=i?cy+Math.sin(i*PI/3)*r*1.732:cy;
    pl([0,1,2,3,4,5].map(j=>[ox+r*Math.cos(j*PI/3+PI/6),oy+r*Math.sin(j*PI/3+PI/6)]),1)}
@@ -153,7 +153,12 @@ function fig(op,W,H,u){const[k,a]=op,cx=W-180*u,cy=175*u,TAU=2*PI,small={it:1,a:
   for(let i=0;i<=48;i++){const s=(i/48-.5)*L;pts.push(f<.01?[cx+s,cy+40*u]:[cx+L/f*Math.sin(s*f/L),cy+40*u-L/f*(1-Math.cos(s*f/L))])}
   pl(pts);c2.beginPath();c2.arc(cx,cy+30*u,4*u,0,TAU);c2.stroke();
   txt('fig. 4 — a horizon, folded',cx,cy+82*u,16*u,small)}
- if(k=='#cnt')for(const[x,y,n]of op[2])txt(''+n,x,y,24*u,{a,w:600})}
+ // pole numbers: never overlapping. Far poles crowd the vanishing point, so their numbers fan out to the right along a rising diagonal, each tied to its pole by a thin leader.
+ if(k=='#cnt'){const P=[],px=24*u;c2.lineWidth=1.2*u;
+  let qx=-1e9,qy=1e9;for(const[x,y,n]of op[2]){const w=(n>9?30:18)*u;
+   // near to far the poles move right towards the vanishing point: keep the labels in strict order, at least a label-width apart
+   const lx=Math.max(x,qx+w+10*u),ly=Math.min(y-12*u,qy-(lx>x+2*u?7*u:0));qx=lx;qy=ly;if(lx>x+2*u){c2.globalAlpha=a*.5;c2.beginPath();c2.moveTo(x,y-4*u);c2.lineTo(lx,ly+4*u);c2.stroke()}
+   sub(''+n,lx,ly,px,a,FF,'#f6e8c8','center',0)}}}
 // ---------- clock ----------
 let actx,song,start=null,started=MUTE;
 function now(){if(MUTE)return start===null?T0:T0+(performance.now()-start)/1000;return song?actx.currentTime-song.base:0}
@@ -194,6 +199,6 @@ function frame(){requestAnimationFrame(frame);const pn=performance.now(),W=pn/10
  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,cv.width,cv.height);gl.useProgram(PF);U=PF.U;
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,A.tx);gl.uniform1i(U.A,0);gl.uniform1i(U.X,2);
  gl.uniform2f(U.R,cv.width,cv.height);gl.uniform1f(U.T,started?t:W);gl.uniform1f(U.Fd,1);
- let Cu=0;for(const c of CUTS)if((t>c-7&&t<c-6.83)||(t>c-1&&t<c-.83))Cu=1;gl.uniform1f(U.Cu,Cu);gl.uniform1f(U.Lk,Lk);gl.uniform1f(U.Tr,Tr);gl.uniform1f(U.Bn,Bn);
+ gl.uniform1f(U.Lk,Lk);gl.uniform1f(U.Tr,Tr);gl.uniform1f(U.Bn,Bn);
  gl.drawArrays(gl.TRIANGLES,0,3)}
 frame()})();

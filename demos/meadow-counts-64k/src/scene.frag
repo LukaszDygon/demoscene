@@ -14,8 +14,8 @@ mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}
 float hx(vec2 p){p=abs(p);return max(dot(p,vec2(.5,.866)),p.x);}
 vec4 hcell(vec2 p){vec2 s=vec2(1,1.732),h=s*.5,a=mod(p,s)-h,b=mod(p-h,s)-h,g=dot(a,a)<dot(b,b)?a:b;return vec4(p-g,g);}
 // nearest seed of a 256-seed Vogel head (golden angle): x dist, y edge (2nd-1st), z index
-vec4 vogel(vec2 p){float r=length(p),lo=max(1.,floor((r-1.3)*(r-1.3))),hi=min(256.,ceil((r+1.3)*(r+1.3))),b1=1e9,b2=1e9,bn=0.;
- for(int i=0;i<140;i++){float n=lo+float(i);if(n>hi)break;float a=n*2.39996;vec2 d=p-sqrt(n)*vec2(cos(a),sin(a));float dd=dot(d,d);
+vec4 vogel(vec2 p,float N){float r=length(p),lo=max(1.,floor((r-1.3)*(r-1.3))),hi=min(N,ceil((r+1.3)*(r+1.3))),b1=1e9,b2=1e9,bn=0.;
+ for(int i=0;i<180;i++){float n=lo+float(i);if(n>hi)break;float a=n*2.3999632;vec2 d=p-sqrt(n)*vec2(cos(a),sin(a));float dd=dot(d,d);
   if(dd<b1){b2=b1;b1=dd;bn=n;}else if(dd<b2)b2=dd;}
  return vec4(sqrt(b1),sqrt(b2)-sqrt(b1),bn,r);}
 // ---------------- sky ----------------
@@ -43,9 +43,12 @@ vec3 sky(vec3 rd){
  return c;}
 // ---------------- the meadow, wrapped on the inside of a cylinder of radius Rc ----------------
 float Rc,km;
-float hgt(vec2 q){float a=abs(q.x);
- float h=(fbm(vec2(a,q.y)*.022,4)*7.4-1.6)*ss(1.,28.,min(a,3.14159*Rc-a));
- return h+.22*vn(vec2(a,q.y)*.45)+.06*vn(vec2(a,q.y)*3.1);}
+float hgt(vec2 q){float a=abs(q.x),pr=3.14159*Rc,
+ // asymmetric terrain, folded to symmetric only in the last stretch before the cylinder's seam (no mirror line down the path)
+ x=mix(q.x,a,ss(pr-25.,pr,a)),
+ // a flat lane for the camera that opens out again far ahead, so no V-notch sits at the vanishing point
+ h=(fbm(vec2(x,q.y)*.022,4)*7.4-1.6)*ss(1.,28.,min(a,pr-a)+max(q.y-C.z-50.,0.)*.4);
+ return h+.22*vn(vec2(x,q.y)*.45)+.06*vn(vec2(x,q.y)*3.1);}
 float cap(vec3 p,vec3 a,vec3 b,float r){vec3 pa=p-a,ba=b-a;return length(pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.))-r;}
 // a small figure, feet at the origin
 float kid(vec3 p,float ph,float s){p/=s;float w=sin(ph)*.14;
@@ -74,7 +77,9 @@ vec3 tv(vec3 ro,vec3 rd,vec3 p,vec3 n){vec3 l=p-vec3(0,.6,Q.x),c;
  return c;}
 vec3 meadow(vec3 ro,vec3 rd){
  Rc=P.x;float t=.05,d;vec2 q;bool hit=false;
- for(int i=0;i<130;i++){d=mapM(ro+rd*t,q);if(d<.0015*t){hit=true;break;}t+=d;if(t>420.)break;}
+ for(int i=0;i<160;i++){d=mapM(ro+rd*t,q);if(d<.0015*t){hit=true;break;}t+=d;if(t>420.)break;}
+ // ran out of steps skimming a ridge: that is ground, not a sliver of sky
+ if(!hit&&t<420.)hit=true;
  vec3 fc=mix(H0,H2,pow(max(dot(rd,D),0.),4.)*.6),bn;
  vec2 bt=Q.x>0.?box(ro,rd,vec3(0,.6,Q.x),vec3(.95,.6,.55),bn):vec2(-1);
  if(bt.y>0.&&(!hit||bt.x<t))return mix(tv(ro,rd,ro+rd*bt.x,bn),fc,1.-exp(-bt.x*.0065));
@@ -87,7 +92,7 @@ vec3 meadow(vec3 ro,vec3 rd){
  vec3 al=mix(vec3(.58,.44,.17),vec3(.3,.35,.17),ss(.35,.7,g));
  al=mix(al,vec3(.72,.57,.27),g2*.35)*(.8+.3*g3);
  // seen from above, the fields are the seeds of one enormous flower
- if(P.y>0.){vec2 fp=(q-vec2(0,700.))/11.;vec4 v=vogel(fp);float k=h1(vec2(v.z,3.)),fr=v.w;
+ if(P.y>0.){vec2 fp=(q-vec2(0,700.))/11.;vec4 v=vogel(fp,256.);float k=h1(vec2(v.z,3.)),fr=v.w;
   vec3 cr=k<.3?vec3(.74,.56,.2):k<.55?vec3(.3,.38,.2):k<.8?vec3(.62,.34,.15):vec3(.55,.5,.3);
   cr*=.85+.3*vn(q*rot(k*6.)*vec2(.08,2.));cr=mix(cr,vec3(.25,.15,.07),ss(9.,2.,fr)*.6);
   if(fr>16.3){float a=atan(fp.y,fp.x),w=abs(fract(a/6.2832*34.)-.5)*2.,rr=(fr-16.3)/4.;
@@ -95,56 +100,66 @@ vec3 meadow(vec3 ro,vec3 rd){
   al=mix(al,cr,P.y*.85);al*=1.-P.y*.55*ss(.18,.04,v.y)*step(fr,16.3);}
  if(Q.x>0.)al*=.45+.55*ss(.8,2.2,length((p.xz-vec2(0,Q.x))/vec2(1.3,1.)));
  // dandelion dots in the grass
- vec2 dq=q*.9;float dd=length(fract(dq)-.5);al+=vec3(.5,.45,.3)*ss(.12,.05,dd)*step(.86,h1(floor(dq)))*ss(40.,5.,t);
+ vec2 dq=q*.9;float dd=length(fract(dq)-.5);al+=vec3(.42,.36,.12)*ss(.08,.04,dd)*step(.9,h1(floor(dq)))*ss(18.,6.,t);
  float dif=max(dot(n,D)*.6+.4,0.),amb=.5+.5*dot(n,up);
  vec3 c=al*(H2*dif*1.15+H1*.5*amb);
  c+=H2*al*pow(max(dot(rd,D),0.),3.)*(.4+.6*g2)*.9;
  return mix(c,fc,1.-exp(-t*.0065*(1.-.65*P.y)));}
 // ---------------- seed head zoom (2D, exactly self-similar) ----------------
-// Every head is 256 Vogel seeds (r=sqrt n, golden angle) out to r=16, a petal ring to 20, dark backing beyond.
-// Every seed is a small flower: disc of florets to .7, petal ring to .87 (= 16/20 and 20/20 of a head, scaled by 1/23).
-// Seed K=21 holds a real head scaled by A = e^(i PH)/23; the camera zooms out about the fixed point of that map.
+// A head: 1000 Vogel seeds (r = sqrt n, golden angle) to r = 31.6, petal ring to 40. Seen from far away a head is a dark
+// disc graded from the centre out, with a gold rim: that is also exactly how one seed is drawn, so every seed can be a head.
+// Head-in-seed map: z_parent = c_K + A z_child, A = e^(i PH)/SS, the head (radius 40) filling a seed disc of radius .85.
 vec2 cm(vec2 a,vec2 b){return vec2(a.x*b.x-a.y*b.y,a.x*b.y+a.y*b.x);}
 vec2 cdv(vec2 a,vec2 b){return cm(a,vec2(b.x,-b.y))/dot(b,b);}
-const vec3 PT=vec3(.95,.66,.2),BK=vec3(.1,.12,.08);
-// petal ring + backing, x = radius in disc units (petals .8..1), a = angle
-vec3 ring(float x,float a){float w=abs(fract(a/6.2832*34.)-.5)*2.,rr=(x-.8)*5.;
+const vec3 PT=vec3(.95,.66,.2),BK=vec3(.07,.07,.04);
+const float GA=2.3999632,NS=1000.,HO=40.,SR=.85,SS=40./.85,PH=.35,KS=55.;
+// seed colour by radius in the head, 0..1: greenish heart, umber, ochre rim. Smooth, no per-seed noise.
+vec3 sc(float x){return mix(mix(vec3(.2,.21,.08),vec3(.33,.17,.06),ss(.0,.35,x)),vec3(.6,.4,.12),ss(.45,1.,x));}
+// petal ring + backing, x = radius as a fraction of the head (petals .79..1)
+vec3 ring(float x,float a){float w=abs(fract(a/6.2832*34.)-.5)*2.,rr=(x-.79)/.21;
  return mix(BK,PT*(.8+.2*cos(w*3.)),ss(.08,0.,w-(1.-rr*rr)*.92)*step(rr,1.));}
 vec3 seeds(vec2 uv){
- float u=fract(L/10.5),e=2.-u,SS=23.,PH=.7,K=21.;
- vec2 A=vec2(cos(PH),sin(PH))/SS,cK=sqrt(K)*vec2(cos(K*2.39996),sin(K*2.39996)),zs=cdv(cK,vec2(1,0)-A);
- vec2 z=zs+cm(vec2(cos(PH*e),sin(PH*e))*pow(SS,-e),uv*24.);
- float px=48./R.y*pow(SS,-e);
- // average colour of a whole head (= of one seed) seen from far away; solves avg=.485*avg+.163*PT+.352*BK
- vec3 L2=normalize(vec3(-.5,.6,.65)),av=(.163*PT+.352*BK)/.515,ac=vec3(0),c=av,m=vec3(1);float b=1.;
- for(int l=0;l<5;l++){
+ // hold on one head; at "Every seed is a smaller flower" pull back until it is one seed of the next head; then drift on
+ float e=ss(18.,24.5,L)+max(L-24.5,0.)*.05;e=fract(e);
+ uv=rot(.006*L)*uv;
+ vec2 A=vec2(cos(PH),sin(PH))/SS,cK=sqrt(KS)*vec2(cos(KS*GA),sin(KS*GA));
+ float k=44.*pow(SS,e-1.),px=2.*k/R.y/SS;
+ vec2 z=cK+cm(A,cK*(1.-e)+cm(vec2(cos(PH*(1.-e)),sin(PH*(1.-e))),uv*k));
+ vec3 L2=normalize(vec3(-.5,.6,.65)),ac=vec3(0),c=vec3(.33,.22,.08),m=vec3(1);float b=1.;
+ for(int l=0;l<4;l++){
   float r=length(z);
-  if(r>16.){c=ring(r/20.,atan(z.y,z.x));break;}
-  vec4 v=vogel(z);float n=v.z;vec2 d=z-sqrt(n)*vec2(cos(n*2.39996),sin(n*2.39996));float dl=length(d)/.87;
+  if(r>31.6){c=ring(r/HO,atan(z.y,z.x));break;}
+  vec4 v=vogel(z,NS);float n=v.z;vec2 d=z-sqrt(n)*vec2(cos(n*GA),sin(n*GA));float dl=length(d)/SR,cp=1.77/px;
   if(dl>=1.){c=BK;break;}
-  // every seed is a whole head, lit as one dome and tinted by its place in the parent head
-  vec3 nn=normalize(vec3(d/.87*1.3,1.-dl*.5));
-  m*=(max(dot(nn,L2),0.)*1.15+.3)*ss(1.,.9,dl)*(.75+.5*ss(.1,1.,sqrt(n)/16.))*(.85+.3*h1(vec2(n,7.)));
-  // fade to the flat average once a seed is a few pixels across; c = ac + b*(deeper)
-  float w=ss(1.5,4.,1.9/px);ac+=b*(1.-w)*m*av;b*=w;c=av;
+  // a seed: dome-lit miniature of a head; the 34 and 55 spiral families light up in turn while they are counted
+  vec3 nn=normalize(vec3(d/SR*1.2,1.-dl*.5));float lt=max(dot(nn,L2),0.)*1.1+.35;
+  float hi=1.+P.x*.9*step(mod(mod(n,34.),2.),.5)+P.y*.9*step(mod(mod(n,55.),2.),.5);
+  // the disc's inside is the average a whole head shows at that radius (its seeds' gradient, gold rims and gaps), so a
+  // seed and the head that replaces it match exactly when the renderer steps in
+  vec3 sp=(dl<.79?.57*sc(dl/.79)+.19*PT+.24*BK:ring(dl,atan(d.y,d.x)))*ss(1.,1.-1.5/cp,dl);
+  sp=mix(vec3(.3,.22,.08),sp,ss(1.,3.,cp))*lt*hi;
+  // descend into the seed (it is a head) once it is big enough on screen to show one
+  float w=ss(24.,60.,cp);ac+=b*(1.-w)*m*sp;b*=w;c=sp;
   if(w<=0.)break;
-  z=cdv(d,A);px*=SS;}
+  m*=lt;z=cdv(d,A);px*=SS;}
  c=ac+b*m*c;
- return c*max(1.6-.25*dot(uv,uv),0.)+H2*.05;}
+ return c*max(1.25-.12*dot(uv,uv),0.)+H2*.04;}
 // ---------------- basalt columns ----------------
 float HC(vec2 id){float h=fbm(id*.11+3.,3)*4.4-.8+h1(id)*.5;return clamp(floor(h*3.)/3.,-1.,3.2);}
 const float SC=1.7,WL=.35;
 // P.x: 0 = a plain of honeycomb, 1 = the stones have risen out of it
-float CH(vec2 id){return max(mix(.45,HC(id),P.x),WL);}
+float CH(vec2 id){float h=HC(id);return mix(.45,max(h,WL),P.x);}
 vec4 cells(vec3 ro,vec3 rd,int N,out vec4 hc){
- float t=0.,lr=length(rd.xz)+1e-4,hh;vec3 p;
- for(int i=0;i<200;i++){if(i>=N)break;p=ro+rd*t;hc=hcell(p.xz/SC);hh=CH(hc.xy);
+ // skip straight down to the tallest possible column top, and stop once the ray climbs above it
+ float HM=mix(.45,3.2,P.x)+.01,t=ro.y>HM?(rd.y<0.?(ro.y-HM)/-rd.y:1e9):0.,lr=length(rd.xz)+1e-4,hh;vec3 p=ro;
+ for(int i=0;i<240;i++){if(i>=N||t>300.)break;p=ro+rd*t;if(p.y>HM&&rd.y>=0.)break;hc=hcell(p.xz/SC);hh=CH(hc.xy);
   if(p.y<hh)return vec4(p,t);
   float de=(.5-hx(hc.zw))*SC/lr,dv=rd.y<0.?(p.y-hh)/-rd.y:1e9;
-  t+=min(de,dv)+.004;if(t>260.)break;}
- return vec4(p,-1.);}
+  t+=min(de,dv)+.004;}
+ // out of steps while still below the tops: call it a hit in the haze rather than a hole to the sky
+ return vec4(p,N>100&&t<300.&&p.y<HM?t:-1.);}
 vec3 basalt(vec3 ro,vec3 rd){
- vec4 hc;vec4 h=cells(ro,rd,150,hc);
+ vec4 hc;vec4 h=cells(ro,rd,240,hc);
  if(h.w<0.)return sky(rd);
  vec3 p=h.xyz;float m=P.x,raw=HC(hc.xy),hh=CH(hc.xy);bool top=hh-p.y<.012;
  vec2 g=hc.zw,e=vec2(.002,0);
@@ -153,9 +168,9 @@ vec3 basalt(vec3 ro,vec3 rd){
  vec3 c;
  float sh=1.;{vec4 h2;vec4 s=cells(p+n*.02+vec3(0,.01,0),D,32,h2);if(s.w>0.)sh=.25;}
  float dif=max(dot(n,D),0.)*sh;
- if(top&&(raw<WL&&m>.5||hx(hc.zw)<.42*(1.-m))){ // pools of warm honey-light between the stones
+ if(top&&(raw<WL&&m>.5||hx(hc.zw)<.4*(1.-m)&&hh<.5)){ // pools of warm honey-light between the stones
   vec3 rf=reflect(rd,n);float fr=pow(max(1.+min(rd.y,0.),0.),4.);
-  c=vec3(1.,.55,.15)*(.9+.35*vn(p.xz*3.+T*.3))+sky(rf)*(.25+.6*fr);
+  c=vec3(.8,.36,.07)*(.8+.3*vn(p.xz*3.+T*.3))+sky(rf)*(.2+.6*fr)+H2*pow(max(dot(rf,D),0.),40.)*1.5;
  }else{
   float lich=ss(.5,.78,fbm(p.xz*.6+hc.xy));
   vec3 al=top?mix(vec3(.3,.26,.21),vec3(.62,.47,.18),lich):vec3(.16,.14,.13)*(.8+.4*vn(vec2(p.y*6.,atan(g.y,g.x)*3.)));
@@ -165,13 +180,13 @@ vec3 basalt(vec3 ro,vec3 rd){
   c=al*(H2*dif*1.5+H1*.45*ao+H0*.12);}
  float t=h.w;
  vec3 fc=mix(H0,H2,pow(max(dot(rd,D),0.),5.)*.5);
- c=mix(c,fc,1.-exp(-t*.0055));
+ c=mix(c,fc,1.-exp(-t*.0055-max(t-60.,0.)*.012));
  c=mix(c,fc*1.05,ss(1.2,-.4,p.y)*.15*ss(5.,30.,t)); // low mist
  return c;}
 // ---------------- the poles that grow with distance ----------------
 const float KP=55.,DP=28.,XP=-4.5;
 float scl(float z){return 1.+max(z,0.)/KP;}
-float poles(vec3 p){float n=floor(p.z/DP+.5),d=p.y;
+float poles(vec3 p){float n=floor(p.z/DP+.5),d=1e9;
  for(float k=-1.;k<=1.;k++){float c=(n+k)*DP,s=scl(c);vec3 q=p-vec3(XP,0,c);
   float pd=max(length(q.xz)-.15*s*(1.-.3*q.y/(9.*s)),q.y-9.*s);
   vec3 b=q-vec3(0,8.3*s,0);pd=min(pd,max(abs(b.x)-1.6*s,max(abs(b.y)-.09*s,abs(b.z)-.08*s)));
@@ -181,13 +196,16 @@ vec2 seg(vec3 ro,vec3 rd,vec3 a,vec3 b){vec3 ba=b-a,w=ro-a;float d=dot(rd,ba),e=
  float s=clamp((g-d*f)/max(e-d*d,1e-5),0.,1.),t=d*s-f;return vec2(length(w+rd*t-ba*s),t);}
 vec3 field(vec3 ro,vec3 rd){
  float t=.1;bool hit=false;
- for(int i=0;i<140;i++){float d=poles(ro+rd*t);if(d<.001*t){hit=true;break;}t+=d*.9;if(t>700.)break;}
+ // the ground is an exact plane; only the poles are marched (marching the plane at grazing angles left a stepped dark band)
+ float tg=rd.y<0.?-ro.y/rd.y:1e9;bool gr=false;
+ for(int i=0;i<140;i++){float d=poles(ro+rd*t);if(d<.0005*t){hit=true;break;}t+=d*.9;if(t>min(tg,700.))break;}
+ if(tg<700.&&(!hit||tg<t)){t=tg;hit=gr=true;}
  vec3 c=sky(rd);
  // distant hills silhouette
  float az=atan(rd.x,rd.z),hl=.025+.02*fbm(vec2(az*6.,1.))-.01;
  if(rd.y<hl&&rd.y>0.)c=mix(c,mix(H1*.5,H0*.7,.5),.8*ss(hl,hl-.004,rd.y));
  if(hit){vec3 p=ro+rd*t;
-  if(p.y<.01){ // the field
+  if(gr){ // the field
    float road=ss(2.4,1.6,abs(p.x-.3+sin(p.z*.02)*.6));
    vec3 al=mix(vec3(.3,.22,.12),vec3(.42,.3,.15),fbm(p.xz*vec2(.6,.08)))*(.7+.3*vn(p.xz*4.));
    al=mix(al,vec3(.5,.4,.3),road*.7);

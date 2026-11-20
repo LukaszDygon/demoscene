@@ -14,7 +14,7 @@ A 64k browser intro in the shape of a half-remembered 1970s school film. A meado
 
 | | bytes | budget |
 |---|---|---|
-| whole file (raw, no packer) | 45,982 | 65,536 |
+| whole file (raw, no packer) | 46,754 | 65,536 |
 | soundtrack (`music.js` as shipped) | 14,308 | 16,384 |
 
 There are no external requests and no embedded fonts. All type comes from the OS:
@@ -25,7 +25,7 @@ There are no external requests and no embedded fonts. All type comes from the OS
 | file | what |
 |---|---|
 | `src/scene.frag` | one shader with five worlds: film leader, meadow/cylinder world (with the TV and the children), the self-similar seed head, honeycomb/basalt, poles |
-| `src/film.frag` | film and tape pass: gate weave, line wobble, chroma bleed, halation, faded grade, light leaks, dust, scratch, cue marks, burn-out, burned-in text, grain |
+| `src/film.frag` | film and tape pass: gate weave, line wobble, chroma bleed, halation, faded grade, light leaks, dust, burn-out, burned-in text, grain |
 | `src/main.js` | storyboard (everything is a function of song time), camera, feedback buffer, particles (fluff, bees, birds); subtitles, typed lines and diagrams drawn into a canvas texture |
 | `src/music.js` | the 88 BPM soundtrack, including the typewriter keys for the child's lines, on the same scheduler live and offline |
 
@@ -36,7 +36,7 @@ There are no external requests and no embedded fonts. All type comes from the OS
 | start | – | Title card over the meadow, with dandelion fluff and birds | – |
 | 0–3 | 0:00 | Film leader counting 8 to 2, with the sweep hand, projector clatter and the pop on "2" | Tape hiss, pad fading in, beep |
 | 4–11 | 0:11 | **Part one, the meadow.** A slow drift forward through grass at golden hour. Foreground blades are out of focus, a treeline sits in the haze, and a flock of birds is arranged on a golden-angle spiral. | Pad, bass, music box and electric-piano comping. The boom-bap drums enter at bar 8 |
-| 12–21 | 0:33 | **Part two, the seed.** An exactly self-similar pull-back: every seed is a whole sunflower, and the camera leaves one head through one seed of the next, looping every 10.5 s. A diagram draws the 137.5° golden angle and counts the 34 and 55 spirals | A recorder melody first, then the lead at bar 16 |
+| 12–21 | 0:33 | **Part two, the seed.** A held close-up of one textbook sunflower head: 1000 seeds on a Vogel spiral at the golden angle. A diagram draws the 137.5° angle. On "Thirty-four one way" every other one of the 34 spiral arms lights up while a counter counts them, then the 55 arms the other way. On "Every seed is a smaller flower" the camera pulls back 47× over 6.5 s, until the head is one seed of an identical, bigger head, and keeps drifting | A recorder melody first, then the lead at bar 16 |
 | 22–31 | 1:00 | **Part three, the cell.** A plain of honeycomb with bees. On "the stones learned it too" the cells rise into basalt columns with honey pooled between them, under a hexagonal sun. A hex-tiling diagram appears | Recorder, rimshots, a staccato lead, then a resonant arpeggio |
 | 32–43 | 1:27 | **Part four, the fold.** "Now look up." The flat world bends into a cylinder until the horizon wraps overhead and the sky is a field. A diagram folds a line into a circle. Two giant children walk upside down on the far side. **Bars 42–44 have no words:** the camera rolls 180° until the children are the right way up and we aren't | Tape sag, deeper wow, sparse drums, then half-time, a ghost choir, a slow high lead, and the recorder carrying the roll into a reversed cymbal |
 | 44–55 | 2:00 | **Part five, the poles.** Dusk. A line of telephone poles with sagging wires and sodium lamps, which grow taller the further away they are. The camera backs away while a pale moon grows. **The child counts them:** a number appears above each pole, one every eighth note, each with a rising music-box note | Busiest section: arpeggio opening across 12 bars, shaker sixteenths, the Neapolitan Eb chord, a minor-second lead |
@@ -97,16 +97,16 @@ The answer flashes for two frames just before the film burns: 89, the next Fibon
 - **One shader, five worlds:**
   - The meadow is a heightfield wrapped onto the inside of a cylinder of radius `Rc`. At `Rc = 10⁴` it's flat. Shrinking it to 20 folds the horizon up into the sky, and since the terrain is mirrored around the path, the seam overhead stays invisible.
   - The seed head is an exact self-similar zoom:
-    - **Layout:** a head is 256 Vogel seeds (r = √n, θ = n·137.5°) out to r = 16, then a petal ring out to 20.
-    - **Every seed is a whole head**, scaled by A = e^(0.7i)/23 into a disc of radius 0.87 (the floret/petal proportions match exactly), lit as one dome.
-    - **The camera:** it zooms out about the fixed point z* = c₂₁/(1 − A) of the map that puts a head into seed 21. One 10.5 s cycle multiplies the view by exactly A⁻¹ (×23, rotated 0.7 rad), so the loop point is the identity.
-    - **Far seeds:** a seed a few pixels across fades to the head's exact average colour, which solves avg = 0.485·avg + 0.163·petal + 0.352·backing, so there's no shimmer or jump.
+    - **Layout:** a head is 1000 Vogel seeds (r = √n, θ = n·137.5077°) out to r = 31.6, then a ring of 34 petals out to 40.
+    - **Every seed is drawn as a small head:** a dark disc graded from a greenish heart through umber to an ochre rim, then a gold petal ring (r 0.79–1), lit as one dome, with no per-seed noise. So a head shrunk into a seed's disc (×1/47, turned 0.35 rad) looks exactly like the seed it replaces.
+    - **Descending:** once a seed is more than about 24–60 px across on screen, the renderer steps into it and draws its real head.
+    - **The camera:** it holds on one head (the one in seed 55 of its parent). During the pull-back, scale, centre and rotation interpolate in log-space to the parent head, and the end state is the same picture as the start, one level up. The spiral families are lit by index: every other residue of n mod 34 (or mod 55) is one parastichy arm.
     - **The search:** the nearest-seed search only looks at indices whose radius is within ±1.3.
-  - The basalt is a hex-cell walker, not an SDF. Each step goes to the nearer of the cell edge or the column top, and a short second walk gives the long shadows.
+  - The basalt is a hex-cell walker, not an SDF. It first jumps down to the tallest possible column top and stops once the ray climbs back above it. Each step goes to the nearer of the cell edge or the column top, and a short second walk gives the long shadows.
   - The poles scale with distance (s = 1 + z/55). Their wires are two-segment sags, intersected analytically against the ray and anti-aliased by angular distance. Their lamps are analytic glows.
 - **TV recursion:** the scene shader samples last frame's composite onto the TV screen, with barrel distortion, scanlines, a phosphor tint and a gain below 1, so it converges as genuine video feedback.
-- **Feedback dissolves:** cuts dissolve through the feedback buffer, which is slightly zoomed each frame so ghosts drift outward. Cuts are also marked by light leaks and film cue marks. The feedback dissolve is short (it decays at 2.2/s), and the feedback is zeroed when the buffers are recreated.
-- **Film and tape pass:** chroma is blurred and offset while luma stays sharp (VHS bleed), plus halation from the mip chain, lifted teal blacks, warm faded highlights, gate weave, grain, dust, a scratch, a tracking band during the tape sags and the burn-out. The frame-indexed hashes for grain, dust and weave are wrapped modulo a small prime, because large arguments to `sin` turned the grain into diagonal stripes late in the film.
+- **Feedback dissolves:** cuts dissolve through the feedback buffer, which is slightly zoomed each frame so ghosts drift outward. Cuts are also marked by light leaks. The feedback dissolve is short (it decays at 2.2/s), and the feedback is zeroed when the buffers are recreated.
+- **Film and tape pass:** chroma is blurred while luma stays sharp (VHS bleed), plus halation from the mip chain, lifted teal blacks, warm faded highlights, gate weave, grain, dust, a tracking band during the tape sags and the burn-out. The frame-indexed hashes for grain, dust and weave are wrapped modulo a small prime, because large arguments to `sin` turned the grain into diagonal stripes late in the film.
 - **Music:** the master runs through a delay line modulated by wow (0.43 Hz and 0.17 Hz) and flutter (6 Hz). Its delay time is also automated:
   - three "motor sags", where the pitch dips and recovers at section changes
   - a quadratic ramp at the end, which makes a real tape stop
@@ -121,7 +121,7 @@ The answer flashes for two frames just before the film burns: 89, the next Fibon
 
 ## What I invented beyond the brief
 
-- the school-film framing: leader countdown, chapter cards, the "fig." diagrams, the rewind-the-tape end card, the cue marks
+- the school-film framing: leader countdown, chapter cards, the "fig." diagrams, the rewind-the-tape end card
 - the 34/55/89 counting thread through the script
 - the honeycomb-to-basalt rise
 - the upside-down children on the folded field
@@ -156,6 +156,32 @@ The answer flashes for two frames just before the film burns: 89, the next Fibon
 - reversed cymbals
 - typewriter keys and the bell
 - the counting notes
+
+## Fixes in the third round
+
+I found these by rendering dense sequences at 1280×720, 10 frames per second of film time, and reading consecutive frames side by side. I also ran a frame-to-frame change detector over the whole film at 10 fps. Its only spikes are the intended hard cuts (bars 4, 32, 44 and 64) and the two-frame "89" flash.
+
+**Cell (bees and stones):**
+- **Towers along the horizon.** The hex-cell walker ran out of its 150 steps on grazing rays. Those pixels fell through to the sky, which drew jagged stair-step "towers" along the horizon of the honeycomb plain. It now skips straight to the tallest possible column top, stops once the ray climbs above it, has 240 steps, and treats running out of steps as a hit in the haze.
+- **Ledges between honey cells.** The honey pools sat at slightly different heights, leaving dashed little ledges between them. They're now one level.
+- **Honey on rising stones.** The honey disc was still painted on top of stones as they rose. Now only cells still at comb height show honey.
+- **Flat honey.** The honey was the same tone as the wax. It's now a deeper glossy amber with a sun glint.
+- **Distant shimmer.** Distant columns get more haze.
+
+**Poles:**
+- **Overlapping numbers.** The far poles all crowd the vanishing point, so their numbers overlapped. Labels are now placed in strict near-to-far order, each at least a label-width right of the previous one along a rising diagonal, and tied to its pole top by a thin leader line. They can't collide.
+- **Stepped dark band in the field.** The ground was marched together with the poles with a loose hit threshold. Far ground pixels landed a little above y = 0 and were shaded as pole silhouettes, which drew a stepped dark band across the field. The ground is now an exact ray-plane intersection, and only the poles are marched.
+- **Red fringes.** The VHS chroma bleed was offset to one side, which put red fringes on every thin pole. It's now centred.
+
+**Meadow:**
+- **Pale streak under the ridge crests.** Rays skimming the ridge crests ran out of steps and showed sky, a pale streak under the crests. Running out of steps now counts as ground.
+- **Mirror line and V-notch.** The terrain was mirrored about the camera path, so it had a symmetric line and a V-notch at the vanishing point. It's now asymmetric, and folds symmetric only near the cylinder's far seam, where it must. The flat lane under the camera now opens out again 50 m ahead.
+- **Blotchy dandelion dots.** The dots were bright blotches that swam in motion. They're now small, dim and fade in close.
+
+**Seed zoom:** rebuilt as described in Tricks. The head is crisp and regular, the 34 and 55 families are shown, and there's one deliberate held pull-back instead of a constant zoom.
+
+**Film pass:**
+- **Scratch and cue mark removed.** The vertical "film scratch" line and the white reel-change cue mark both read as glitches.
 
 ## Not verified
 

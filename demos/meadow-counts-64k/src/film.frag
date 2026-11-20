@@ -1,7 +1,7 @@
 #version 300 es
 precision highp float;
 // film/tape pass: gate weave, line wobble, chroma bleed, halation, faded grade, leaks, dust, burn-out, burned-in text, grain
-uniform sampler2D A,X;uniform vec2 R;uniform float T,Fd,Lk,Tr,Bn,Cu;out vec4 o;
+uniform sampler2D A,X;uniform vec2 R;uniform float T,Fd,Lk,Tr,Bn;out vec4 o;
 #define ss smoothstep
 float h(float n){return fract(sin(n*91.7)*43758.5453);}
 float h2(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
@@ -14,7 +14,7 @@ void main(){
  float tb=Tr*ss(.06,0.,abs(uv.y-fract(T*.17+.3)));
  w.x+=tb*(h2(vec2(fr,floor(uv.y*110.)))-.5)*.035;
  vec3 Y=vec3(.299,.587,.114),c=texture(A,w).rgb,cb=vec3(0);
- for(float i=-3.;i<=3.;i++)cb+=texture(A,w+vec2(i*.0028+.0025,0)).rgb;cb/=7.;
+ for(float i=-3.;i<=3.;i++)cb+=texture(A,w+vec2(i*.002,0)).rgb;cb/=7.;
  c=dot(c,Y)+cb-dot(cb,Y);
  vec3 hl=textureLod(A,w,3.).rgb*.45+textureLod(A,w,5.).rgb*.55;
  c+=max(hl-.5,0.)*vec3(1.,.5,.25)*.9+hl*vec3(.05,.03,.02);
@@ -30,12 +30,9 @@ void main(){
  c+=Lk*.35*ss(.5,0.,uv.x)*vec3(.9,.3,.1)*vn(vec2(T*.5,uv.y*3.));
  // vignette, flicker
  c*=(1.-.45*pow(length((uv-.5)*vec2(1.,.8))*1.25,2.4))*(.965+.035*h(fr*1.3));
- // dust and a wandering scratch
+ // dust
  c*=1.-.6*step(.99985,h2(floor(uv*R/3.)+fr*17.13));
- float sk=mod(floor(T*1.7),89.),sx=h(sk+.3);c*=1.-.3*ss(.0012,0.,abs(uv.x-sx-.004*sin(uv.y*4.+T*3.)))*step(.55,h(sk+.9));
- // reel-change cue mark, top right
- c=mix(c,vec3(.95,.9,.8),Cu*ss(.03,.026,length((uv-vec2(.9,.84))*vec2(R.x/R.y,1.)))*(.7+.3*vn(uv*90.)));
- // burn-out: holes grow, edges glow, then dark
+  // burn-out: holes grow, edges glow, then dark
  if(Bn>0.){float b=Bn*1.35-(vn(uv*vec2(5.,3.)+3.)*.7+vn(uv*23.)*.3);
   c=mix(c,vec3(1.,.75,.4)*1.6,ss(-.12,0.,b));c=mix(c,vec3(.035,.025,.02),ss(0.,.12,b));}
  c*=Fd;
