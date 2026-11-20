@@ -4,6 +4,10 @@ Size-coded browser intros: each one is a single self-contained HTML file with re
 
 ## Watch
 
+Online: **https://lukaszdygon.github.io/demoscene/**. Click a demo's screen to start it with sound.
+
+Locally:
+
 ```bash
 python3 -m http.server 8000      # from this folder
 ```
