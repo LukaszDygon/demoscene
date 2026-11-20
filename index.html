@@ -26,7 +26,7 @@ h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 16px}
 <p class=s>Size-coded browser intros. Pick one to open it, then click its start screen to play with sound.</p>
 <div class=filters>
  <span>Size<span class=seg data-f=size><button data-v="">All</button><button data-v=16k>16k</button><button data-v=64k>64k</button></span></span>
- <span>Built by<span class=seg data-f=agent><button data-v="">All</button><button data-v=opus-5.5-high>Opus 5.5 · high</button><button data-v=opus-5.5-medium>Opus 5.5 · medium</button><button data-v=haiku-5.5-medium>Haiku 5.5 · medium</button></span></span>
+ <span>Built by<span class=seg data-f=agent><button data-v="">All</button><button data-v=fable-5.2-high>Fable 5.2 · high</button><button data-v=opus-5.5-high>Opus 5.5 · high</button><button data-v=opus-5.5-medium>Opus 5.5 · medium</button><button data-v=haiku-5.5-medium>Haiku 5.5 · medium</button></span></span>
  <span id=count></span>
 </div>
 <div class=grid id=g></div>
@@ -47,8 +47,9 @@ const DEMOS=[
  ['PLEASE ASSEMBLE','demos/please-assemble-64k/dist/please-assemble-64k.opus-5.5-medium.html','64k · 47 KB',"A too-cheerful announcer walks you through assembling Penrose stairs, Necker cubes and a Möbius ribbon on graph paper, in 7/8 and 5/4."],
  ['PROTON MOTIVE','demos/proton-motive-64k/dist/proton-motive-64k.opus-5.5-high.html','64k · 62 KB','A glucose molecule cracks, sparks relay down the respiratory chain, and protons press against a wet membrane cathedral until the ATP synthase rotor engages on the drop, to 134 BPM warehouse techno.'],
  ['READING FRAME','demos/reading-frame-64k/dist/reading-frame-64k.opus-5.5-high.html','64k · 63 KB','One real gene, GFP, read base by base under a confocal microscope: chromatin unspools, a ribosome translates in triplets, the chain snaps into a glowing β-barrel, and the arpeggio is the DNA itself.'],
- ['CLEAVE','demos/cleave-64k/dist/cleave-64k.opus-5.5-high.html','64k · 61 KB','One cell divides under seven microscopes, from phase contrast to SEM and an H&E slide, as dub techno doubles with every cleavage, until a Turing pattern on living skin opens its eye.']];
-const AGENT={'opus-5.5-high':'Opus 5.5 · high','opus-5.5-medium':'Opus 5.5 · medium','haiku-5.5-medium':'Haiku 5.5 · medium'};
+ ['CLEAVE','demos/cleave-64k/dist/cleave-64k.opus-5.5-high.html','64k · 61 KB','One cell divides under seven microscopes, from phase contrast to SEM and an H&E slide, as dub techno doubles with every cleavage, until a Turing pattern on living skin opens its eye.'],
+ ['COWBELL GRAND PRIX','demos/cowbell-grand-prix-64k/dist/cowbell-grand-prix-64k.fable-5.2-high.html','64k · 64 KB','Four pimped-out cars race a skyway through a megacity to 144 BPM drift phonk, throwing a rocket, a mirror ball, a black hole, a boxing glove, a grand piano and a freeze ray at each other, until a rubber duck settles it above the clouds at dawn.']];
+const AGENT={'fable-5.2-high':'Fable 5.2 · high','opus-5.5-high':'Opus 5.5 · high','opus-5.5-medium':'Opus 5.5 · medium','haiku-5.5-medium':'Haiku 5.5 · medium'};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // VP8 WebM is decoded in software, which sidesteps flaky hardware VP9 decoders; H.264 MP4 covers browsers without WebM (older Safari, iPhone).
