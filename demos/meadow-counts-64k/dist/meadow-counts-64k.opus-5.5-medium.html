@@ -235,6 +235,9 @@ SF='Baskerville,"Hoefler Text","Iowan Old Style",Georgia,"DejaVu Serif","Times N
 function txt(str,x,y,px,o={}){c2.font=`${o.it?'italic ':''}${o.w||500} ${px}px ${o.f||FF}`;c2.textAlign=o.al||'center';c2.letterSpacing=(o.ls||0)+'px';
 c2.globalAlpha=o.a??1;c2.shadowColor='rgba(0,0,0,.85)';c2.shadowBlur=px*.35;c2.shadowOffsetY=px*.06;c2.fillStyle=o.c||'#f6e8c8';
 c2.fillText(str,x,y);c2.shadowBlur=px*.9;c2.globalAlpha=(o.a??1)*.5;c2.fillText(str,x,y)}
+function sub(str,x,y,px,a,f,col,al,ls){c2.font=`400 ${px}px ${f}`;c2.textAlign=al;c2.letterSpacing=ls+'px';c2.globalAlpha=a;c2.lineJoin='round';
+c2.shadowColor='rgba(0,0,0,.9)';c2.shadowBlur=px*.12;c2.shadowOffsetY=px*.05;c2.strokeStyle='rgba(16,11,6,.85)';c2.lineWidth=px*.13;c2.strokeText(str,x,y);
+c2.shadowBlur=0;c2.shadowOffsetY=0;c2.fillStyle=col;c2.fillText(str,x,y)}
 function text(t,started,wall,st,M){const W=tcv.width,H=tcv.height,u=H/720,ops=[];
 if(!started){const bl=(s(wall*2.2)>-.3)|0;
 ops.push(['an educational film for schools  ·  reel three',W/2,H*.36,20*u,{ls:4*u,a:.85}],['THE MEADOW COUNTS',W/2,H*.47,64*u,{ls:14*u,w:600}],
@@ -243,8 +246,8 @@ else{const b=t/BAR;
 if(b<3.5){const n=8-Math.floor(t/(BEAT*2));ops.push([''+n,W/2,H/2+70*u,200*u,{w:600,c:'#1a1712',a:.9}])}
 for(const[cb,n,name]of CHAP){const a=ss(cb+.2,cb+.7,b)*(1-ss(cb+2.6,cb+3.2,b));
 if(a>0)ops.push([('part '+n).toUpperCase(),60*u,70*u,17*u,{al:'left',ls:6*u,a:+a.toFixed(1)}],[name,60*u,108*u,34*u,{al:'left',it:1,a:+a.toFixed(1)}])}
-for(const[c0,len,str]of NC){const a=+(ss(c0,c0+.25,b)*(1-ss(c0+len-.3,c0+len,b))).toFixed(2);if(a>0)ops.push(['#card',str,a])}
-for(const[c0,str]of SONG.TY){const n=Math.min(str.length,Math.floor((b-c0)*16)+1),e=c0+str.length/16,a=+(ss(c0-.1,c0,b)*(1-ss(e+1,e+1.4,b))).toFixed(2);
+for(const[c0,len,str]of NC){const a=+(ss(c0,c0+.15,b)*(1-ss(c0+len*.85-.25,c0+len*.85,b))).toFixed(2);if(a>0)ops.push(['#card',str,a])}
+for(const[c0,str]of SONG.TY){const n=Math.min(str.length,Math.floor((b-c0)*16)+1),e=c0+str.length/16,a=+(ss(c0-.1,c0,b)*(1-ss(e+.5,e+.8,b))).toFixed(2);
 if(n>0&&a>0)ops.push(['#type',str,n,a,n<str.length||s(t*9)>0])}
 const fa=(x,y)=>+(ss(x,x+.5,b)*(1-ss(y-.5,y,b))).toFixed(2),r2=v=>+v.toFixed(2);
 if(b>14.4&&b<19)ops.push(['#gold',fa(14.4,19),r2(ss(14.8,16,b)),r2(ss(16.9,18.3,b))]);
@@ -262,17 +265,10 @@ const key=JSON.stringify(ops);if(key==tkey)return;tkey=key;
 c2.clearRect(0,0,W,H);
 for(const op of ops){if(op[0][0]!='#'){txt(...op);continue}
 if(op[0]=='#card'){const[,str,a]=op,ls=str.split('|'),px=36*u;
-let g=c2.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.6);g.addColorStop(0,`rgba(10,7,4,${.45*a})`);g.addColorStop(1,`rgba(10,7,4,${.2*a})`);
-c2.globalAlpha=1;c2.shadowBlur=0;c2.fillStyle=g;c2.fillRect(0,0,W,H);
-c2.font=`400 ${px}px ${SF}`;c2.letterSpacing=2*u+'px';const cw=Math.max(...ls.map(l=>c2.measureText(l).width))+110*u,ch=ls.length*px*1.35+70*u,x0=(W-cw)/2,y0=(H-ch)/2;
-c2.globalAlpha=a;c2.fillStyle='rgba(30,21,12,.86)';c2.fillRect(x0,y0,cw,ch);c2.strokeStyle='#e9dcbc';c2.lineWidth=1.5*u;
-c2.strokeRect(x0+12*u,y0+12*u,cw-24*u,ch-24*u);c2.globalAlpha=a*.5;c2.strokeRect(x0+18*u,y0+18*u,cw-36*u,ch-36*u);
-ls.forEach((l,i)=>txt(l,W/2,y0+35*u+px*(1+i*1.35),px,{a,f:SF,w:400,ls:2*u,c:'#f1e6c9'}));continue}
-if(op[0]=='#type'){const[,str,n,a,cur]=op,px=34*u,y=H*.87;
-let g=c2.createRadialGradient(W/2,y-10*u,0,W/2,y-10*u,W*.5);g.addColorStop(0,`rgba(8,8,6,${.3*a})`);g.addColorStop(1,'rgba(8,8,6,0)');
-c2.globalAlpha=1;c2.shadowBlur=0;c2.fillStyle=g;c2.save();c2.translate(0,y-10*u);c2.scale(1,.18);c2.translate(0,-(y-10*u));c2.fillRect(0,0,W,H*6);c2.restore();
-c2.font=`400 ${px}px ${TF}`;c2.letterSpacing='0px';const x=W/2-c2.measureText(str).width/2;
-txt(str.slice(0,n)+(cur?'_':''),x,y,px,{a,f:TF,w:400,al:'left',c:'#e4efe2'});continue}
+ls.forEach((l,i)=>sub(l,W/2,H*.83-(ls.length-1-i)*px*1.2,px,a,SF,'#f4e9cc','center',1.5*u));continue}
+if(op[0]=='#type'){const[,str,n,a,cur]=op,px=27*u;
+c2.font=`400 ${px}px ${TF}`;c2.letterSpacing='0px';
+sub(str.slice(0,n)+(cur?'_':''),W/2-c2.measureText(str).width/2,H*.925,px,a,TF,'#e2efe0','left',0);continue}
 fig(op,W,H,u)}
 gl.bindTexture(gl.TEXTURE_2D,ttx);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tcv);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)}

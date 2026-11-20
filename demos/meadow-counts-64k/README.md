@@ -2,7 +2,7 @@
 
 *an educational film for schools · reel three*
 
-A 64k browser intro in the shape of a half-remembered 1970s school film. A meadow at golden hour, a sunflower whose seeds are smaller sunflowers, honeycomb that turns into basalt columns, a horizon that folds up into the sky, telephone poles that get taller as they recede, a television in a field that shows itself, and a sunset over fields that turn out to be the seeds of one enormous flower. It's a silent film: a narrator speaks through intertitle cards, and a child's questions are typed into the picture one key at a time, in time with the beat.
+A 64k browser intro in the shape of a half-remembered 1970s school film. A meadow at golden hour, a sunflower whose seeds are smaller sunflowers, honeycomb that turns into basalt columns, a horizon that folds up into the sky, telephone poles that get taller as they recede, a television in a field that shows itself, and a sunset over fields that turn out to be the seeds of one enormous flower. It's a silent film: the narrator speaks in burned-in subtitles, and a child's questions are typed into the picture one key at a time, in time with the beat.
 
 **Run:** open `dist/meadow-counts-64k.opus-5.5-medium.html` in Chrome, Safari or Firefox (WebGL2) and click. Sound starts immediately (live synthesis, no pre-render).
 
@@ -14,11 +14,11 @@ A 64k browser intro in the shape of a half-remembered 1970s school film. A meado
 
 | | bytes | budget |
 |---|---|---|
-| whole file (raw, no packer) | 46,528 | 65,536 |
+| whole file (raw, no packer) | 45,982 | 65,536 |
 | soundtrack (`music.js` as shipped) | 14,308 | 16,384 |
 
 There are no external requests and no embedded fonts. All type comes from the OS:
-- **Intertitles:** Baskerville, Hoefler Text, Georgia or DejaVu Serif.
+- **The narrator's subtitles:** Baskerville, Hoefler Text, Georgia or DejaVu Serif.
 - **The child's lines:** American Typewriter, Courier or DejaVu Sans Mono.
 - **Labels and diagrams:** Futura, Century Gothic, Avenir or DejaVu Sans.
 
@@ -26,7 +26,7 @@ There are no external requests and no embedded fonts. All type comes from the OS
 |---|---|
 | `src/scene.frag` | one shader with five worlds: film leader, meadow/cylinder world (with the TV and the children), the self-similar seed head, honeycomb/basalt, poles |
 | `src/film.frag` | film and tape pass: gate weave, line wobble, chroma bleed, halation, faded grade, light leaks, dust, scratch, cue marks, burn-out, burned-in text, grain |
-| `src/main.js` | storyboard (everything is a function of song time), camera, feedback buffer, particles (fluff, bees, birds); intertitle cards, typed lines and diagrams drawn into a canvas texture |
+| `src/main.js` | storyboard (everything is a function of song time), camera, feedback buffer, particles (fluff, bees, birds); subtitles, typed lines and diagrams drawn into a canvas texture |
 | `src/music.js` | the 88 BPM soundtrack, including the typewriter keys for the child's lines, on the same scheduler live and offline |
 
 ## Timeline (88 BPM, 1 bar = 2.727 s, 74 bars, about 3:26 including the tail)
@@ -45,56 +45,49 @@ There are no external requests and no embedded fonts. All type comes from the OS
 | 72–74 | 3:17 | The last typed question, a two-frame flash of "89", the film burns through, and the tape stops (the pitch slides to zero) | Typewriter bell, tape stop, projector clatter |
 | end | 3:20 | *end of lesson. please rewind the tape before returning it to the library.* | – |
 
-## Narration (silent, part of the film)
+## Narration (silent, burned-in subtitles)
 
-There's no voice. The film is narrated the way silent films and school filmstrips were.
+There's no voice. The film is narrated by burned-in subtitles of the kind school films carried. There are no cards, boxes, bands or haze, and the picture is never dimmed: it stays at full brightness while text is up.
 
-**The narrator speaks in intertitle cards:**
-- **Typeface and card:** Baskerville-style serif in cream, on a dark sepia card with a double rule.
-- **Readability:** while a card is up, the picture behind it dims softly, so it stays readable over bright frames.
-- **Timing:** cards fade in on a downbeat (or a beat inside the bar) over a quarter bar and hold for 1¼ to 2½ bars.
+- **The narrator:** cream Baskerville-style serif, in the lower third (one or two lines stacked upward from 83% of the height).
+- **Readability:** a tight dark outline (about 13% of the type size) plus a small drop shadow keeps both voices legible. I checked frames over the brightest moments: the golden meadow, the hexagonal sun over the honey, and the sunset.
+- **Timing:** each narrator line fades in over 0.15 bar, on the bar grid. It stays for 85% of its slot, which is 1¼ to 2½ bars.
+- **The child:** smaller pale-green typewriter type at 92.5% of the height, below the narrator's lines, so the two stack when they overlap. It's typed one letter per swung sixteenth with a blinking cursor. The soundtrack plays a typewriter key for every letter and a carriage-return bell at the end of each line, so the typing is part of the groove.
+- **Wordless moments:** the music carries two passages on its own, the fold roll (bars 42–44) and the TV pull-back (63–64). A third moment is told in music and numbers instead of a sentence: the counting (bars 53.5–55.4).
+- **Burned in:** all text and diagrams are drawn into a canvas that's burned into the film, so they wobble, bleed and grain with the picture.
 
-**The child types questions** in small pale-green typewriter type near the bottom of the picture:
-- **Timing:** one letter per swung sixteenth, with a blinking cursor.
-- **Sound:** the soundtrack plays a typewriter key for every letter and a carriage-return bell at the end of each line, so the typing is part of the groove.
-- **Readability:** a soft dark haze sits behind the line.
-
-**Wordless moments:** the music has to carry two passages on its own, the fold roll (bars 42–44) and the TV pull-back (63–64). A third moment is told in music and numbers instead of a sentence: the counting (bars 53.5–55.4).
-
-All cards, typed lines and diagrams are drawn into a canvas that's burned into the film, so they wobble, bleed and grain with the picture.
-
-| bar | time | who | text (`/` = line break on the card) |
+| bar | time | who | text (`/` = line break) |
 |---|---|---|---|
-| 5–7 | 0:13.6 | card | This is a meadow. |
-| 7–9 | 0:19.1 | card | Everything here is counting. |
-| 9–11 | 0:24.5 | card | The grass counts the wind. |
-| 13–15 | 0:35.5 | card | Look closer at the flower. |
-| 15–17 | 0:40.9 | card | The seeds turn by / the golden angle. |
-| 17–19 | 0:46.4 | card | Thirty-four one way. / Fifty-five the other. |
-| 19–20.5 | 0:51.8 | card | Every seed is / a smaller flower. |
+| 5–7 | 0:13.6 | narrator | This is a meadow. |
+| 7–9 | 0:19.1 | narrator | Everything here is counting. |
+| 9–11 | 0:24.5 | narrator | The grass counts the wind. |
+| 13–15 | 0:35.5 | narrator | Look closer at the flower. |
+| 15–17 | 0:40.9 | narrator | The seeds turn by / the golden angle. |
+| 17–19 | 0:46.4 | narrator | Thirty-four one way. / Fifty-five the other. |
+| 19–20.5 | 0:51.8 | narrator | Every seed is / a smaller flower. |
 | 20.5 | 0:55.9 | typed | and every flower is a seed. |
-| 23–24.5 | 1:02.7 | card | The bees learned it first. |
-| 25–26.5 | 1:08.2 | card | Six sides. No gaps. / No waste. |
-| 27–29 | 1:13.6 | card | Then the stones / learned it too. |
+| 23–24.5 | 1:02.7 | narrator | The bees learned it first. |
+| 25–26.5 | 1:08.2 | narrator | Six sides. No gaps. / No waste. |
+| 27–29 | 1:13.6 | narrator | Then the stones / learned it too. |
 | 29 | 1:19.1 | typed | how long did they practise? |
-| 30.75–32 | 1:23.9 | card | A very long time. |
-| 33–34.5 | 1:30.0 | card | Now look up. |
-| 35–37 | 1:35.5 | card | The horizon does not end. / It folds. |
-| 37.5–39.5 | 1:42.3 | card | That is the same field, / above you. |
-| 39.5–41.5 | 1:47.7 | card | We walked there / as children. |
+| 30.75–32 | 1:23.9 | narrator | A very long time. |
+| 33–34.5 | 1:30.0 | narrator | Now look up. |
+| 35–37 | 1:35.5 | narrator | The horizon does not end. / It folds. |
+| 37.5–39.5 | 1:42.3 | narrator | That is the same field, / above you. |
+| 39.5–41.5 | 1:47.7 | narrator | We walked there / as children. |
 | 41.75 | 1:53.9 | typed | we are still walking there. |
-| 45–47 | 2:02.7 | card | Follow the line of poles. |
-| 47–49 | 2:08.2 | card | They do not get smaller. |
-| 49–51.5 | 2:13.6 | card | The further they go, / the taller they grow. |
-| 52–53.5 | 2:21.8 | card | Do not count them. |
+| 45–47 | 2:02.7 | narrator | Follow the line of poles. |
+| 47–49 | 2:08.2 | narrator | They do not get smaller. |
+| 49–51.5 | 2:13.6 | narrator | The further they go, / the taller they grow. |
+| 52–53.5 | 2:21.8 | narrator | Do not count them. |
 | 53.5 | 2:25.9 | typed | i counted them. (numbers 1 to 15 then appear over the poles, one per eighth note) |
-| 57–59 | 2:35.5 | card | This film was made / a long time ago. |
-| 59.25–60.75 | 2:41.6 | card | It is still playing. |
+| 57–59 | 2:35.5 | narrator | This film was made / a long time ago. |
+| 59.25–60.75 | 2:41.6 | narrator | It is still playing. |
 | 61 | 2:46.4 | typed | is that us? |
-| 62.5–64 | 2:50.5 | card | You are watching it now. |
-| 65–67 | 2:57.3 | card | The sun goes down / at the usual time. |
-| 67.5–69 | 3:04.1 | card | This is the end / of the lesson. |
-| 69.5–71 | 3:09.5 | card | Remember the number. |
+| 62.5–64 | 2:50.5 | narrator | You are watching it now. |
+| 65–67 | 2:57.3 | narrator | The sun goes down / at the usual time. |
+| 67.5–69 | 3:04.1 | narrator | This is the end / of the lesson. |
+| 69.5–71 | 3:09.5 | narrator | Remember the number. |
 | 71 | 3:13.6 | typed | what was the number? |
 
 The answer flashes for two frames just before the film burns: 89, the next Fibonacci number after 34 and 55.
@@ -156,7 +149,7 @@ The answer flashes for two frames just before the film burns: 89, the next Fibon
 
 **2. Seed zoom.** The old version put a 40× copy inside the cramped central seed. That seed was smaller than its neighbours, and the copy was drawn differently from the ordinary seeds, so it read as a dot in a hole. Now every seed is a whole head and the zoom runs about the fixed point of the head-into-seed-21 map. Frames on either side of the loop point (L = 10.27 s and L = 10.57 s) frame the same thing, and the zoom is continuous in between.
 
-**3. Narration.** The formant voice, its phoneme table and the ducking are gone. The freed music bytes went to:
+**3. Narration.** The formant voice, its phoneme table and the ducking are gone. The intertitle cards that replaced them, which dimmed the picture, have since become plain burned-in subtitles. The freed music bytes went to:
 - the recorder and the electric piano
 - the arpeggio
 - the doubled reprise lead
