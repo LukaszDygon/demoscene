@@ -2,9 +2,9 @@
 
 An orbital battle above a banded gas giant, told from one escape pod drifting through the wreckage. Explosions are silent. The only sounds come from inside the pod: breathing, a soft beacon ping and a formant choir pad, and at the end a roar of fire.
 
-Entry: `dist/silent-fleet-16k.html` (one self-contained file, no packer, no external requests).
+Entry: `dist/silent-fleet-16k.haiku-5.5-medium.html` (one self-contained file, no packer, no external requests).
 
-Rebuild with `python3 build.py`. It writes `dist/silent-fleet-16k.html` and prints its size. It also writes `dist/dev.html`, the same page with the camera-clearance probe, which is only used by the checks.
+Rebuild with `python3 build.py`. It writes `dist/silent-fleet-16k.haiku-5.5-medium.html` and prints its size. It also writes `dist/dev.html`, the same page with the camera-clearance probe, which is only used by the checks.
 
 ## Sizes against budget
 
@@ -50,7 +50,7 @@ No bloom or post pass is used. The glows are additive in the same shader, which 
 ## Check results
 
 - `budget.py` against 16 384 total and 4 096 music: **OK** (12 782 total, 3 488 music, no external references).
-- `check.mjs e2e dist/silent-fleet-16k.html`: click to first sound **0.0 s**, **no exceptions or console errors**. This also confirms that the shader compiled in headless Chrome.
+- `check.mjs e2e dist/silent-fleet-16k.haiku-5.5-medium.html`: click to first sound **0.0 s**, **no exceptions or console errors**. This also confirms that the shader compiled in headless Chrome.
 - `check.mjs audio src/music.js 4`: 85 s song, **peak 0.573**, **no NaN**. RMS per 4 bars runs −25.8, −23.3, −25.8, −20.8, −23.3, −19.4 dB, then the tail. That follows the arrangement: intro quiet, the silence block dips, the every-beat pings and the roar peak.
 - `check.mjs clearance dist/dev.html`: the camera **never enters a probe box**. Minimum distance is 4.28 units, at 40.9 s. The probe boxes are conservative boxes around the static hull fragments and the ships. Two collisions were found and fixed during the work (a hull fragment on the path at about 57 s, and a loose ship box), so the rock at `[-2,-24,64]` was moved.
 

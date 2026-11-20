@@ -2,18 +2,25 @@
 <style>
 html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:pointer;color:#eee}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-#st{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;box-sizing:border-box;pointer-events:none;
-text-align:center;font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;text-shadow:0 0 12px #000,0 0 3px #000;transition:opacity 1.5s}
+.o{position:fixed;pointer-events:none;font-family:ui-monospace,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;text-shadow:0 0 6px #000,0 0 2px #000}
+#st{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;box-sizing:border-box;text-align:center;font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;text-shadow:0 0 12px #000,0 0 3px #000;transition:opacity 1.5s}
 body.go #st{opacity:0}
-#st h1{font-weight:300;font-size:min(10vw,84px);letter-spacing:.42em;margin:0 0 0 .42em}
+#st h1{font-weight:300;font-size:min(10vw,84px);letter-spacing:.42em;margin:0 0 0 .42em;animation:fl 5s steps(1) infinite}
 #st .s{font-size:min(3.2vw,16px);letter-spacing:.3em;text-transform:uppercase;opacity:.75;margin:.8em 0 0}
 #st .k{font-size:min(3.4vw,16px);letter-spacing:.42em;margin-top:3.4em;animation:br 2.4s ease-in-out infinite}
 @keyframes br{50%{opacity:.3}}
-#tc{position:fixed;left:16px;bottom:14px;pointer-events:none;font-family:ui-monospace,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;
-font-size:min(3.4vw,20px);letter-spacing:.06em;text-shadow:0 0 6px #000,0 0 2px #000}
+@keyframes fl{0%,62%{opacity:1}63%{opacity:.4}64%{opacity:1}}
+#tc{left:16px;bottom:14px;font-size:min(3.4vw,20px);letter-spacing:.06em}
+#cap{left:16px;top:14px;font-size:min(2.6vw,14px);letter-spacing:.3em;opacity:0}
+#en{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity 2.5s}
+#en.on{opacity:1}
+#en h2{font-weight:300;font-size:min(8vw,64px);letter-spacing:.4em;margin:0 0 0 .4em}
+#en p{font-size:min(2.6vw,14px);letter-spacing:.3em;margin:1.4em 0 0;opacity:.7}
 </style></head><body><canvas id=c></canvas>
-<div id=st><h1>ONE SECOND</h1><p class=s>a frozen gunfight</p><p class=k>CLICK TO RESUME TIME</p></div>
-<div id=tc>00:00.000</div>
+<div class=o id=st style="position:fixed"><h1>ONE SECOND</h1><p class=s>a frozen gunfight</p><p class=k>CLICK TO RESUME TIME</p></div>
+<div class=o id=cap></div>
+<div class=o id=tc>00:00.000</div>
+<div class="o" id=en><h2>ONE SECOND</h2><p>00:01.000 &middot; ONE FRAME OF TIME</p></div>
 <script>/*MUSIC*/</script>
 <script>/*MAIN*/</script>
 </body></html>

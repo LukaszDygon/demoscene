@@ -20,5 +20,5 @@ c*=.72+.28*sin(row*3.14159);
 c*=.92+.08*vec3(sin(gl_FragCoord.x*2.1),sin(gl_FragCoord.x*2.1+2.1),sin(gl_FragCoord.x*2.1+4.2));
 c*=1.-.15*dot(p,p);
 c*=1.+.02*sin(TM*45.);
-o=vec4(pow(c,vec3(.92)),1.);
+float e=max(abs(p.x),abs(p.y));c*=1.-.55*smoothstep(.9,1.,e);o=vec4(pow(c,vec3(.92)),1.);
 }

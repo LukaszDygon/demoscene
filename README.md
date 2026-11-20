@@ -23,6 +23,8 @@ Open http://localhost:8000. The page lists every demo with a play button and an 
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 
+Each shipped file is named after the model and effort level that built it, e.g. `kaiju16k.opus-5.5-high.html` or `one-second-16k.haiku-5.5-medium.html`. The label was taken from the Claude Code session logs.
+
 ## The skill
 
 `skill/demoscene-intro/` is a Claude Code skill for making new intros from your own art direction. It covers the spec, the pitfalls and the checking scripts (byte budget, click-to-sound, audio levels, camera clearance). The last four demos were made with it. To install it:

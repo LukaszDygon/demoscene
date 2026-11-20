@@ -1,6 +1,6 @@
 # INK & STEEL (16k)
 
-A wuxia rooftop duel in sumi-e ink wash. One WebGL2 fragment shader, synthesized WebAudio music, DOM captions and a seal stamp. The entry is `dist/ink-and-steel-16k.html`. Rebuild with `python3 build.py`, which also prints the size.
+A wuxia rooftop duel in sumi-e ink wash. One WebGL2 fragment shader, synthesized WebAudio music, DOM captions and a seal stamp. The entry is `dist/ink-and-steel-16k.haiku-5.5-medium.html`. Rebuild with `python3 build.py`, which also prints the size.
 
 ## Sizes
 

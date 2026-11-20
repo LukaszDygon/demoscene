@@ -2,7 +2,7 @@
 
 An original side-scrolling arcade brawler shown as an attract-mode run: one city block, one headband hero, escalating absurd enemies, a giant wrestler boss, a super move and a CONTINUE countdown into the INSERT COIN end card.
 
-Entry: `dist/insert-coin-16k.html`. Rebuild with `python3 build.py`, which prints the sizes.
+Entry: `dist/insert-coin-16k.haiku-5.5-medium.html`. Rebuild with `python3 build.py`, which prints the sizes.
 
 ## Sizes
 
@@ -51,8 +51,8 @@ Hits land on the beat grid (every enemy contact is at a half-second multiple), s
 
 ## Checks
 
-- `budget.py dist/insert-coin-16k.html --total 16384 --music src/music.js --music-max 4096`: passes, no external references.
-- `check.mjs e2e dist/insert-coin-16k.html`: click → first sound 0.0 s, no exceptions and no console errors over 8 s of play.
+- `budget.py dist/insert-coin-16k.haiku-5.5-medium.html --total 16384 --music src/music.js --music-max 4096`: passes, no external references.
+- `check.mjs e2e dist/insert-coin-16k.haiku-5.5-medium.html`: click → first sound 0.0 s, no exceptions and no console errors over 8 s of play.
 - `check.mjs audio src/music.js`: offline render in 0.74 s, 85 s long, peak 0.862, no NaN samples. RMS per four bars: intro −31.8 dB, stage 1 −26 dB, stages 2–4 −24 to −26 dB, boss −23.9 dB. The last partial chunk is −53 dB because the chord has decayed.
 - Extra headless check, outside the repo: stepped the game clock through the whole run (no audio) with the scene drawn every frame. 2 581 frames, no exceptions, all 24 enemies including the boss knocked out.
 
@@ -70,4 +70,4 @@ Hits land on the beat grid (every enemy contact is at a half-second multiple), s
 - `src/main.js`: the game, title, HUD and state timeline.
 - `src/post.frag`: the CRT and bloom pass.
 - `src/index.html`: the page shell.
-- `build.py`: builds `dist/insert-coin-16k.html`.
+- `build.py`: builds `dist/insert-coin-16k.haiku-5.5-medium.html`.

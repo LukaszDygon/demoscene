@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/the-tapestry-16k.html: music inlined verbatim, shader and main.js lightly stripped, then print the size."""
+"""Build dist/the-tapestry-16k.haiku-5.5-medium.html: music inlined verbatim, shader and main.js lightly stripped, then print the size."""
 import pathlib
 
 R = pathlib.Path(__file__).parent
@@ -23,7 +23,7 @@ for k, v in [('MUSIC', rd('music.js').strip()), ('SCENE', strip(rd('scene.frag')
     html = html.replace('/*%s*/' % k, v)
 
 (R / 'dist').mkdir(exist_ok=True)
-out = R / 'dist' / 'the-tapestry-16k.html'
+out = R / 'dist' / 'the-tapestry-16k.haiku-5.5-medium.html'
 data = html.encode()
 out.write_bytes(data)
 music = len(rd('music.js').strip().encode())

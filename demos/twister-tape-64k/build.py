@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/twister-tape-64k.html: music inlined verbatim, GLSL and main.js lightly minified, one file, no externals."""
+"""Build dist/twister-tape-64k.haiku-5.5-medium.html: music inlined verbatim, GLSL and main.js lightly minified, one file, no externals."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda n: (R / 'src' / n).read_text()
@@ -21,6 +21,6 @@ main = js(rd('main.js'))
 main = main.replace('$SCENE$', glsl(rd('scene.frag'))).replace('$POST$', glsl(rd('post.frag')))
 html = rd('index.html').replace('/*MUSIC*/', music, 1).replace('/*MAIN*/', main, 1)
 (R / 'dist').mkdir(exist_ok=True)
-out = R / 'dist' / 'twister-tape-64k.html'
+out = R / 'dist' / 'twister-tape-64k.haiku-5.5-medium.html'
 out.write_text(html)
 print(f'{out.name}: {len(html.encode())} bytes (budget 65536); music {len(music.encode())} bytes (budget 16384)')

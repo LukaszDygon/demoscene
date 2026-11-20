@@ -1,6 +1,6 @@
 The 16k intro is built: **THE DAILY FLUX**, a one-minute black-and-white newspaper demo with a 70s muzak soundtrack.
 
-**File:** `dist/the-daily-flux-16k.html`, a single self-contained HTML file. Open it in Chrome, Edge or Safari, then click or press a key to print the edition; the sound starts on that click.
+**File:** `dist/the-daily-flux-16k.haiku-5.5-medium.html`, a single self-contained HTML file. Open it in Chrome, Edge or Safari, then click or press a key to print the edition; the sound starts on that click.
 
 **Size:** 12,943 bytes total against a 16,384 budget. The soundtrack is 4,091 bytes against a 4,096 sub-budget. The build inlines `src/music.js` and `src/main.js` and light-minifies them (indentation and comments stripped).
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/twister-tape-16k.html: music.js inlined verbatim, shader and main.js with comments and blank lines stripped."""
+"""Build dist/twister-tape-16k.haiku-5.5-medium.html: music.js inlined verbatim, shader and main.js with comments and blank lines stripped."""
 import pathlib, re
 
 R = pathlib.Path(__file__).parent
@@ -21,7 +21,7 @@ def build():
     html = html.replace('/*SHADER*/', strip(rd('intro.frag')))
     html = html.replace('/*MAIN*/', strip(rd('main.js')))
     (R / 'dist').mkdir(exist_ok=True)
-    out = R / 'dist' / 'twister-tape-16k.html'
+    out = R / 'dist' / 'twister-tape-16k.haiku-5.5-medium.html'
     data = html.encode()
     out.write_bytes(data)
     music = len(rd('music.js').rstrip('\n').encode())

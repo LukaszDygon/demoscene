@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/toy-box-war-16k.html: music inlined verbatim, shaders and main.js minified, then print the size."""
+"""Build dist/toy-box-war-16k.haiku-5.5-medium.html: music inlined verbatim, shaders and main.js minified, then print the size."""
 import re, pathlib
 
 R = pathlib.Path(__file__).parent
@@ -44,7 +44,7 @@ def build():
         assert '/*%s*/' % k in html, k
         html = html.replace('/*%s*/' % k, v)
     (R / 'dist').mkdir(exist_ok=True)
-    out = R / 'dist' / 'toy-box-war-16k.html'
+    out = R / 'dist' / 'toy-box-war-16k.haiku-5.5-medium.html'
     out.write_text(html)
     music = len(rd('music.js').encode())
     print(out.name, len(html.encode()), 'bytes (music source', music, 'bytes)')

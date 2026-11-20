@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/insert-coin-64k.html from src/. The music is inlined verbatim; shader and main script are only stripped of comments and indentation."""
+"""Build dist/insert-coin-64k.haiku-5.5-medium.html from src/. The music is inlined verbatim; shader and main script are only stripped of comments and indentation."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 src = lambda n: (R / 'src' / n).read_text()
@@ -20,5 +20,5 @@ main = js(src('main.js')).replace('$CRT$', glsl(src('crt.frag')))
 music = src('music.js')
 html = src('index.html').replace('/*MUSIC*/', music).replace('/*MAIN*/', main)
 (R / 'dist').mkdir(exist_ok=True)
-(R / 'dist' / 'insert-coin-64k.html').write_text(html)
+(R / 'dist' / 'insert-coin-64k.haiku-5.5-medium.html').write_text(html)
 print(len(html.encode()), 'bytes total; music', len(music.encode()), 'bytes')

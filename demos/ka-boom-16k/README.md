@@ -2,7 +2,7 @@
 
 Kinetic typography in Swiss style: black, white and one signal red. No figurative imagery. Each word is a set of glyph quads rasterized from a canvas atlas and drawn with instanced WebGL2. A background shader draws the grid, and a post pass adds motion trails and hit shake. The soundtrack is synthesized with WebAudio.
 
-Entry: `dist/ka-boom-16k.html`. Rebuild with `python3 build.py`, which prints the size.
+Entry: `dist/ka-boom-16k.haiku-5.5-medium.html`. Rebuild with `python3 build.py`, which prints the size.
 
 ## Sizes against budget
 
@@ -63,4 +63,4 @@ Length: 48 bars at 174 BPM, which is 66.2 s plus a 3 s audio tail. Start is one 
 - `src/music.js`: the soundtrack. `SONG.live()` plays it in the browser, and `SONG.render()` renders it offline for checks.
 - `src/main.js`: the WebGL pipeline, the timeline and the shrapnel system.
 - `src/index.html`: the shell that `build.py` fills.
-- `build.py` → `dist/ka-boom-16k.html`.
+- `build.py` → `dist/ka-boom-16k.haiku-5.5-medium.html`.

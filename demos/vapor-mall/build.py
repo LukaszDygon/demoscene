@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack src/ into a single self-contained dist/vapor-mall.html and enforce the 64k budget.
+"""Pack src/ into a single self-contained dist/vapor-mall.opus-5.5-high.html and enforce the 64k budget.
 
 Limits: whole file <= 65536 bytes, soundtrack (music.js as packed) <= 16384 bytes.
 "Minification" is deliberately conservative: strip indentation and full-line // comments.
@@ -27,7 +27,7 @@ shell = (SRC / "shell.html").read_text("utf-8")
 html = shell.replace("/*MUSIC*/", music).replace("/*DEMO*/", demo)
 
 DIST.mkdir(exist_ok=True)
-out = DIST / "vapor-mall.html"
+out = DIST / "vapor-mall.opus-5.5-high.html"
 out.write_bytes(html.encode("utf-8"))
 
 mb, tb = len(music.encode()), len(html.encode())

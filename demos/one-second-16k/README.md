@@ -1,6 +1,6 @@
 # ONE SECOND, 16k
 
-A frozen bank-lobby gunfight. The piece covers one real second, stretched over about 72 s. Entry: `dist/one-second-16k.html`. Rebuild with `python3 build.py`, which prints the size.
+A frozen bank-lobby gunfight. The piece covers one real second, stretched over about 72 s. Entry: `dist/one-second-16k.haiku-5.5-medium.html`. Rebuild with `python3 build.py`, which prints the size.
 
 ## Sizes
 

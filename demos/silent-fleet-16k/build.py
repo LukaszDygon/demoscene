@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/silent-fleet-16k.html: music inlined verbatim, shader and main.js lightly minified.
+"""Build dist/silent-fleet-16k.haiku-5.5-medium.html: music inlined verbatim, shader and main.js lightly minified.
 
 Also writes dist/dev.html, the same page with the camera-clearance probe (window.__probe) for check.mjs clearance.
 """
@@ -40,7 +40,7 @@ def build(dev):
     for k, v in [('MUSIC', music), ('SCENE', glsl(rd('scene.frag'))), ('MAIN', js(rd('main.js'), dev))]:
         html = html.replace('/*%s*/' % k, v)
     (R / 'dist').mkdir(exist_ok=True)
-    out = R / 'dist' / ('dev.html' if dev else 'silent-fleet-16k.html')
+    out = R / 'dist' / ('dev.html' if dev else 'silent-fleet-16k.haiku-5.5-medium.html')
     out.write_bytes(html.encode())
     print(f'{out.name}: {len(html.encode())} bytes (music {len(music.encode())} bytes)')
 

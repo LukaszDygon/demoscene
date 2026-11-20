@@ -1,6 +1,6 @@
 # DOMINO HOUSE — 16k
 
-Entry: `dist/domino-house-16k.html` (one self-contained file, no packer, no external requests). Rebuild with `python3 build.py`, which also prints the size.
+Entry: `dist/domino-house-16k.haiku-5.5-medium.html` (one self-contained file, no packer, no external requests). Rebuild with `python3 build.py`, which also prints the size.
 
 ## Sizes against budget
 
@@ -60,4 +60,4 @@ The waltz speeds up by note density, from 3 notes per bar to 6 at bar 12 and 9 a
 - `src/main.js`: WebGL setup, camera path, captions.
 - `src/index.html`: page, start screen and caption styles.
 - `src/music.js`: the soundtrack. `SONG.live()` plays it, `SONG.render()` renders it offline.
-- `build.py`: inlines the sources and writes `dist/domino-house-16k.html`.
+- `build.py`: inlines the sources and writes `dist/domino-house-16k.haiku-5.5-medium.html`.

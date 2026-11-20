@@ -1,6 +1,6 @@
 # DESCENSUS: a 64k deep-sea intro
 
-The intro is **`dist/descensus.html`**, a single self-contained file. Open it, then click or press Space/Enter on the title screen ("tange aquam ut descendas", meaning "touch the water to descend").
+The intro is **`dist/descensus.opus-5.5-high.html`**, a single self-contained file. Open it, then click or press Space/Enter on the title screen ("tange aquam ut descendas", meaning "touch the water to descend").
 
 ## Size
 - **Total: 30,185 / 65,536 bytes (46%)**, raw and uncompressed. No packer is used (gzip would bring it to 13 KB), and it makes no external requests.

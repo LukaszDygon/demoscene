@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/domino-house-16k.html: music inlined verbatim, GLSL and JS comment-stripped, then print the size."""
+"""Build dist/domino-house-16k.haiku-5.5-medium.html: music inlined verbatim, GLSL and JS comment-stripped, then print the size."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda n: (R / 'src' / n).read_text()
@@ -23,6 +23,6 @@ html = rd('index.html')
 music = rd('music.js')
 html = html.replace('/*SCENE*/', glsl(rd('scene.frag'))).replace('/*MUSIC*/', music).replace('/*MAIN*/', js(rd('main.js')))
 (R / 'dist').mkdir(exist_ok=True)
-out = R / 'dist' / 'domino-house-16k.html'
+out = R / 'dist' / 'domino-house-16k.haiku-5.5-medium.html'
 out.write_text(html)
 print(out.name, len(html.encode()), 'bytes', '| music', len(music.encode()), 'bytes')

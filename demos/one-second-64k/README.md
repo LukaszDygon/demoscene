@@ -1,48 +1,62 @@
 # ONE SECOND: a frozen gunfight
 
-Intro: **`dist/one-second-64k.html`**, one self-contained file with no external requests. Open it and click (or press Space/Enter) on the frozen frame, which says "CLICK TO RESUME TIME". The click starts the audio clock, and everything else follows it.
+Intro: **dist/one-second-64k.haiku-5.5-medium.html**, one self-contained file with no external requests. Click (or press Space/Enter) on the frozen frame, which says CLICK TO RESUME TIME. The click starts the audio clock, and everything else follows it.
 
-Rebuild with `python3 build.py`. It inlines `src/` into `dist/` and prints the size.
+Rebuild with python3 build.py. It inlines src/ into dist/ and prints the size.
 
-## Size
-- **Total: 19,773 / 65,536 bytes (30%)**, raw and uncompressed. No packer (gzip would be 8,721).
-- **Music: 4,501 / 16,384 bytes (27%)**, inlined verbatim from `src/music.js`.
+## Size: below the requested range
+- **Total: 30,306 / 65,536 bytes (46%)**, raw. The requested floor was 57,344, so this is **27 KB short**. I did not reach it, and I did not pad to reach it.
+- **Music: 6,027 / 16,384 bytes (37%)**, inlined as written. The requested 9-14 KB is **about 3 KB short**.
+- Comments are stripped from the shaders and main script at build time. Music is inlined without a minifier.
 
-## Timeline (60 BPM, one bar = 4 s, 25 bars, about 100 s)
-The whole piece is one second of real time. Motion runs at 1/100 speed (S = T/100) until the snap at T = 97 s. The timecode counts 00:00.000 to 00:01.000 over the same stretch.
+## Timeline (60 BPM, one bar = 4 s, 38 bars, runtime 150 s)
+The piece is one second of real time. Motion runs at 1/147 speed until the snap at 147 s, so the timecode reaches 00:01.000 at the snap.
 
-| Bars | Time | Picture | Music |
-|---|---|---|---|
-| start | - | The frozen frame: the skylight shards, the guard, the robber, with "CLICK TO RESUME TIME" | silence |
-| 0-4 | 0-16 s | **A. Skylight.** The camera rises from the floor up through the shafts toward the shards. The timecode starts at 00:00.000 | The Shepard chord fades in over 8 s. Ticks begin at 0.5 s intervals |
-| 4-8 | 16-32 s | **B. Muzzle flashes.** The camera orbits the diving guard. The flashes hang as blooms with red cores, and banknotes flutter | Heartbeat from 8 s at a soft level |
-| 8-11 | 32-44 s | **C. Robber.** A low camera dolly on the mid-stride robber, with its flash | Heartbeat deepens |
-| 11-14 | 44-56 s | **D. Brass.** Casings on the marble, camera near the floor | Ticks slow down |
-| 14-18 | 56-72 s | **E. Vault.** The camera flies over the robber's flash to the vault, ajar under the red alarm lamp | Heartbeat at a louder level from 32 s |
-| 18-21 | 72-84 s | **F. Clock.** A close view of the wall clock with its second hand frozen at 12 | Heartbeat louder |
-| 21-24 | 84-96 s | **G. Wide orbit.** The whole lobby, with banknotes and blood droplets in the air | Heartbeat at full level. The heartbeat stops at 96 s |
-| 24-25 | 96-100 s | **H. Snap.** At 97 s time returns to full speed. The shards and banknotes fall, the guns fire harder, a white flash decays, and the picture cuts to black at 98.5 s | The massive hit at 97 s: a sub drop, a noise boom, a crash and three gunshot pops. The chord runs until 99.2 s, then silence |
+| Time | Shot | Picture |
+|---|---|---|
+| start | - | Frozen frame with the title, CLICK TO RESUME TIME |
+| 0-8 | 01 Skylight | Camera rises through the shafts toward the shards |
+| 8-16 | 02 Coffers | Looks up at the coffered ceiling and the chandelier |
+| 16-24 | 03 Muzzle flash | Orbits the diving guard; flashes hang as blooms with red cores |
+| 24-32 | 04 Robber | Low dolly on the mid-stride robber |
+| 32-40 | 05 Dropped gun | Low view of the gun on the marble |
+| 40-48 | 06 Banknotes | Among the fluttering notes |
+| 48-56 | 07 Money bag | Bag on the floor |
+| 56-64 | 08 Brass | Casings on the marble |
+| 64-72 | 09 Cabinets | Filing cabinets along the left wall |
+| 72-80 | 10 Teller | Crouched teller behind the counter, with the glass screen |
+| 80-88 | 11 Plant and rope | Potted plant and velvet rope |
+| 88-96 | 12 Vault | Vault ajar under the red alarm lamp |
+| 96-104 | 13 Clock | Wall clock, second hand frozen at 12 |
+| 104-112 | 14 Sconce | Wall sconce and safe-deposit boxes |
+| 112-120 | 15 Chandelier | Chandelier and the surrendering standing guard |
+| 120-128 | 16 Blood | Blood pool and droplets |
+| 128-137 | 17 Lobby | Wide orbit |
+| 137-147 | 18 Push | Slow push-in toward the snap |
+| 147-148.5 | 19 Snap | Shards and banknotes fall, guns fire, white flash, cut to black |
+| 148.5-150 | - | Black, then the end card |
 
-## What I invented beyond the brief
-- **Rendering.** A single raymarched SDF scene, not meshes. It has volumetric skylight shafts with dust motes, bloom-like halos around the muzzles, and a few wisps of smoke that move at the same frozen speed.
-- **Depth of field.** Depth is written to the alpha channel, and a 20-tap disc blur follows the distance from each shot's focus plane. Film grain is static, because the frame is frozen.
-- **Red.** The alarm lamp casts red light and a red halo. It pulses with the heartbeat. Blood droplets and the flash cores are the other red elements.
-- **Shepard strings.** Three voices of six octave-spaced sawtooth partials, through a lowpass. Each partial glides up one octave over 97 s, and its level follows a bell in log-frequency. Built once and automated, so it works live and offline.
-- **Ticks** that slow exponentially (interval 0.5 s, growing to about 4 s), a generated reverb, and a hard cut to silence at 99.2 s.
-- **Debris scatter** is seeded, so every run shows the same frame. Falling debris lands on the floor instead of passing through it.
-- **Adaptive resolution.** The render drops resolution if frames run slow. It also falls back to 8-bit targets when half-float is not available.
-- **Clearance probe.** `window.__probe` checks the camera path against rough boxes for the set.
+Music: the Shepard tone is seven octave-spaced partials per voice, with a detuned pair each, wrapping every 12 s. Levels stay on a bell in log-frequency, so the wrap is inaudible. Heartbeat from 8 s, sequenced bass and drums in sections, a pentatonic pluck melody, a riser before the snap, and the hit at 147 s with silence from 149.2 s.
+
+## What I added beyond the brief
+- Volumetric skylight shafts with dust motes; muzzle smoke plumes; a red alarm halo.
+- Marble veining with bullet holes and cracks, brass floor inlay, column fluting, bump-mapped walls.
+- Reflections on the marble floor (single bounce).
+- Props: coffered ceiling, safe-deposit wall, pendant lamps, desk and chairs, teller glass screen with mullions, banknote stacks, revolving door, plant, velvet rope, filing cabinets, money bag, dropped gun.
+- Characters: diving guard, mid-stride robber, crouched teller, standing guard with hands up.
+- Depth of field and bloom in the post pass.
+- Shot captions, end card, timecode.
 
 ## Checks run
-- `budget.py` (total 65,536; music 16,384): **pass**.
-- `check.mjs e2e`: **click to first sound 0.0 s**, no uncaught exceptions or console errors.
-- `check.mjs audio src/music.js`: offline render of 102 s, **peak 0.906**, **0 NaN samples**. RMS per 4 bars runs −30.1, −27.2, −23.8, −23.8, −22.9, −22.2, −21.4 dB. The levels rise through the piece as the heartbeat and the chord build.
-- `check.mjs clearance`: the camera never enters geometry (**min distance 1.0**, 0 s inside).
-- Headless numeric frame checks, without screenshots. Both shader programs link with no GL errors. The white flash rises at 97.2 s, the frame is fully black at 98.6 s, and red appears in the vault and clock shots.
+- budget.py: pass (30,306 / 65,536; music 6,027 / 16,384).
+- check.mjs e2e: click to first sound 0.4 s, no exceptions or console errors.
+- check.mjs audio: peak 0.879, no NaN, RMS rising from -34 to -23 dB through the piece.
+- check.mjs clearance: 67 boxes, including every shard and banknote position. Min distance 0.4, 0 s inside geometry. Two camera paths were moved because they clipped a stanchion and a column.
+- Headless numeric frame checks (no screenshots): both programs link, no GL errors, cut to black at 148.5 s.
 
-## What isn't verified
-- **I have not heard the piece or seen it in motion.** The audio numbers are measurements, not listening. Whether the Shepard illusion holds, whether the hit lands with the snap, and whether the ticks read as slowing are all unjudged.
-- **The look is unjudged.** I checked the frames numerically, not by eye. The exposure, the DOF strength, the shaft and flash brightness, and how readable the red alarm is all need a look on a real screen.
-- **Performance is unmeasured on real hardware.** The headless run used software rendering, so frame times mean nothing. The adaptive resolution is the only safeguard.
-- **Untested paths.** The 8-bit fallback (no `EXT_color_buffer_float`), other browsers, and phone layouts are not checked.
-- **The clearance boxes are rough approximations** of the set, not the real meshes.
+## Not verified
+- Not heard, not seen. Audio figures are measurements. Whether the Shepard wrap, the hit timing and the tick slowdown work is unjudged.
+- Look is unjudged; exposure, DOF and red legibility need a real screen.
+- Performance not measured on real hardware.
+- The 8-bit fallback, other browsers and phone layouts are untested.
+- The clearance boxes are approximations.

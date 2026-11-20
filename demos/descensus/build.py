@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inline shaders, music and main script into dist/descensus.html (no external minifier needed)."""
+"""Inline shaders, music and main script into dist/descensus.opus-5.5-high.html (no external minifier needed)."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 src = lambda n: (R / 'src' / n).read_text()
@@ -23,5 +23,5 @@ music = js(src('music.js'))
 (R / 'dist').mkdir(exist_ok=True)
 (R / 'dist' / 'music.min.js').write_text(music)
 html = src('index.html').replace('/*MUSIC*/', music).replace('/*MAIN*/', main)
-(R / 'dist' / 'descensus.html').write_text(html)
+(R / 'dist' / 'descensus.opus-5.5-high.html').write_text(html)
 print(len(html.encode()), 'bytes; music', len(music.encode()))

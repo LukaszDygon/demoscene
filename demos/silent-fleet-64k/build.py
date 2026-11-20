@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inline shader, main script and music into dist/silent-fleet-64k.html. The music is inlined verbatim."""
+"""Inline shader, main script and music into dist/silent-fleet-64k.haiku-5.5-medium.html. The music is inlined verbatim."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 src = lambda n: (R / 'src' / n).read_text()
@@ -14,5 +14,5 @@ main = js(src('main.js')).replace('$SCENE$', glsl(src('scene.frag')))
 music = src('music.js')
 html = src('index.html').replace('/*MUSIC*/', music).replace('/*MAIN*/', main)
 (R / 'dist').mkdir(exist_ok=True)
-(R / 'dist' / 'silent-fleet-64k.html').write_text(html)
+(R / 'dist' / 'silent-fleet-64k.haiku-5.5-medium.html').write_text(html)
 print(len(html.encode()), 'bytes total;', len(music.encode()), 'bytes music (verbatim)')

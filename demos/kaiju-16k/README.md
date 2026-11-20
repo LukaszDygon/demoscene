@@ -1,4 +1,4 @@
-**KAIJU 16k** is built and fits both budgets. The entry is `~/demos/kaiju16k/dist/kaiju16k.html`.
+**KAIJU 16k** is built and fits both budgets. The entry is `~/demos/kaiju16k/dist/kaiju16k.opus-5.5-high.html`.
 
 | | size | budget |
 |---|---|---|
@@ -49,4 +49,4 @@ It's one self-contained file. It makes no external requests, embeds no fonts and
 - `src/music.js`: the soundtrack. `SONG.live()` plays it in the browser and `SONG.render()` renders it offline for measuring.
 - `src/scene.frag`, `src/post.frag`: the shaders.
 - `src/main.js`, `src/index.html`: camera path, sign textures, captions and HUD.
-- `build.py` → `dist/kaiju16k.html` (the entry) and `dist/dev.html` (dev build with the camera probe).
+- `build.py` → `dist/kaiju16k.opus-5.5-high.html` (the entry) and `dist/dev.html` (dev build with the camera probe).

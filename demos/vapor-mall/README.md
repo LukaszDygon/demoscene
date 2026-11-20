@@ -2,11 +2,11 @@
 
 A 64k browser intro: an FPV drone flight through a low-poly vaporwave mall that ends inside the pocket of a smiling giant with very gelled hair.
 
-**Run:** open `dist/vapor-mall.html` in Chrome, Safari or Firefox (WebGL2) and click. It pre-renders the soundtrack first (~5–10 s).
+**Run:** open `dist/vapor-mall.opus-5.5-high.html` in Chrome, Safari or Firefox (WebGL2) and click. It pre-renders the soundtrack first (~5–10 s).
 
-**Build:** `python3 build.py` packs `src/` into `dist/vapor-mall.html` and fails if the file goes over 65 536 bytes or the soundtrack over 16 384 bytes.
+**Build:** `python3 build.py` packs `src/` into `dist/vapor-mall.opus-5.5-high.html` and fails if the file goes over 65 536 bytes or the soundtrack over 16 384 bytes.
 
-**Debug:** `dist/vapor-mall.html?mute&t=110` starts silently at 110 s.
+**Debug:** `dist/vapor-mall.opus-5.5-high.html?mute&t=110` starts silently at 110 s.
 
 | file | what |
 |---|---|

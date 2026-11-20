@@ -1,6 +1,6 @@
 # 秋の小径 · "a little autumn walk", a birthday intro for Mika
 
-The intro is finished. It's one self-contained HTML file: **`dist/autumn-walk.html`**. Open it in Chrome, Safari or Firefox and click once to start (sound on). It runs about 2:05.
+The intro is finished. It's one self-contained HTML file: **`dist/autumn-walk.opus-5.5-high.html`**. Open it in Chrome, Safari or Firefox and click once to start (sound on). It runs about 2:05.
 
 ## Size
 | | bytes | budget |
@@ -57,7 +57,7 @@ The Japanese is set vertically (縦書き) next to the English lines, and each l
   - **I haven't opened it in your browser.** This was a test run, so I skipped that step.
 
 ## Files
-- `dist/autumn-walk.html`: the intro.
+- `dist/autumn-walk.opus-5.5-high.html`: the intro.
 - `src/index.html`, `src/main.js` (visuals) and `src/music.js` (soundtrack): the sources.
 - `build.py`: inlines the sources into `dist/` and does a light whitespace and comment strip.
 

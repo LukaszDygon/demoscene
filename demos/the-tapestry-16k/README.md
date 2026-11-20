@@ -2,7 +2,7 @@
 
 A medieval siege worked as an embroidered tapestry. The camera pans steadily along the cloth at 0.3 world units per second, and the action inside the frame is busy. One WebGL2 fragment shader draws the cloth, one WebAudio scheduler plays the music, and the caption band is plain HTML.
 
-Build: `python3 build.py` writes `dist/the-tapestry-16k.html` and prints the size.
+Build: `python3 build.py` writes `dist/the-tapestry-16k.haiku-5.5-medium.html` and prints the size.
 
 ## Sizes against budget
 
@@ -36,8 +36,8 @@ The 3 855 figure is the file as given. The build inlines it with outer whitespac
 
 ## Checks
 
-- `budget.py dist/the-tapestry-16k.html --total 16384 --music src/music.js --music-max 4096`: **pass**. No external references.
-- `check.mjs e2e dist/the-tapestry-16k.html`: **pass**. Click to first sound 0.0 s, no uncaught exceptions or console errors. The shader compiles and links in headless Chrome, since a compile failure would throw at page load.
+- `budget.py dist/the-tapestry-16k.haiku-5.5-medium.html --total 16384 --music src/music.js --music-max 4096`: **pass**. No external references.
+- `check.mjs e2e dist/the-tapestry-16k.haiku-5.5-medium.html`: **pass**. Click to first sound 0.0 s, no uncaught exceptions or console errors. The shader compiles and links in headless Chrome, since a compile failure would throw at page load.
 - `check.mjs audio src/music.js 4`: **pass**. Offline render 75 s, peak 0.555, no NaN. RMS per 4 bars runs from −29 dB (intro) to about −22 dB (bars 5–20), about −20.5 dB (bars 21–24, growl and roll) and −21 to −22 dB (bars 25–32), then −25.5 dB (bars 33–36). The tail after 75 s is silent.
 - `check.mjs clearance`: **not run**. The camera is a 2D pan with no geometry to pass through, so there is no `__probe`.
 

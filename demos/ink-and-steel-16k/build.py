@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/ink-and-steel-16k.html: music inlined verbatim, GLSL and JS lightly minified, then print the size."""
+"""Build dist/ink-and-steel-16k.haiku-5.5-medium.html: music inlined verbatim, GLSL and JS lightly minified, then print the size."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda n: (R / 'src' / n).read_text()
@@ -33,6 +33,6 @@ html = '\n'.join(l.strip() for l in html.split('\n'))
 for k, v in [('MUSIC', rd('music.js').strip()), ('SCENE', glsl(rd('scene.frag'))), ('MAIN', js(rd('main.js')))]:
     html = html.replace('/*%s*/' % k, v)
 (R / 'dist').mkdir(exist_ok=True)
-out = R / 'dist' / 'ink-and-steel-16k.html'
+out = R / 'dist' / 'ink-and-steel-16k.haiku-5.5-medium.html'
 out.write_text(html)
 print(out.name, len(html.encode()), 'bytes')

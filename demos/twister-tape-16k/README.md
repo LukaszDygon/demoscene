@@ -2,7 +2,7 @@
 
 A found-footage storm chaser's camcorder tape from a 1950s plains town. The tornado takes the barn, water tower, silo, pickup and white church, then the tape glitches, the sky clears and a lone radio in the debris plays a ballad. The tape ends on blue.
 
-Entry: `dist/twister-tape-16k.html`. Rebuild with `python3 build.py`, which also prints the size.
+Entry: `dist/twister-tape-16k.haiku-5.5-medium.html`. Rebuild with `python3 build.py`, which also prints the size.
 
 ## Sizes
 
@@ -62,4 +62,4 @@ Shader, main script and markup make up the other ~8 000 bytes. Gzip is 5 772 byt
 - `src/intro.frag`: the fragment shader, with the storm, the camera timeline and the VHS post pass.
 - `src/main.js`: the WebGL bootstrap, the start screen and the OSD.
 - `src/index.html`: the HTML shell and the OSD styles.
-- `build.py`: builds `dist/twister-tape-16k.html`.
+- `build.py`: builds `dist/twister-tape-16k.haiku-5.5-medium.html`.

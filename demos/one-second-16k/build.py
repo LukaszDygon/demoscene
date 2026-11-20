@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/one-second-16k.html: music inlined verbatim, shaders and main.js lightly minified."""
+"""Build dist/one-second-16k.haiku-5.5-medium.html: music inlined verbatim, shaders and main.js lightly minified."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda n: (R / 'src' / n).read_text(encoding='utf-8')
@@ -33,6 +33,6 @@ music = rd('music.js').strip()          # shipped verbatim
 for k, v in [('MUSIC', music), ('SCENE', glsl(rd('scene.frag'))), ('POST', glsl(rd('post.frag'))), ('MAIN', js(rd('main.js')))]:
     html = html.replace('/*%s*/' % k, v)
 (R / 'dist').mkdir(exist_ok=True)
-out = R / 'dist' / 'one-second-16k.html'
+out = R / 'dist' / 'one-second-16k.haiku-5.5-medium.html'
 out.write_text(html, encoding='utf-8')
 print(out.name, len(html.encode('utf-8')), 'bytes; music', len(music.encode('utf-8')), 'bytes')

@@ -2,7 +2,7 @@
 
 A desert chase on a salt flat at golden hour. One raymarched WebGL2 fragment shader, a bloom/grade post pass, and a WebAudio score. No words except the title and the end card.
 
-Entry: `dist/rust-convoy-16k.html`. Rebuild with `python3 build.py`, which prints the size.
+Entry: `dist/rust-convoy-16k.haiku-5.5-medium.html`. Rebuild with `python3 build.py`, which prints the size.
 
 ## Sizes
 
@@ -59,4 +59,4 @@ Entry: `dist/rust-convoy-16k.html`. Rebuild with `python3 build.py`, which print
 - `src/post.frag`: haze, bloom, flares, grade, grain and fade.
 - `src/music.js`: the score. `SONG.live()` plays it, `SONG.render()` renders it offline.
 - `src/main.js`, `src/index.html`: start, uniforms, end card.
-- `build.py` produces `dist/rust-convoy-16k.html`.
+- `build.py` produces `dist/rust-convoy-16k.haiku-5.5-medium.html`.

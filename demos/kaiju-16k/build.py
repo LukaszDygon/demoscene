@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/kaiju16k.html: inline music (verbatim), minified shaders and lightly minified main.js."""
+"""Build dist/kaiju16k.opus-5.5-high.html: inline music (verbatim), minified shaders and lightly minified main.js."""
 import re, pathlib
 R = pathlib.Path(__file__).parent
 rd = lambda n: (R / 'src' / n).read_text()
@@ -38,7 +38,7 @@ def build(dev):
   for k, v in [('MUSIC', rd('music.js').strip()), ('SCENE', glsl(rd('scene.frag'))), ('POST', glsl(rd('post.frag'))), ('MAIN', js(main))]:
     html = html.replace('/*%s*/' % k, v)
   (R / 'dist').mkdir(exist_ok=True)
-  out = R / 'dist' / ('dev.html' if dev else 'kaiju16k.html')
+  out = R / 'dist' / ('dev.html' if dev else 'kaiju16k.opus-5.5-high.html')
   out.write_text(html)
   print(out.name, len(html.encode()), 'bytes')
 build(False); build(True)
