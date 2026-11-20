@@ -1,10 +1,10 @@
 # Audio scheduling pattern
 
-One function builds the song on *any* context, so the same code plays live (instant start) and renders offline (for `check.mjs audio`). Instruments, timbres, harmony and arrangement are entirely yours; only the scheduling skeleton below is load-bearing.
+One function builds the song on *any* context, so the same code plays live (instant start) and renders offline (for `check.mjs audio`). Tempo, key, harmony, instruments, effects and arrangement are entirely yours, chosen from the brief; only the scheduling skeleton below is load-bearing. It carries no musical defaults on purpose.
 
 ```js
 var SONG=(()=>{
-const BPM=90,BAR=240/BPM,BARS=48,LEN=BARS*BAR+5;
+const BPM=0/* from the brief */,BAR=240/BPM,BARS=0/* song length in bars */,LEN=BARS*BAR+5;
 // Builds the graph on ctx with song time 0 at context time `base`. Returns sched(barIndex).
 function setup(A,base){
  const SR=A.sampleRate;               // live contexts are often 48 kHz: never hard-code 44100 for buffers
@@ -14,8 +14,8 @@ function setup(A,base){
  // --- master chain (long-lived: build before the bags start) ---
  const comp=A.createDynamicsCompressor();comp.connect(A.destination);
  const master=G(.6,comp);
- // tape wobble / chorus: ONE modulated delay on the mix, not an LFO on every oscillator (that's slow)
- // reverb: ConvolverNode with a generated decaying-noise IR at SR
+ // mix-wide effects the piece calls for (if any) go here as ONE shared node each, not one per voice:
+ // a per-oscillator LFO or convolver on every note is slow. A ConvolverNode IR must be generated at SR.
  // --- instruments: functions (t, note, ...) that create nodes through G/O (so they land in the bag) ---
  function bar(b,t){ /* arrangement: schedule everything for bar b at context time t */ }
  function sched(b){bag=[];

@@ -28,6 +28,8 @@ Spend bytes where the eye goes:
 - secondary motion: things drifting, breathing, reacting to the beat
 - one or two signature moments per piece that the viewer remembers
 
+Beware the genre's first answer: the most familiar progression, tempo, sound palette or post effect for the style, such as Am–F–C–G for synthwave, or tape wobble, scanlines and bloom on everything. Derive tempo, key, harmony, timbres and post-processing from this brief's mood and subject, and make at least one choice a listener wouldn't predict from the genre label. Take conventions only from other intros' folder structure, never their look or sound.
+
 Treat the title screen, the transitions and the end card as part of the art. If the brief is thin, invent in its spirit and tell the user what you added.
 
 ## Contracts (so the checking tools work)
