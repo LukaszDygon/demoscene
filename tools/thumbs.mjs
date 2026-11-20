@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Record a looping WebM preview (and a PNG poster) of each demo's start screen for the screening page.
-// Needs Node >= 22, Chrome and ffmpeg with libvpx-vp9; no npm deps.
+// Record a looping preview clip (and a PNG poster) of each demo's start screen for the screening page.
+// Needs Node >= 22, Chrome and ffmpeg with libvpx and libx264; no npm deps.
 //   node tools/thumbs.mjs [name-filter]
-// Reads the DEMOS list from index.html and, for each demo, writes demos/<folder>/thumb.webm and thumb.png.
+// Reads the DEMOS list from index.html and, for each demo, writes demos/<folder>/thumb.webm (VP8), thumb.mp4 (H.264) and thumb.png.
 // Chrome's virtual time steps the page clock exactly one frame per capture, so the motion is smooth however
 // slowly headless Chrome renders. The clip is cross-faded into a seamless loop, and the poster is its first frame.
 import {spawn,spawnSync} from 'node:child_process';
@@ -41,10 +41,12 @@ try{
     // seamless loop: play seconds FADE..LOOP+FADE, cross-fading the last FADE seconds into seconds 0..FADE
     const vf=`[0:v]split[a][b];[a]trim=start=${FADE},setpts=PTS-STARTPTS,fps=${FPS}[main];[b]trim=end=${FADE},setpts=PTS-STARTPTS,fps=${FPS}[head];`+
              `[main][head]xfade=transition=fade:duration=${FADE}:offset=${LOOP-FADE},format=yuv420p[v]`;
-    const out=path.join(dir,'thumb.webm');
-    const r=spawnSync('ffmpeg',['-y','-loglevel','error','-framerate',String(FPS),'-i',path.join(frames,'%04d.jpg'),'-filter_complex',vf,'-map','[v]',
-      '-c:v','libvpx-vp9','-crf','40','-b:v','0','-row-mt','1','-deadline','good','-cpu-used','2','-an',out]);
-    if(r.status)throw new Error('ffmpeg failed: '+r.stderr);
+    // VP8 WebM (decoded in software, which avoids flaky hardware VP9 decoders) plus an H.264 MP4 for browsers without WebM
+    const out=path.join(dir,'thumb.webm'),mp4=path.join(dir,'thumb.mp4');
+    const enc=args=>{const r=spawnSync('ffmpeg',['-y','-loglevel','error','-framerate',String(FPS),'-i',path.join(frames,'%04d.jpg'),'-filter_complex',vf,'-map','[v]',...args]);
+      if(r.status)throw new Error('ffmpeg failed: '+r.stderr)};
+    enc(['-c:v','libvpx','-crf','10','-b:v','600k','-auto-alt-ref','0','-an',out]);
+    enc(['-c:v','libx264','-crf','26','-preset','slow','-pix_fmt','yuv420p','-movflags','+faststart','-an',mp4]);
     spawnSync('ffmpeg',['-y','-loglevel','error','-i',out,'-frames:v','1','-update','1',path.join(dir,'thumb.png')]);
     // how much the picture moves across the loop (mean absolute pixel change between frames 1 s apart), so static ones stand out
     const st=spawnSync('ffmpeg',['-i',out,'-vf','select=not(mod(n\\,30)),scale=64:36,tblend=all_mode=difference,signalstats,metadata=print:key=lavfi.signalstats.YAVG','-f','null','-'],{encoding:'utf8'});
