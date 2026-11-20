@@ -7,7 +7,7 @@ It follows one real gene, the green fluorescent protein of the jellyfish *Aequor
 The soundtrack is 124 BPM progressive techno in F minor. **The arpeggio is the gene.** Every note is one base of the GFP coding sequence (717 nt, wild type). It is played at the exact moment the polymerase or ribosome on screen reads that base, and the letters on screen are the same letters.
 
 ## Size
-- **Total: 62,906 / 65,536 bytes (96%)**, raw and uncompressed. There's no packer and no external requests. Gzipped, it would be about 27.9 KB.
+- **Total: 62,970 / 65,536 bytes (96%)**, raw and uncompressed. There's no packer and no external requests. Gzipped, it would be about 27.9 KB.
 - **Music: 15,231 / 16,384 bytes** (`dist/music.min.js`). There's no narration voice.
 - `src/` is commented. `python3 build.py` strips comments and whitespace with a string-aware minifier (no external tools), inlines the five shaders, the music and the main script, and prints the sizes.
 

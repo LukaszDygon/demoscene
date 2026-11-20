@@ -20,5 +20,5 @@ void main(){
   tt+=1.;
  }
  // temporal accumulation = motion trails when things move faster than the shutter
- o=vec4(mix(ac/tt,texture(Hs,u).rgb,MB),1);
+ vec3 c=ac/tt;if(MB>0.)c=mix(c,texture(Hs,u).rgb,MB);o=vec4(clamp(c,0.,6e4),1);
 }

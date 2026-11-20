@@ -12,7 +12,7 @@ void main(){
   // point-spread function: gaussian core and a faint first airy ring
   float p=length(vq);
   if(p>1.)discard;
-  float I=(exp(-p*p*9.)+.05*exp(-pow((p-.62)*9.,2.)))*vi;
+  float e=(p-.62)*9.,I=(exp(-p*p*9.)+.05*exp(-e*e))*vi;
   o=vec4(col.rgb*col.a*I,0);
   return;
  }
@@ -29,6 +29,6 @@ void main(){
  if(DC>0.)k=mix(k,(.5+.5*cos(6.283*(clamp((z-FZ)/FZ*.6+.5,0.,1.)*.72+vec3(.55,.75,.95))))*(.35+.75*max(k.r,max(k.g,k.b))),DC);
  vec3 c=k*(.08+.6*df+.95*fr*fr)+sp*(.25+.3*k)+k*col.a*2.2;
  // optical sectioning: light from outside the focal plane is rejected by the pinhole
- if(SEC>0.)c*=mix(1.,exp(-pow((z-FZ)/(FZ*SEC),2.)),.85);
+ if(SEC>0.){float e=(z-FZ)/(FZ*SEC);c*=mix(1.,exp(-e*e),.85);}
  o=vec4(c,log2(z));
 }

@@ -14,7 +14,7 @@ void main(){
  if(lz>19.){
   vec2 q=(u-.5)*vec2(R.x/R.y,1)*2.2;
   float n=vn(q+T*.013)*.6+vn(q*2.3-T*.02)*.3+vn(q*5.1+T*.03)*.1;
-  o=vec4(s.rgb+BG*n*n*(1.2-length(u-.5)),lz);
+  o=vec4(clamp(s.rgb+BG*n*n*(1.2-length(u-.5)),0.,6e4),lz);
   return;
  }
  float z=exp2(lz),oc=0.,rp=clamp(AO*R.y/z*.7,1.5,40.),a0=hs(gl_FragCoord.xy)*6.283;
@@ -23,5 +23,5 @@ void main(){
   float sz=exp2(texture(S,u+vec2(cos(a),sin(a))*rp*sqrt((fi+.5)/12.)/R).a),dz=z-sz;
   oc+=clamp(dz/AO,0.,1.)*(1.-smoothstep(AO*2.,AO*6.,dz));
  }
- o=vec4(s.rgb*(1.-.75*oc/12.),lz);
+ o=vec4(clamp(s.rgb*(1.-.75*oc/12.),0.,6e4),lz);
 }
