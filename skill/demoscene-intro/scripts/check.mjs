@@ -21,7 +21,7 @@ if(!['audio','e2e','clearance'].includes(mode)||!file){console.error('usage: che
 const CH=[process.env.CHROME,'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(p=>p&&fs.existsSync(p));
 if(!CH){console.error('Chrome not found; set CHROME=');process.exit(2)}
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'intro-check-'));
-let url=pathToFileURL(path.resolve(file)).href;
+let url=/^https?:\/\//.test(file)?file:pathToFileURL(path.resolve(file)).href;   // a local file or a deployed URL
 if(mode==='audio'){const n=+arg||4;
   fs.writeFileSync(path.join(tmp,'a.html'),`<!doctype html><meta charset=utf-8><body><script src="${url}"></script><script>
 (async()=>{const t0=performance.now();try{const b=await SONG.render();const ms=performance.now()-t0;
