@@ -12,13 +12,11 @@ h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 24px}
 .meta{color:var(--mut);font-size:12px;margin:2px 0 8px}.meta a{color:var(--link)}
 .brief{font-size:13px;color:var(--mut);margin:8px 0 0}
 .stage{aspect-ratio:16/9;background:#000;border-radius:4px;overflow:hidden;position:relative}
-.stage button{all:unset;position:absolute;inset:0;display:grid;place-items:center;cursor:pointer;color:var(--fg);font-size:15px}
-.stage button:hover{background:#ffffff10}
 iframe{width:100%;height:100%;border:0}
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
 </style></head><body><main>
 <h1>Demo Screening Room</h1>
-<p class=s>Size-coded browser intros. Press play (one at a time, as each synthesizes its own audio), then click inside to start the sound, or open one in its own window for fullscreen.</p>
+<p class=s>Size-coded browser intros. Click a demo's screen to start it with sound; starting one resets the others. Open one in its own window for fullscreen.</p>
 <div class=grid id=g></div>
 </main><script>
 // Add a demo: one line here. Paths are relative to this page.
@@ -31,9 +29,11 @@ const DEMOS=[
 const g=document.getElementById('g');
 for(const[t,u,m,b]of DEMOS){const c=document.createElement('section');c.className='card';
  c.innerHTML=`<h2>${t}</h2><div class=meta>${m} · <a href="${u}" target=_blank>open in own window ↗</a></div>
- <div class=stage><button>▶ play</button></div><p class=brief>${b}</p>`;
- // load the iframe only on demand, so the page doesn't start five WebGL contexts at once
- c.querySelector('button').onclick=e=>{for(const f of document.querySelectorAll('iframe'))f.replaceWith(Object.assign(document.createElement('button'),{textContent:'▶ play',onclick:f.parentNode.btn}));
-  const s=e.currentTarget.parentNode;s.btn=e.currentTarget.onclick;s.innerHTML=`<iframe allow="autoplay; fullscreen" allowfullscreen src="${u}"></iframe>`};
+ <div class=stage><iframe loading=lazy allow="autoplay; fullscreen" allowfullscreen src="${u}"></iframe></div><p class=brief>${b}</p>`;
+ const f=c.querySelector('iframe');
+ // one demo at a time: a click inside one reloads any other that has been started (back to its start screen)
+ f.onload=()=>{try{f.contentWindow.addEventListener('pointerdown',()=>{
+  for(const o of document.querySelectorAll('iframe'))if(o!==f&&o.dataset.on){delete o.dataset.on;o.src=o.src}
+  f.dataset.on=1},true)}catch{}};
  g.append(c)}
 </script></body></html>
