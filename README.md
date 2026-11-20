@@ -19,14 +19,10 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 
 | Demo | Budget | Notes |
 |---|---|---|
-| [Vapor Mall](demos/vapor-mall) | 64k | The original; the skill was distilled from it |
 | [Descensus](demos/descensus) | 64k | Deep-sea descent, raymarched |
-| [KAIJU](demos/kaiju-16k) | 16k | Neon city, a single raymarched shader |
-| [Autumn Walk](demos/autumn-walk) | 64k | Fox, forest, birthday cake |
-| [The Daily Flux](demos/daily-flux-16k) | 16k | 70s newspaper; built by Claude Haiku |
-| [The Meadow Counts](demos/meadow-counts-64k) | 64k | IDM: warm 70s school film, 88 BPM boom-bap, formant narrator |
+| [The Meadow Counts](demos/meadow-counts-64k) | 64k | IDM: warm 70s school film, 88 BPM boom-bap, silent-film intertitles |
 | [RECURSOR](demos/recursor-64k) | 64k | IDM: 170 BPM acid drill'n'bass, 4D and hyperbolic geometry |
-| [PLEASE ASSEMBLE](demos/please-assemble-64k) | 64k | IDM: toy speech chip, impossible objects, 7/8 and 5/4 |
+| [PLEASE ASSEMBLE](demos/please-assemble-64k) | 64k | IDM: TTS announcer, impossible objects, 7/8 and 5/4 |
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 

@@ -1,4 +1,4 @@
-// THE MEADOW COUNTS - soundtrack and narrator. 88 BPM, 74 bars (~3:26). Same scheduler runs live and offline.
+// THE MEADOW COUNTS - soundtrack. 88 BPM, 74 bars (~3:26). Same scheduler runs live and offline.
 var SONG=(()=>{
 const BPM=88,BAR=240/BPM,BEAT=60/BPM,S16=BEAT/4,BARS=74,LEN=BARS*BAR+4;
 const mf=m=>440*2**((m-69)/12);
@@ -22,66 +22,19 @@ const PA=['6-----5-4---2---','....4-5-6---8-6-','5-----4-2---0---','3-----2-----
  PC=['9---------8-----','6---------------','7-------5-------','6---------......'],
  PD=['6---7---6-----..','c-----5-----7---','7-----4-----7---','3-----d-----0---'],
  PX=['6---------------','d-----3-----....'];
-const LEAD=[],put=(b,p)=>p.forEach((s,i)=>LEAD[b+i]=s);
+// recorder phrases: a second, plainer voice that carries the wordless moments
+const RA=['9-------8---6---','4-------6-------','5-------4---2---','3---------------'],
+ RB=['6---4---2---4---','6-------8---9---','a-------9-------','8-------d-------'];
+const LEAD=[],REC=[],put=(b,p,T=LEAD)=>p.forEach((s,i)=>T[b+i]=s);
+put(12,['........6---5---','4-------3-------','........6---8---','9-------8-------'],REC);put(22,RA,REC);put(40,RB,REC);put(56,RA,REC);
+put(70,['9---------------','6---------------','4---------------','2---------------'],REC);
+const EP=b=>(b>=4&&b<12)||(b>=22&&b<26)||(b>=56&&b<70);
 put(16,PA);put(20,PX);put(26,PB);put(36,PC);put(48,PD);put(52,[PA[0],PA[1],PD[1],PX[1]]);put(60,PB);put(64,PA);put(68,[PA[0],PA[1]]);
-// ---------- narrator: hand-spelled phonetics, one phonetic word per subtitle word ----------
-// vowels a(cat) e(bed) i(sit) o(hot) u(but) A(schwa) E(see) U(too) R(her) I(father) O(law); ' = stress
-const NAR=[
-[4.5,0,'This is a meadow.',"Dis iz A 'medoU."],
-[6.6,0,'Everything here is counting.',"'evrETiN hEr iz 'kIUntiN."],
-[9,0,'The grass counts the wind.',"DA 'gras 'kIUnts DA 'wind."],
-[12.5,0,'Look closer at the flower.',"'luk 'kloUzR at DA 'flIUR."],
-[14.6,0,'The seeds turn by the golden angle.',"DA 'sEdz 'tRn bIE DA 'goUldAn 'aNgAl."],
-[16.8,0,'Thirty-four one way. Fifty-five the other.',"'TRtEfor 'wun 'weE. 'fiftEfIEv DA 'uDR."],
-[19,0,'Every seed is a smaller flower.',"'evrE 'sEd iz A 'smOlR 'flIUR."],
-[20.8,1,'And every flower is a seed.',"and 'evrE 'flIUR iz A 'sEd."],
-[22.5,0,'The bees learned it first.',"DA 'bEz 'lRnd it 'fRst."],
-[24.5,0,'Six sides. No gaps. No waste.',"'siks 'sIEdz. 'noU 'gaps. 'noU 'weEst."],
-[26.8,0,'Then the stones learned it too.',"Den DA 'stoUnz 'lRnd it 'tU."],
-[29,1,'How long did they practise?',"hIU 'loN did DeE 'praktis?"],
-[30.6,0,'A very long time.',"A 'verE 'loN 'tIEm."],
-[32.6,0,'Now look up.',"'nIU luk 'up."],
-[34.5,0,'The horizon does not end. It folds.',"DA hA'rIEzAn duz 'not 'end. it 'foUldz."],
-[37,0,'That is the same field, above you.',"Dat iz DA 'seEm 'fEld, A'buv yU."],
-[39.6,0,'We walked there as children.',"wE 'wOkt Der az 'cildrAn."],
-[41.6,1,'We are still walking there.',"wE Ir 'stil 'wOkiN Der."],
-[44.6,0,'Follow the line of poles.',"'foloU DA 'lIEn Av 'poUlz."],
-[46.8,0,'They do not get smaller.',"DeE dU 'not get 'smOlR."],
-[49,0,'The further they go, the taller they grow.',"DA 'fRDR DeE 'goU, DA 'tOlR DeE 'groU."],
-[51.8,0,'Do not count them.',"dU 'not 'kIUnt Dem."],
-[53.6,1,'I counted them.',"IE 'kIUntid Dem."],
-[56.6,0,'This film was made a long time ago.',"Dis 'film woz 'meEd A 'loN 'tIEm A'goU."],
-[59,0,'It is still playing.',"it iz 'stil 'pleEiN."],
-[60.6,1,'Is that us?',"iz 'Dat 'us?"],
-[61.8,0,'You are watching it now.',"yU Ir 'wociN it 'nIU."],
-[64.5,0,'The sun goes down at the usual time.',"DA 'sun goUz 'dIUn at DA 'yUZUAl 'tIEm."],
-[67,0,'This is the end of the lesson.',"Dis iz DE 'end Av DA 'lesAn."],
-[69.2,0,'Remember the number.',"rE'membR DA 'numbR."],
-[71.2,1,'What was the number?',"'wot woz DA 'numbR?"]];
-// formants [F1,F2,F3]
-const VW={a:[700,1650,2500],e:[550,1800,2500],i:[420,1950,2600],o:[600,950,2450],u:[640,1200,2400],A:[520,1350,2450],
- E:[290,2250,3000],U:[330,950,2250],R:[480,1350,1650],I:[750,1200,2500],O:[580,850,2450]};
-// consonants [F1,F2,F3, voice, noise, noise Hz, dur]
-const CN={m:[280,1000,2300,.45,0,0,.07],n:[280,1600,2600,.45,0,0,.06],N:[280,2200,2700,.45,0,0,.07],l:[380,1100,2600,.65,0,0,.06],
- r:[420,1250,1600,.65,0,0,.06],w:[300,700,2200,.55,0,0,.06],y:[280,2200,3000,.55,0,0,.05],v:[300,1200,2400,.35,.15,4000,.06],
- z:[300,1600,2600,.3,.3,5500,.08],Z:[300,1800,2600,.3,.3,2800,.08],D:[300,1500,2500,.35,.12,5000,.05],s:[0,0,0,0,.5,5500,.1],
- S:[0,0,0,0,.45,2700,.1],f:[0,0,0,0,.22,6500,.09],T:[0,0,0,0,.22,6000,.08],h:[0,0,0,0,.2,1600,.06],
- b:[300,900,2300,.45,0,0,.04],d:[300,1700,2600,.45,.05,4000,.04],g:[300,2000,2600,.45,.05,2500,.04],
- p:[0,0,0,0,.3,1500,.05],t:[0,0,0,0,.35,4500,.05],k:[0,0,0,0,.35,2600,.06]};
-// parse -> {t (song s), ch, text, d, ph:[[t,dur,F1,F2,F3,voice,noise,nHz,pitch]], words:[[start,end]]}
-const LINES=NAR.map(([bar,ch,text,phon])=>{let t=0,stress=0;const ph=[],words=[],r=ch?1:1.15,ws=phon.split(' ');
- ws.forEach((w,wi)=>{const w0=t,last=wi==ws.length-1;
-  for(const c0 of w){if(c0=="'"){stress=1;continue}
-   if(',.?'.includes(c0)){ph.push([t,.1,0,0,0,0,0,0,0]);t+=c0==','?.2:.32;continue}
-   for(const c of c0=='c'?'tS':c0=='j'?'dZ':c0){const v=VW[c];
-    if(v){const d=.125*r*(stress?1.5:1)*(last?1.3:1);ph.push([t,d,...v,1,0,0,stress]);t+=d;stress=0}
-    else{const k=CN[c];if('ptkbdg'.includes(c)){ph.push([t,.035*r,0,0,0,0,0,0,0]);t+=.035*r}
-     ph.push([t,k[6]*r,k[0],k[1],k[2],k[3],k[4],k[5],0]);t+=k[6]*r}}}
-  words.push([w0,t]);ph.push([t,.06*r,0,0,0,0,0,0,0]);t+=.06*r});
- const q=text.endsWith('?');
- // intonation: declining contour, stress bumps, question rises at the end, a little jitter
- ph.forEach((p,i)=>{const u=p[0]/t;p[8]=(1.08-.2*u)*(p[8]?1.13:1)*(q&&u>.75?1+(u-.75)*1.6:1)*(1+(hb(i,bar)-.5)*.04)});
- return{t:bar*BAR,ch,text,d:t,ph,words}});
+// the child's typed questions (main.js shows them; here they are clicked out on swung sixteenths, a key per letter)
+const TY=[[20.5,'and every flower is a seed.'],[29,'how long did they practise?'],[41.75,'we are still walking there.'],
+ [53.5,'i counted them.'],[61,'is that us?'],[71,'what was the number?']];
+// the poles are counted on the grid: pole j is numbered at bar 53.5+j/8 (main.js draws the numbers)
+const CNT=15;
 function setup(A,base){
  const SR=A.sampleRate;let bag=[];const BAGS=[],keep=n=>(bag.push(n),n);
  const G=(v,...to)=>{const g=keep(A.createGain());g.gain.value=v;to.forEach(n=>g.connect(n));return g};
@@ -93,7 +46,7 @@ function setup(A,base){
  const N=(t,e,loop)=>{const s=keep(A.createBufferSource());s.buffer=nb;s.loop=!!loop;s.start(t,Math.random()*1.5);s.stop(e);return s};
  // ---- long-lived master chain: music bus -> tape delay (wow/flutter) -> saturation -> lo-fi filters -> comp ----
  const comp=A.createDynamicsCompressor();comp.threshold.value=-15;comp.ratio.value=4;comp.attack.value=.006;comp.release.value=.25;comp.connect(A.destination);
- const out=G(.56,comp);out.gain.setValueAtTime(.56,T(73.4));out.gain.linearRampToValueAtTime(0,END-.2);
+ const out=G(.52,comp);out.gain.setValueAtTime(.52,T(73.4));out.gain.linearRampToValueAtTime(0,END-.2);
  const lp=F('lowpass',7200,.5,out);lp.frequency.setValueAtTime(7200,T(55.8));lp.frequency.exponentialRampToValueAtTime(1900,T(56.4));lp.frequency.setValueAtTime(1900,T(63.6));lp.frequency.exponentialRampToValueAtTime(7200,T(64.1));
  const hp=F('highpass',38,.7,lp);
  const ws=A.createWaveShaper(),cu=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;cu[i]=Math.tanh(x*2.2)/Math.tanh(2.2)}
@@ -107,7 +60,7 @@ function setup(A,base){
  for(const b of[31.6,43.6,55.6,63.6]){dt.setValueAtTime(.014,T(b));dt.linearRampToValueAtTime(.075,T(b)+1.3);dt.linearRampToValueAtTime(.014,T(b)+2.6)}
  // tape stop at the very end: delay grows quadratically -> pitch slides to zero
  {const t0=T(73.25),Ts=2.6,c=new Float32Array(64);for(let i=0;i<64;i++){const x=i/63*Ts;c[i]=.014+x*x/(2*Ts)}dt.setValueCurveAtTime(c,t0,Ts)}
- const mus=G(1,tape),vo=G(1);
+ const mus=G(1,tape);
  // reverb + echo
  const ir=A.createBuffer(2,SR*3|0,SR);for(let c=0;c<2;c++){const d=ir.getChannelData(c);let y=0;for(let i=0;i<d.length;i++){y=y*.55+(Math.random()*2-1)*.45;d[i]=y*Math.exp(-i/SR*1.7)}}
  const cv=A.createConvolver();cv.buffer=ir;cv.connect(G(.5,mus));const rv=G(1,cv);
@@ -121,8 +74,6 @@ function setup(A,base){
   N(base,END,1).connect(F('bandpass',1500,1.4,pg));pg.gain.setValueAtTime(.2,base);pg.gain.setValueAtTime(.2,T(3.7));pg.gain.linearRampToValueAtTime(0,T(4.2));
   pg.gain.setValueAtTime(0,T(72.6));pg.gain.linearRampToValueAtTime(.2,T(73.3));og.gain.setValueAtTime(0,T(3.7));og.gain.linearRampToValueAtTime(0,T(4.2));
   og.gain.setValueAtTime(0,T(72.6));og.gain.linearRampToValueAtTime(.2,T(73.3))}
- // voice chain: band-limited, a touch of room, then the same tape
- {const vh=F('highpass',140,.7,G(2.6,tape),G(.14,rv));const vl=F('lowpass',3900,.6,vh);vo.connect(vl)}
  // ---- instruments ----
  function kk(t,v){const o=O('sine',150,t,t+.6),g=G(0,mus);o.connect(g);o.frequency.setValueAtTime(155,t);o.frequency.exponentialRampToValueAtTime(47,t+.11);
   g.gain.setValueAtTime(v*.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.5);
@@ -151,18 +102,23 @@ function setup(A,base){
  function choir(t,ns,v){const g=G(0,mus,rv,eIn),mx=G(1),e=t+BAR+1.4;
   [[750,330],[1200,900],[2500,2250]].forEach(([a,b],i)=>{const f=F('bandpass',a,8,G([1,.5,.25][i],g));f.frequency.setValueAtTime(a,t);f.frequency.linearRampToValueAtTime(b,e);mx.connect(f)});
   ns.forEach((m,i)=>[-11,10].forEach(c=>{const o=O('sawtooth',mf(m+12),t,e);o.detune.value=c+i*2;o.connect(mx)}));env(g,t,1.2,BAR,e,v*.17)}
+ // typewriter key: a click and a thud
+ function key(t,r){const g=G(0,mus),n=N(t,t+.06);n.connect(F('bandpass',2600+r*1500,2,g));g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.001,t+.035);
+  const o=O('square',140+r*30,t,t+.03),og=G(.05,mus);o.connect(F('lowpass',600,1,og))}
+ // school recorder: triangle + breath noise, delayed vibrato, slightly flat
+ function rec(t,m,d){const f=mf(m)*.996,g=G(0,mus,rv,eIn),o=O('triangle',f,t,t+d+.2),o2=O('sine',f*2,t,t+d+.2);o.connect(g);o2.connect(G(.15,g));
+  const vb=O('sine',5.2,t,t+d+.2),vg=G(0,o.frequency);vb.connect(vg);vg.gain.setValueAtTime(0,t);vg.gain.linearRampToValueAtTime(f*.01,t+Math.min(d,.5));
+  N(t,t+d+.2).connect(F('bandpass',f*2,4,G(.4,g)));env(g,t,.06,d*.85,d+.12,.085)}
+ // electric piano: FM tine with a soft bark
+ function ep(t,m,v){const f=mf(m),g=G(0,mus,rv),o=O('sine',f,t,t+1.6),md=O('sine',f*14.01,t,t+1.6),mg=G(f*.9,o.frequency),md2=O('sine',f,t,t+1.6),mg2=G(f*.6,o.frequency);
+  md.connect(mg);md2.connect(mg2);mg.gain.setValueAtTime(f*.9,t);mg.gain.exponentialRampToValueAtTime(1,t+.08);mg2.gain.setValueAtTime(f*.6,t);mg2.gain.exponentialRampToValueAtTime(f*.05,t+1.2);o.connect(g);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.03,t+.005);g.gain.exponentialRampToValueAtTime(.001,t+1.5)}
+ // reversed cymbal: noise swelling up into the downbeat
+ function rcy(t,d){const g=G(0,mus,rv),n=N(t,t+d);n.connect(F('highpass',5000,.6,g));g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.12,t+d-.02);g.gain.linearRampToValueAtTime(0,t+d)}
+ // arpeggiator: detuned saw pair through a resonant low-pass that opens across the section
+ function arp(t,m,cut,v){const f=mf(m),g=G(0,mus,eIn),l=F('lowpass',cut,7,g);[-9,8].forEach(c=>{const o=O('sawtooth',f,t,t+.25);o.detune.value=c;o.connect(l)});
+  l.frequency.setValueAtTime(cut*2.2,t);l.frequency.exponentialRampToValueAtTime(cut*.6,t+.18);g.gain.setValueAtTime(v*.035,t);g.gain.exponentialRampToValueAtTime(.001,t+.22)}
  function beep(t){const o=O('sine',1000,t,t+.09),g=G(.12,mus);o.connect(g)}
- function speak(L){const t0=base+L.t,k=L.ch?1.17:1,f0=L.ch?208:98,e=t0+L.d+.3;
-  const o=O('sawtooth',f0,t0-.05,e),src=G(0);o.connect(src);
-  const n=N(t0-.05,e),ng=G(0),nf=F('bandpass',3000,2.2,vo);n.connect(ng);ng.connect(nf);
-  const fs=[7,9,12].map((q,j)=>{const x=F('bandpass',500*(j+1),q,G([1,.6,.32][j],vo));src.connect(x);return x});
-  for(const p of L.ph){const at=t0+p[0];
-   fs.forEach((f,j)=>{if(p[2+j])f.frequency.setTargetAtTime(p[2+j]*k,at,.016)});
-   src.gain.setTargetAtTime(p[5],at,.012);ng.gain.setTargetAtTime(p[6],at,.008);if(p[7])nf.frequency.setTargetAtTime(p[7],at,.01);
-   if(p[8])o.frequency.setTargetAtTime(f0*p[8],at,.04)}
-  src.gain.setTargetAtTime(0,t0+L.d,.03);ng.gain.setTargetAtTime(0,t0+L.d,.01);
-  // duck the music under the voice
-  mus.gain.setTargetAtTime(.62,t0-.1,.12);mus.gain.setTargetAtTime(1,t0+L.d+.1,.4)}
  // ---- arrangement ----
  function bar(b,t){const c=CH[PR[b]],ns=c.slice(1),dm=DM(b);
   const cut=b<4?500+b*120:b<12?1200:b<22?1500:b<32?1400:b<44?2300:b<56?1000+(b-44)*130:b<64?1300:b<70?1600:900;
@@ -188,8 +144,22 @@ function setup(A,base){
   if(bo)for(let i=0;i<8;i++)if((!qt||i%2==0)&&hb(b,i+20)>.25)bell(t+st(i*2),ns[AR[i]]+12+(hb(b,i+40)>.85?12:0),.05);
   // lead
   const L=LEAD[b];if(L)for(let i=0;i<16;i++){const ch=L[i];if(ch in LN){let j=i+1;while(L[j]=='-')j++;lead(t+st(i),LN[ch],(j-i)*S16,b>=36&&b<40?.8:1)}}
-  // narration lines starting in this bar
-  LINES.forEach(L=>{if(Math.floor(L.t/BAR+1e-6)==b)speak(L)})}
+  // typewriter: a key per letter, a bell at the end of the line
+  for(const[tb,str]of TY)for(let i=0;i<=str.length;i++){const q=tb*16+i,qb=Math.floor(q/16);if(qb!=b)continue;const at=t+st(q%16|0)+(q%1)*S16;
+   if(i==str.length)bell(at+S16,98,.05);else if(str[i]!=' ')key(at,hb(q,2))}
+  // counting the poles: one rising music-box note per number
+  for(let j=0;j<CNT;j++){const q=53.5*16+j*2;if(Math.floor(q/16)==b)bell(t+st(q%16|0)+(q%1)*S16,[62,65,67,69,72,74,77,79,81,84,86,89,91,93,96][j],.07)}
+  // recorder counter-melody where the words used to be
+  const RC=REC[b];if(RC)for(let i=0;i<16;i++){const ch=RC[i];if(ch in LN){let j=i+1;while(RC[j]=='-')j++;rec(t+st(i),LN[ch]+12,(j-i)*S16)}}
+  // arpeggio (poles, and the last stretch of the cell): up-down through the chord, two octaves, swung
+  if((b>=44&&b<56)||(b>=28&&b<32)){const P=[0,1,2,3,4,3,2,1],cut=b<32?700+(b-28)*150:500+(b-44)*140;
+   for(let i=0;i<16;i++)if(hb(b,i+60)>.15){const k=P[i%8];arp(t+st(i),(k<4?ns[k]:ns[k-4]+12)+12,cut,i%4?.7:1)}}
+  // sunset reprise: lead doubled a sixth below
+  if(L&&b>=64)for(let i=0;i<16;i++){const ch=L[i];if(ch in LN){let j=i+1;while(L[j]=='-')j++;lead(t+st(i)+.015,LN[ch]-(ch>'4'?9:8),(j-i)*S16,.5)}}
+  // electric piano comping
+  if(EP(b))[0,6,10].forEach((s,i)=>{if(i<2||hb(b,30)>.4)ns.forEach((m,k)=>ep(t+st(s)+k*.012,m,i?.6:1))});
+  // reversed cymbals into the big moments
+  if([39,43,55,63].includes(b))rcy(t+BAR*.25,BAR*.75)}
  function sched(b){bag=[];
   if(b>3&&BAGS[b-4]){BAGS[b-4].forEach(n=>n.disconnect());BAGS[b-4]=0}
   BAGS[b]=bag;bar(b,base+b*BAR)}
@@ -200,4 +170,4 @@ function live(A,from=0){const base=A.currentTime+.12-from,sched=setup(A,base);le
 function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sched=setup(A,0);sched(0);
  for(let b=1;b<BARS;b++)A.suspend(((b*BAR-.5)*SR/128|0)*128/SR).then(()=>{sched(b);A.resume()});
  return A.startRendering()}
-return{live,render,kick,LINES,BPM,BAR,BEAT,BARS,LEN}})();
+return{live,render,kick,TY,CNT,st,BPM,BAR,BEAT,BARS,LEN}})();

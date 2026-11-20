@@ -1,6 +1,6 @@
 # PLEASE ASSEMBLE — assembly kit nº 7/8
 
-A 64k browser intro, the bright toy-box end of IDM: a cheerful speech chip walks you through eight assembly steps, and the impossible objects you build only work from one side. Penrose stairs, a Reutersvärd triangle, a room with three floors, Necker cubes, a Möbius ribbon, and a tower that rebuilds itself every time the camera turns.
+A 64k browser intro, the bright toy-box end of IDM: a cheerful announcer (the browser's own text-to-speech voice) walks you through eight assembly steps, and the impossible objects you build only work from one side. Penrose stairs, a Reutersvärd triangle, a room with three floors, Necker cubes, a Möbius ribbon, and a tower that rebuilds itself every time the camera turns.
 
 **Run:** open `dist/please-assemble-64k.opus-5.5-medium.html` in Chrome, Safari or Firefox (WebGL2) and click. Sound starts right away, because the music is synthesized live a bar ahead.
 
@@ -10,18 +10,18 @@ A 64k browser intro, the bright toy-box end of IDM: a cheerful speech chip walks
 
 | file | what |
 |---|---|
-| `src/demo.js` | instanced mesh renderer (box, faceted sphere, cylinder, cone, Möbius strip), shadow map, the impossible-object tricks, scenes, 2D overlay (captions, tags, icons, page wipes) |
-| `src/music.js` | soundtrack plus the speech chip: song structure, narration script and word timings, which the visuals read too |
+| `src/demo.js` | instanced mesh renderer (box, faceted sphere, cylinder, cone, Möbius strip), shadow map, the impossible-object tricks, scenes, 2D overlay (captions, tags, icons, page wipes), speechSynthesis narration |
+| `src/music.js` | soundtrack, song structure and the narration script with its bar cues (the visuals and the speech read both from here) |
 | `src/shell.html` | page and start card |
 
 ## Size
 
 | | bytes | budget |
 |---|---|---|
-| total | 46 718 | 65 536 |
-| music (`dist/music.min.js`, includes the speech synth and script) | 15 033 | 16 384 |
+| total | 47 441 | 65 536 |
+| music (`dist/music.min.js`, includes the narration script and cues) | 13 131 | 16 384 |
 
-Raw and uncompressed (gzip: about 20.1 KB). No packer.
+Raw and uncompressed (gzip: about 20.3 KB). No packer.
 
 ## Timeline (132 BPM on a constant eighth-note grid; the meter shifts per step)
 
@@ -29,13 +29,13 @@ Raw and uncompressed (gzip: about 20.1 KB). No packer.
 |---|---|---|---|---|---|
 | 0–3 | 0:00 | 7/8 | title | the closed kit box hops on each downbeat; PLEASE ASSEMBLE stamps in letter by letter | music box and clockwork ticks |
 | 4–15 | 0:06 | 7/8 | 1 · Open the box | flaps pop open on four eighths; 78 pieces (cubes, pawns, cones, gears, tiny ribbons, wire cubes…) jump out one per eighth and click into a row; the camera pans sideways along it; number tags count up, then all turn into ∞ | ticks, then soft kick and woodblock, then bass |
-| 16–31 | 0:25 | 7/8 | 2 · Build a staircase | Penrose stairs: 24 candy steps drop in one per eighth; three pawns climb for ever while marbles roll down the same steps; a quarter turn shows it's an open spiral ("DO NOT LOOK"), turn back; two more rings stack up as the camera climbs | full 7/8 groove (2+2+3), glockenspiel lead, music-box sparkle, organ stabs, ratchets |
-| 32–43 | 0:51 | 5/4 | 3 · Join the corners | Reutersvärd triangle of 15 cubes clicks together on the grid; a quarter turn shows the corners aren't touching ("NOT TOUCHING"); the ground shadow always shows the truth; then five fast turns where the cubes fly apart and re-form the triangle each time | toy piano lead (FM), prepared-piano plinks, 3+3+2+2 drums |
+| 16–31 | 0:25 | 7/8 | 2 · Build a staircase | Penrose stairs: 32 steps (lavender blocks, alternating cobalt and pink treads) drop in one per eighth and close into a square ring around a courtyard; three pawns climb for ever while marbles roll down the same steps; a quarter turn shows it's an open spiral ("DO NOT LOOK"), turn back; two more rings stack up as the camera climbs | full 7/8 groove (2+2+3), glockenspiel lead, music-box sparkle, organ stabs, ratchets |
+| 32–43 | 0:51 | 5/4 | 3 · Join the corners | Reutersvärd triangle of 15 cubes clicks together on the grid; a quarter turn shows the two free ends (START / END) are nowhere near each other; at "Ignore the shadow" the shadows switch on and the ground shadow shows the truth; then five fast turns where the cubes fly apart and re-form the triangle each time | toy piano lead (FM), prepared-piano plinks, 3+3+2+2 drums |
 | 44–55 | 1:18 | 4/4 + 3/4 | 4 · Choose a down | the room unfolds from a flat-pack net: two walls hinge up on the beat. In the room corner each of the three walls is a floor, with stairs, an arch, a ticking gear and pawns on each; the camera rolls 120° per instruction and six balls fall to the new "down" and roll back to their spots; nine pawns march a triangle that crosses all three floors | glockenspiel and music box, organ, alternating bars |
 | 56–67 | 1:37 | 4/4 | 5 · Look at the cube | a hero wire cube clicks together edge by edge and its face snaps in, then a field of cubes ripples out and the camera scrolls sideways over them. The spinning wire cubes whose depth order is mirrored on the beat, so they seem to spin backwards; tags say ?, then YES/NO; at "neither" the camera settles into true isometric and every cube becomes a flat hexagon | busiest, most micro-edited drums, melodic stutters, plinks |
-| 68–79 | 1:59 | 7/8 | 6 · Paint the ribbon | a candy-striped Möbius strip draws itself on, then ticks round; a pawn walks two laps and paints it pink in one stroke, inside and "outside"; cubes ride the strip like a conveyor | waltzing music box, detune creeping in, soft rim drums |
+| 68–79 | 1:59 | 7/8 | 6 · Paint the ribbon | a candy-striped Möbius strip draws itself on; the ribbon turns under a pawn like a treadmill while it walks two laps and paints it pink in one stroke (lap one on the far side, seen across the hole; lap two hanging upside down on the near side); cubes ride the strip like a conveyor | waltzing music box, detune creeping in, soft rim drums |
 | 80–81 | 2:18 | 5/4 | 6½ | everything freezes; a dotted fold line and scissors; the whole picture folds away | the music box winds down and sags out of tune |
-| 82–101 | 2:23 | 7+7+7+10 | 7 · Climb | an endless tower of stairs, triangles, gears and ribbons; the camera climbs, turns 90° every two bars and every level re-forms; the room rolls upside down at "fold the room", and back at "up is also down"; extra triangles appear at "too many corners"; confetti; the step badge glitches 7/8/A/∞ | climax: everything, toy-piano counter-melody, fills; the last four bars lift a semitone |
+| 82–101 | 2:23 | 7+7+7+10 | 7 · Climb | an endless tower of Penrose stair rings, triangles, gears and ribbons; the camera climbs and turns 90° every two bars, and the impossible levels fly apart and re-form while the gears and ribbons stay rigid; the room rolls upside down at "fold the room", and back at "up is also down"; extra triangles appear at "too many corners"; the step badge glitches 7/8/A/∞ | climax: everything, toy-piano counter-melody, melodica, claps, tape-stop drop-outs, fills; the last four bars lift a semitone |
 | 102–113 | 2:58 | 7/8 | 8 · Put it all back | the camera pans back along the row while every piece arcs into the box; the flaps close, the box flattens to a square and shrinks to a dot; ASSEMBLY COMPLETE end card | drums thin out, fanfare, ticks, final bell chord |
 | | 3:17–3:22 | | | end card holds | reverb tail |
 
@@ -43,10 +43,15 @@ Each step change has a page-turn wipe on the overlay, synced to a swoosh and a g
 
 ## Narration
 
-The narration has two parts that run together:
+The narration is the **browser's own text-to-speech** (`speechSynthesis`), cued from the audio clock and backed by a caption card.
 
-- **Voice:** a toy "speech chip" synthesized in WebAudio inside `music.js`, so it is in the offline render, in sync with the music, and sounds the same on every OS. A sawtooth glottal source goes through three bandpass formant filters, and a noise source handles fricatives and plosive bursts. Each line's phonemes are written by hand in a small phonetic alphabet. The voice is lightly bit-crushed (a 4-bit waveshaper) and pitched on a sing-song pattern taken from the song's key (D major), and the music ducks under it. Later lines get a "glitch" amount, which adds random pitch jumps and stuttered syllables ("ha- ha- half").
-- **Text:** an instruction-manual caption card at the bottom with the step badge. Each word lights up as the chip says it, karaoke-style, using word times computed from the same phoneme plan. The card is the main channel. The chip sounds like a speech toy and is only partly intelligible.
+- **Voice:** a deliberately chosen English voice. It prefers Samantha, Google US English, Microsoft Aria or Jenny, Karen, Moira, Tessa, Google UK English Female, Zira or Serena, then any local English voice, then the default. Pitch is 1.3 and rate 1.02, for a slightly-too-pleasant instructional announcer. A silent utterance is spoken inside the click handler, which primes speech for Safari and iOS.
+- **Timing:** each line is spoken when the audio clock (`AudioContext.currentTime`, read in the frame loop, not timers) reaches its bar cue. Anything still talking is cancelled first, so lines never drift off their cue.
+- **Glitches:** the later lines go geometrically wrong in delivery as well as in words. Each line is split into separate utterances, and glitchy lines get random pitch and rate jumps per fragment. From "Insert yourself into slot A" on, the line also gets a false start that is cut off with `cancel()` and restarted. The two most glitched lines also repeat a fragment. "Step six and a ha- ha- half" is spoken as separate pitched fragments.
+- **Ducking:** TTS can't be routed through WebAudio, so the music bus ducks to 55% on each utterance's `onstart` and comes back on the last fragment's `onend`.
+- **Captions:** an instruction-manual card with the step badge, where words light up karaoke-style. The highlight follows `onboundary` word events where the engine sends them (Chrome and Safari do). Otherwise it estimates from the elapsed time, the speech rate and character offsets. With no speechSynthesis (or with `?mute`) the captions run on estimated word times and carry everything.
+- **Cleanup:** speech is cancelled at load, when the piece ends and on `pagehide`/`beforeunload`.
+- **Caveats:** the voice varies by OS and browser and is **not in the offline render** (`SONG.render()` is music only). Some browsers return no voices until `voiceschanged` fires, which is also handled.
 
 Script (cue = bar.eighth):
 
@@ -89,12 +94,14 @@ Script (cue = bar.eighth):
 
 ## How the impossible objects work
 
-- **The camera is orthographic,** so moving any object along the view axis (1,1,1) leaves the picture unchanged. The Penrose stairs (flights of 10, 10, 2 and 2 steps, each rising a third of a tread) and the Reutersvärd triangle (5+5+5 cubes) are real open 3D shapes. Their two ends are exactly (8,8,8) or (5,5,5) apart, so from the magic angle they close. Walkers that pass the seam teleport by that same vector, which is invisible from the front and obvious from the side.
-- **Fixing the seam:** the triangle needs one bit of occlusion that no real object has. The first three cubes write a stencil bit, and the last two cubes are not drawn there. This only happens while the camera is exactly at the magic angle. During a turn everything renders honestly.
+- **The camera is orthographic,** so moving any object along the view axis (1,1,1) leaves the picture unchanged. The Penrose stairs (flights of 12, 12, 4 and 4 steps, each rising a quarter of a tread) and the Reutersvärd triangle (5+5+5 cubes) are real open 3D shapes. Their two ends are exactly (8,8,8) or (5,5,5) apart, so from the magic angle they close. Walkers that pass the seam teleport by that same vector, which is invisible from the front and obvious from the side.
+- **Why the stairs are 12/12/4/4:** the loop must close along the view axis, which forces two long and two short flights. Shallow quarter-tread risers keep the projected ring nearly square, so the courtyard stays open and the ring reads as a ring and not a solid block. Each step is a lavender body that fades out below, under a cap that alternates cobalt and pink.
+- **Fixing the seam:** the triangle needs one bit of occlusion that no real object has. The first three cubes write a stencil bit, and the last two cubes are not drawn there. This only happens while the camera is exactly at the magic angle. During a turn everything renders honestly. The camera eases into each turn without overshoot, so the mask switches on the moment it arrives and the cubes that are still landing slot in behind.
 - **Re-forming:** to rebuild on a turn, the design is rotated by the same quarter turn as the camera. Each piece flies, staggered, from its old place to its new one, so the picture is identical at both ends of the turn and in pieces in the middle.
 - **Necker cubes:** each instance can mirror its depth around its own centre in the vertex shader. In orthographic view that leaves the image the same and swaps what is in front, so a spinning wire cube appears to reverse direction on the beat.
 - **The room** is one set of furniture copied onto three walls by the 120° rotation about (1,1,1). Rolling the camera by 120° maps the room onto itself, and only "down" changes.
 - **The Möbius ribbon** is painted in the fragment shader from `gl_FrontFacing` and the strip parameter. The two faces form one continuous 0–1 range, so a single stroke covers both "sides".
+- **Consistent shading:** the light turns with the camera's quarter turns, so every re-formed figure is lit the same way. Objects don't shadow each other (only floors and walls receive shadows), so no stray shadow seams cut across an impossible joint.
 - **Rendering:** flat shading comes from screen-space derivatives. Ink edges on boxes are computed from local coordinates and the instance scale (about 1.5 px wide at any zoom). The shadows are crisp, lavender-tinted and come from a 2048² shadow map. A graph-paper grid on every floor plane is chosen by the surface normal, plus paper grain and a vignette in the background.
 
 ## What I invented beyond the brief
@@ -103,4 +110,4 @@ The kit-box framing, with steps, a contents list, number tags, "click" stickers,
 
 ## Not verified
 
-I measured the music offline but haven't heard it. I don't know how intelligible the speech chip is (the caption card carries the words regardless). I checked the visuals by reasoning and with coarse pixel probes, not by watching. The CSS fold at step 6½ uses a 3D transform on the WebGL canvas, which should work in every modern browser but I haven't seen it.
+I measured the music offline but haven't heard it. The TTS cues, utterance splits, cancels and boundary events were logged in headless Chrome (macOS voice: Samantha), but I haven't listened to them. Other OSes will pick different voices. I checked the visuals with rendered stills at each object's hero moment and turns, not in motion. The CSS fold at step 6½ uses a 3D transform on the WebGL canvas, which should work in every modern browser but I haven't seen it.

@@ -9,6 +9,14 @@ const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]
 const PAL={gold:[[1,.68,.38],[.38,.55,.58],[1,.62,.3]],fold:[[.98,.7,.46],[.3,.5,.56],[1,.6,.33]],hex:[[1,.72,.42],[.34,.52,.55],[1,.66,.34]],
  dusk:[[.95,.5,.32],[.22,.33,.42],[1,.42,.22]],tv:[[1,.62,.36],[.33,.48,.55],[1,.55,.28]],set:[[1,.55,.3],[.28,.36,.48],[1,.45,.2]]};
 const CUTS=[4,12,22,32,44,56,64].map(B);
+// narrator intertitle cards: [bar, length in bars, text; | breaks the line]. The child's typed lines live in SONG.TY.
+const NC=[[5,2,'This is a meadow.'],[7,2,'Everything here is counting.'],[9,2,'The grass counts the wind.'],[13,2,'Look closer at the flower.'],
+ [15,2,'The seeds turn by|the golden angle.'],[17,2,'Thirty-four one way.|Fifty-five the other.'],[19,1.5,'Every seed is|a smaller flower.'],
+ [23,1.5,'The bees learned it first.'],[25,1.5,'Six sides. No gaps.|No waste.'],[27,2,'Then the stones|learned it too.'],[30.75,1.25,'A very long time.'],
+ [33,1.5,'Now look up.'],[35,2,'The horizon does not end.|It folds.'],[37.5,2,'That is the same field,|above you.'],[39.5,2,'We walked there|as children.'],
+ [45,2,'Follow the line of poles.'],[47,2,'They do not get smaller.'],[49,2.5,'The further they go,|the taller they grow.'],[52,1.5,'Do not count them.'],
+ [57,2,'This film was made|a long time ago.'],[59.25,1.5,'It is still playing.'],[62.5,1.5,'You are watching it now.'],
+ [65,2,'The sun goes down|at the usual time.'],[67.5,1.5,'This is the end|of the lesson.'],[69.5,1.5,'Remember the number.']];
 const CHAP=[[4,'one','the meadow'],[12,'two','the seed'],[22,'three','the cell'],[32,'four','the fold'],[44,'five','the poles'],[56,'six','the television'],[64,'seven','the usual time']];
 // ---------- storyboard: everything is a function of song time ----------
 function meadow(L){return{S:1,L,c:[s(L*.07)*.6,2.4+.15*s(L*.4),10+L*2.2],f:[s(L*.05)*.15,.04+.02*s(L*.3),1],P:[1e4,0,0,1],D:nrm([.05,.1,1]),pal:PAL.gold,mo:1,bm:L>5?2:0}}
@@ -17,12 +25,12 @@ function state(t){const b=t/BAR;let r;
  else if(b<12)r=meadow(t-B(4));
  else if(b<22)r={S:2,L:t-B(12),c:[0,0,0],f:[0,0,1],P:[0,0,0,0],D:[0,.1,1],pal:PAL.gold,mo:0};
  else if(b<32){const L=t-B(22),k=ss(B(28.5),B(32),t);
-  r={S:3,L,c:[s(L*.08)*2,5.2+k*4.5,L*2.4],f:[s(L*.06)*.2,-.16-.14*k,1],P:[ss(B(26.6),B(28.8),t),0,0,0],D:nrm([.22,.1,1]),pal:PAL.hex,mo:1,bm:b<28?1:0}}
+  r={S:3,L,c:[s(L*.08)*2,5.2+k*4.5,L*2.4],f:[s(L*.06)*.2,-.16-.14*k,1],P:[ss(B(26.6),B(28.8),t),0,0,0],D:nrm([.22,.33,1]),pal:PAL.hex,mo:1,bm:b<28?1:0}}
  else if(b<44){const L=t-B(32),k=ss(B(33),B(40.5),t),pu=ss(B(32.6),B(34.6),t)*.55-ss(B(36),B(38.5),t)*.4+ss(B(39),B(40.6),t)*.5-ss(B(42.6),B(43.9),t)*.3;
   r={S:1,L,c:[0,2.4,200+L*2.6],f:[s(L*.05)*.1,.04+pu,1],roll:ss(B(37.5),B(43.6),t)*PI,P:[3000*Math.pow(20/3000,k),0,0,1-ss(B(32),B(33.4),t)],
    Q:[0,b>39.2?245+L*2.6-(t-B(39.2))*.8:0,t*4.5,0],D:nrm([0,.08,1]),pal:PAL.fold,mo:1}}
  else if(b<56){const L=t-B(44);r={S:4,L,c:[.3+s(L*.1)*.3,1.7+s(L*.3)*.05,30-L*1.6],f:[s(L*.04)*.08-.03,.07,1],P:[0,0,.045+.06*ss(B(44),B(56),t),0],D:nrm([-.1,-.03,1]),pal:PAL.dusk,mo:0}}
- else if(b<64){const L=t-B(56),k=ss(B(56.2),B(63.9),t),cz=40-1.05-14*k,cy=.6+.9*k,cx=s(L*.2)*.4*k;
+ else if(b<64){const L=t-B(56),k=ss(B(56.2),B(63.9),t),cz=40-2.3-13*k,cy=.62+.9*k,cx=s(L*.2)*.4*k;
   r={S:1,L,c:[cx,cy,cz],f:[-.225*(1-k)-cx,.6-cy+.25*k,40-cz],P:[1e4,0,0,ss(B(57.5),B(60),t)],Q:[40,0,0,0],D:nrm([-.25,.07,1]),pal:PAL.tv,mo:k}}
  else{const L=t-B(64),k=ss(B(64.5),B(72.5),t);
   r={S:1,L,c:[0,2.6+k*55,600-L*1.4],f:[0,.03-k*.5,1],P:[1e4,ss(B(66),B(71.5),t),0,1-ss(B(64.2),B(65.6),t)],D:nrm([0,.035,1]),pal:PAL.set,mo:1-k,bm:2}}
@@ -59,7 +67,7 @@ v=Bm>.5?.85*smoothstep(260.,60.,q.z)*min(1.,sz/1.5):Mo*(.2+1.3*pow(max(dot(norma
 gl_PointSize=clamp(sz,1.5,90.);gl_Position=vec4(q.x*1.6/q.z*R.y/R.x,q.y*1.6/q.z,0,1);}}`,
 `#version 300 es
 precision highp float;in float v,k,fl;out vec4 o;
-void main(){vec2 d=gl_PointCoord*2.-1.;float r=length(d),a=atan(d.y,d.x);
+void main(){vec2 d=gl_PointCoord*2.-1.;float r=length(d),a=atan(d.y,abs(d.x)+1e-6);
 if(k>2.5){float w=abs(d.y+abs(d.x)*fl*.7-.1);o=vec4(vec3(v*smoothstep(.25,.08,w)*step(abs(d.x),.9)),0);return;}
 if(k>1.5){o=vec4(vec3(v*smoothstep(1.,.2,r)),0);return;}
 float f=exp(-r*r*(k>.5?40.:5.))+k*.45*smoothstep(1.,.25,r)*pow(abs(cos(a*7.)),40.)*smoothstep(.0,.25,r);
@@ -76,16 +84,17 @@ function target(w,h,mip){const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2
  if(mip)gl.generateMipmap(gl.TEXTURE_2D);
  const fb=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tx,0);return{tx,fb,w,h}}
 const ttx=gl.createTexture();
-let sc=1,SW,SH,FS,FC=[];
+let sc=1,SW,SH,FS,FC=[],fresh=1;
 const tcv=document.createElement('canvas'),c2=tcv.getContext('2d');let tkey='';
 function size(){const k=Math.min(devicePixelRatio||1,1.5);cv.width=innerWidth*k|0;cv.height=innerHeight*k|0;
  const q=Math.min(1,Math.sqrt(480000/(cv.width*cv.height)))*sc;SW=Math.max(64,cv.width*q|0);SH=Math.max(36,cv.height*q|0);
  [FS,...FC].forEach(f=>f&&(gl.deleteTexture(f.tx),gl.deleteFramebuffer(f.fb)));FS=target(SW,SH);FC=[target(SW,SH,1),target(SW,SH,1)];
- tcv.width=1280;tcv.height=Math.round(1280*cv.height/cv.width);tkey=''}
+ tcv.width=1280;tcv.height=Math.round(1280*cv.height/cv.width);tkey='';fresh=1}
 addEventListener('resize',size);size();
 // ---------- text, drawn into a canvas and burned into the film ----------
-const FF='Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS","DejaVu Sans",Verdana,sans-serif';
-function txt(str,x,y,px,o={}){c2.font=`${o.it?'italic ':''}${o.w||500} ${px}px ${FF}`;c2.textAlign=o.al||'center';c2.letterSpacing=(o.ls||0)+'px';
+const FF='Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS","DejaVu Sans",Verdana,sans-serif',
+ SF='Baskerville,"Hoefler Text","Iowan Old Style",Georgia,"DejaVu Serif","Times New Roman",serif',TF='"American Typewriter","Courier New",Courier,"Nimbus Mono PS","DejaVu Sans Mono",monospace';
+function txt(str,x,y,px,o={}){c2.font=`${o.it?'italic ':''}${o.w||500} ${px}px ${o.f||FF}`;c2.textAlign=o.al||'center';c2.letterSpacing=(o.ls||0)+'px';
  c2.globalAlpha=o.a??1;c2.shadowColor='rgba(0,0,0,.85)';c2.shadowBlur=px*.35;c2.shadowOffsetY=px*.06;c2.fillStyle=o.c||'#f6e8c8';
  c2.fillText(str,x,y);c2.shadowBlur=px*.9;c2.globalAlpha=(o.a??1)*.5;c2.fillText(str,x,y)}
 function text(t,started,wall,st,M){const W=tcv.width,H=tcv.height,u=H/720,ops=[];
@@ -96,15 +105,15 @@ function text(t,started,wall,st,M){const W=tcv.width,H=tcv.height,u=H/720,ops=[]
   if(b<3.5){const n=8-Math.floor(t/(BEAT*2));ops.push([''+n,W/2,H/2+70*u,200*u,{w:600,c:'#1a1712',a:.9}])}
   for(const[cb,n,name]of CHAP){const a=ss(cb+.2,cb+.7,b)*(1-ss(cb+2.6,cb+3.2,b));
    if(a>0)ops.push([('part '+n).toUpperCase(),60*u,70*u,17*u,{al:'left',ls:6*u,a:+a.toFixed(1)}],[name,60*u,108*u,34*u,{al:'left',it:1,a:+a.toFixed(1)}])}
-  for(const L of SONG.LINES){const lt=t-L.t;if(lt<-.05||lt>L.d+1.3)continue;
-   const a=+(ss(-.05,.15,lt)*(1-ss(L.d+.6,L.d+1.3,lt))).toFixed(1),n=L.words.filter(w=>lt>=w[0]-.03).length;
-   ops.push(['#cap',L.text,n,a,L.ch])}
+  for(const[c0,len,str]of NC){const a=+(ss(c0,c0+.25,b)*(1-ss(c0+len-.3,c0+len,b))).toFixed(2);if(a>0)ops.push(['#card',str,a])}
+  for(const[c0,str]of SONG.TY){const n=Math.min(str.length,Math.floor((b-c0)*16)+1),e=c0+str.length/16,a=+(ss(c0-.1,c0,b)*(1-ss(e+1,e+1.4,b))).toFixed(2);
+   if(n>0&&a>0)ops.push(['#type',str,n,a,n<str.length||s(t*9)>0])}
   // educational-film diagrams
   const fa=(x,y)=>+(ss(x,x+.5,b)*(1-ss(y-.5,y,b))).toFixed(2),r2=v=>+v.toFixed(2);
   if(b>14.4&&b<19)ops.push(['#gold',fa(14.4,19),r2(ss(14.8,16,b)),r2(ss(16.9,18.3,b))]);
   if(b>24.2&&b<28.4)ops.push(['#hex',fa(24.2,28.4),r2(ss(24.4,26,b))]);
   if(b>34.2&&b<39)ops.push(['#fold',fa(34.2,39),r2(ss(34.6,37.6,b))]);
-  if(b>53.4&&b<56){const n=Math.floor(ss(53.6,55.2,b)*15),pts=[];
+  if(b>53.4&&b<56){const n=Math.max(0,Math.min(SONG.CNT,Math.floor((b-53.5)*8)+1)),pts=[];
    for(let j=0;j<n;j++){const k=1+j*28/55,d=[-4.5-st.c[0],10.4*k-st.c[1],j*28-st.c[2]],q=[0,3,6].map(i=>M[i]*d[0]+M[i+1]*d[1]+M[i+2]*d[2]);
     if(q[2]>1)pts.push([Math.round(W/2+q[0]*.8/q[2]*H),Math.round(H/2-q[1]*.8/q[2]*H),j+1])}
    ops.push(['#cnt',fa(53.4,56),pts])}
@@ -115,10 +124,21 @@ function text(t,started,wall,st,M){const W=tcv.width,H=tcv.height,u=H/720,ops=[]
  const key=JSON.stringify(ops);if(key==tkey)return;tkey=key;
  c2.clearRect(0,0,W,H);
  for(const op of ops){if(op[0][0]!='#'){txt(...op);continue}
-  if(op[0]!='#cap'){fig(op,W,H,u);continue}
-  const[,str,n,a,ch]=op,ws=str.split(' '),px=31*u,o={a,it:ch,c:ch?'#d4ece4':'#f6e8c8'};
-  c2.font=`${ch?'italic ':''}500 ${px}px ${FF}`;c2.letterSpacing='1px';const sp=c2.measureText(' ').width;let x=W/2-c2.measureText(str).width/2;
-  ws.forEach((w,i)=>{const ww=c2.measureText(w).width;if(i<n)txt(w,x,H*.87,px,{...o,al:'left',ls:1});x+=ww+sp})}
+
+  if(op[0]=='#card'){const[,str,a]=op,ls=str.split('|'),px=36*u;
+   // dim the picture softly, then a dark sepia intertitle card with a double rule
+   let g=c2.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.6);g.addColorStop(0,`rgba(10,7,4,${.45*a})`);g.addColorStop(1,`rgba(10,7,4,${.2*a})`);
+   c2.globalAlpha=1;c2.shadowBlur=0;c2.fillStyle=g;c2.fillRect(0,0,W,H);
+   c2.font=`400 ${px}px ${SF}`;c2.letterSpacing=2*u+'px';const cw=Math.max(...ls.map(l=>c2.measureText(l).width))+110*u,ch=ls.length*px*1.35+70*u,x0=(W-cw)/2,y0=(H-ch)/2;
+   c2.globalAlpha=a;c2.fillStyle='rgba(30,21,12,.86)';c2.fillRect(x0,y0,cw,ch);c2.strokeStyle='#e9dcbc';c2.lineWidth=1.5*u;
+   c2.strokeRect(x0+12*u,y0+12*u,cw-24*u,ch-24*u);c2.globalAlpha=a*.5;c2.strokeRect(x0+18*u,y0+18*u,cw-36*u,ch-36*u);
+   ls.forEach((l,i)=>txt(l,W/2,y0+35*u+px*(1+i*1.35),px,{a,f:SF,w:400,ls:2*u,c:'#f1e6c9'}));continue}
+  if(op[0]=='#type'){const[,str,n,a,cur]=op,px=34*u,y=H*.87;
+   let g=c2.createRadialGradient(W/2,y-10*u,0,W/2,y-10*u,W*.5);g.addColorStop(0,`rgba(8,8,6,${.3*a})`);g.addColorStop(1,'rgba(8,8,6,0)');
+   c2.globalAlpha=1;c2.shadowBlur=0;c2.fillStyle=g;c2.save();c2.translate(0,y-10*u);c2.scale(1,.18);c2.translate(0,-(y-10*u));c2.fillRect(0,0,W,H*6);c2.restore();
+   c2.font=`400 ${px}px ${TF}`;c2.letterSpacing='0px';const x=W/2-c2.measureText(str).width/2;
+   txt(str.slice(0,n)+(cur?'_':''),x,y,px,{a,f:TF,w:400,al:'left',c:'#e4efe2'});continue}
+  fig(op,W,H,u)}
  gl.bindTexture(gl.TEXTURE_2D,ttx);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tcv);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)}
 function fig(op,W,H,u){const[k,a]=op,cx=W-180*u,cy=175*u,TAU=2*PI,small={it:1,a:a*.85};
@@ -151,7 +171,7 @@ function frame(){requestAnimationFrame(frame);const pn=performance.now(),W=pn/10
  ema=ema*.95+(pn-last)*.05;last=pn;if(++fr>90&&ema>24&&sc>.45){sc*=.85;size();ema=18;fr=0}
  const t=started?Math.min(now(),LEN):0,st=started?state(t):meadow(W*.6%60);
  let dc=1e9;for(const c of CUTS)if(t>=c)dc=t-c;
- const Fk=started?.14+.78*Math.exp(-dc*1.3):.3,b=t/BAR;
+ const Fk=started?.12+.6*Math.exp(-dc*2.2):.3,b=t/BAR;
  const Lk=started?.1+.85*Math.exp(-dc*.9)+.3*Math.max(0,s(t*.23)*s(t*.071+1)):.35;
  let Tr=0;for(const x of[31.6,43.6,55.6,63.6])Tr+=ss(x,x+.3,b)*(1-ss(x+.6,x+1.1,b));
  const Bn=started?ss(B(72.5),B(73.6),t):0,K=started&&b>=8?SONG.kick(t):0,M=basis(st.f,st.roll);
@@ -171,13 +191,13 @@ function frame(){requestAnimationFrame(frame);const pn=performance.now(),W=pn/10
  const A=FC[pp],Bk=FC[pp^1];pp^=1;
  gl.bindFramebuffer(gl.FRAMEBUFFER,A.fb);gl.useProgram(PC);U=PC.U;gl.bindVertexArray(ev);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,FS.tx);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,Bk.tx);
- gl.uniform1i(U.A,0);gl.uniform1i(U.B,1);gl.uniform2f(U.R,SW,SH);gl.uniform1f(U.Fk,Fk);gl.drawArrays(gl.TRIANGLES,0,3);
+ gl.uniform1i(U.A,0);gl.uniform1i(U.B,1);gl.uniform2f(U.R,SW,SH);gl.uniform1f(U.Fk,fresh?0:Fk);fresh=0;gl.drawArrays(gl.TRIANGLES,0,3);
  gl.bindTexture(gl.TEXTURE_2D,A.tx);gl.generateMipmap(gl.TEXTURE_2D);
  // film
  gl.activeTexture(gl.TEXTURE2);text(t,started,W,st,M);gl.bindTexture(gl.TEXTURE_2D,ttx);
  gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,cv.width,cv.height);gl.useProgram(PF);U=PF.U;
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,A.tx);gl.uniform1i(U.A,0);gl.uniform1i(U.X,2);
  gl.uniform2f(U.R,cv.width,cv.height);gl.uniform1f(U.T,started?t:W);gl.uniform1f(U.Fd,1);
- let Cu=0;for(const c of CUTS)if((t>c-7&&t<c-6.83)||(t>c-1&&t<c-.83))Cu=1;gl.uniform1f(U.Cu,Cu);let Ro=0;for(const x of[43.9,55.9])Ro+=ss(x,x+.14,b);gl.uniform1f(U.Ro,Ro%1);gl.uniform1f(U.Lk,Lk);gl.uniform1f(U.Tr,Tr);gl.uniform1f(U.Bn,Bn);
+ let Cu=0;for(const c of CUTS)if((t>c-7&&t<c-6.83)||(t>c-1&&t<c-.83))Cu=1;gl.uniform1f(U.Cu,Cu);gl.uniform1f(U.Lk,Lk);gl.uniform1f(U.Tr,Tr);gl.uniform1f(U.Bn,Bn);
  gl.drawArrays(gl.TRIANGLES,0,3)}
 frame()})();

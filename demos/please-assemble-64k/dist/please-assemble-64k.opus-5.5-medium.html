@@ -22,56 +22,43 @@ BS.push(T);SB.push(M.length);
 const BARS=M.length,LEN=T+5,BAR=T/BARS;
 const rng=s=>()=>(s=(s*16807+11)%2147483647)/2147483647;
 const LN=[
-[1,0,"Hello! I am your assembly kit.","hel@U AE am yO @semblE kit",0],
-[4,0,"Step one. Open the box.","step wun @Up@n D@ boks",0],
-[8,0,"Count the pieces.","kAUnt D@ pEs@z",0],
-[10,0,"There should be infinity.","De@ SUd bE infinitE",0],
-[13,0,"Good counting!","gUd kAUntiN",0],
-[16,0,"Step two. Build a staircase.","step tU bild @ ste@keEs",0],
-[21,0,"Climb it. Keep climbing.","klAEm it kEp klAEmiN",0],
-[25,0,"Please do not look behind the stairs.","plEz dU not lUk bEhAEnd D@ ste@z",0],
-[29,0,"Thank you. You are back at the bottom.","Tank yU yU A bak at D@ bot@m",0],
-[32,0,"Step three. Join the three corners.","step TrE dZOEn D@ TrE kOn@z",0],
-[36,0,"Turn the room a quarter turn.","tRn D@ rUm @ kwOt@ tRn",0],
-[38,4,"Some corners are farther away than they look.","sum kOn@z A fAD@ @weE Dan DeE lUk",0],
-[41,2,"Ignore the shadow.","ignO D@ Sad@U",0],
-[44,0,"Step four. Choose which way is down.","step fO tSUz witS weE iz dAUn",0],
-[48,0,"Choose again.","tSUz @gen",0],
-[50,0,"Down is now to the left.","dAUn iz nAU tU D@ left",0],
-[52,0,"Down is now behind you.","dAUn iz nAU bEhAEnd yU",0],
-[54,0,"Good. Stay there.","gUd steE De@",0],
-[56,0,"Step five. Look at the cube.","step fAEv lUk at D@ kyUb",0],
-[59,0,"Is it facing you? Is it facing away?","iz it feEsiN yU iz it feEsiN @weE",0],
-[62,0,"Both answers are correct.","b@UT ans@z A k@rekt",0],
-[64,4,"Neither answer is correct.","nAED@ ans@ iz k@rekt",.1],
-[68,0,"Step six. Paint the inside of the ribbon pink.","step siks peEnt DE insAEd @v D@ rib@n piNk",0],
-[73,0,"Now paint the outside pink.","nAU peEnt DE AUtsAEd piNk",.1],
-[76,0,"There is no outside.","De@ iz n@U AUtsAEd",.2],
-[80,0,"Step six and a ha- ha- half.","step siks and @ ha ha hAf",.5],
-[82,0,"Step seven. Place step eight before step seven.","step sev@n pleEs step eEt bEfO step sev@n",.25],
-[87,0,"Fold the room along the dotted line.","f@Uld D@ rUm @loN D@ dotid lAEn",.35],
-[91,0,"Insert yourself into slot A.","insRt yOself intU slot eE",.45],
-[94,0,"You have too many corners. This is normal.","yU hav tU meni kOn@z Dis iz nOm@l",.55],
-[98,0,"Keep climbing. Up is also down.","kEp klAEmiN up iz Ols@U dAUn",.7],
-[102,0,"Step eight. Put everything back in the box.","step eEt pUt evriTiN bak in D@ boks",0],
-[106,0,"Including the stairs. Including you.","inklUdiN D@ ste@z inklUdiN yU",.15],
-[110,0,"Assembly complete. Thank you for playing!","@semblE k@mplEt Tank yU fO pleEiN",0]];
-const VW={a:[760,1720,2600,11],e:[580,1850,2550,9],i:[430,2000,2650,8],o:[640,960,2500,10],u:[660,1220,2550,8],E:[300,2300,3000,12],U:[340,920,2300,11],A:[730,1100,2550,13],O:[520,860,2500,12],R:[500,1350,1700,12],'@':[500,1500,2500,6],
-l:[380,1000,2600,6,.6],r:[420,1150,1500,6,.6],w:[300,700,2300,5,.6],y:[290,2200,2900,5,.6],m:[280,1100,2300,7,.35],n:[280,1500,2500,6,.35],N:[280,2000,2600,7,.35]};
-const CN={s:[6200,9,0,.9],S:[2700,10,0,.9],f:[4800,8,0,.35],T:[5200,7,0,.3],h:[1700,5,0,.4],z:[5600,8,1,.5],v:[3800,6,1,.3],Z:[2600,8,1,.5],D:[4600,4,1,.25],
-p:[900,7,2,.8],t:[4000,7,2,.8],k:[2300,7,2,.8],b:[800,6,3,.5],d:[3200,6,3,.5],g:[2000,6,3,.5]};
-const MEL=[0,4,7,4,2,5,9,7];
-const LINES=LN.map(([b,e,txt,ph,g],li)=>{
-const t0=BS[b]+e*E,R=rng(li*977+5),dw=txt.split(' '),pw=ph.split(' '),P=[],W=[];let t=0;
-pw.forEach((w,wi)=>{W.push({w:dw[wi],t:t0+t});
-let p=220*2**(MEL[(wi+li)%8]/12);if(wi==pw.length-1)p*=/\?/.test(dw[wi])?1.25:.84;
-if(g&&R()<g)p*=2**((floor(R()*9)-4)/6);
-let s=[...w];if(g&&R()<g*.5&&s.length>2)s=[...s.slice(0,2),...s.slice(0,2),...s];
-for(const c of s){const d=(VW[c]||CN[c])[VW[c]?3:1]*.0105*(g?1-g*.25:1);P.push([c,t,d,p*(1+(R()-.5)*g*.3)]);t+=d}
-t+=/[.,!?]$/.test(dw[wi])?.16:.035});
-return{t:t0,end:t0+t,words:W,ph:P,g}});
+[1,0,"Hello! I am your assembly kit.",0],
+[4,0,"Step one. Open the box.",0],
+[8,0,"Count the pieces.",0],
+[10,0,"There should be infinity.",0],
+[13,0,"Good counting!",0],
+[16,0,"Step two. Build a staircase.",0],
+[21,0,"Climb it. Keep climbing.",0],
+[25,0,"Please do not look behind the stairs.",0],
+[29,0,"Thank you. You are back at the bottom.",0],
+[32,0,"Step three. Join the three corners.",0],
+[36,0,"Turn the room a quarter turn.",0],
+[38,4,"Some corners are farther away than they look.",0],
+[41,2,"Ignore the shadow.",0],
+[44,0,"Step four. Choose which way is down.",0],
+[48,0,"Choose again.",0],
+[50,0,"Down is now to the left.",0],
+[52,0,"Down is now behind you.",0],
+[54,0,"Good. Stay there.",0],
+[56,0,"Step five. Look at the cube.",0],
+[59,0,"Is it facing you? Is it facing away?",0],
+[62,0,"Both answers are correct.",0],
+[64,4,"Neither answer is correct.",.1],
+[68,0,"Step six. Paint the inside of the ribbon pink.",0],
+[73,0,"Now paint the outside pink.",.1],
+[76,0,"There is no outside.",.2],
+[80,0,"Step six and a ha- ha- half.",.5],
+[82,0,"Step seven. Place step eight before step seven.",.25],
+[87,0,"Fold the room along the dotted line.",.35],
+[91,0,"Insert yourself into slot A.",.45],
+[94,0,"You have too many corners. This is normal.",.55],
+[98,0,"Keep climbing. Up is also down.",.7],
+[102,0,"Step eight. Put everything back in the box.",0],
+[106,0,"Including the stairs. Including you.",.15],
+[110,0,"Assembly complete. Thank you for playing!",0]];
+const LINES=LN.map(([b,e,txt,g])=>{const t0=BS[b]+e*E;let t=0;const words=txt.split(' ').map(w=>{const o={w,t:t0+t};t+=.07+w.length*.06+(/[.,!?]$/.test(w)?.25:0);return o});return{t:t0,end:t0+t,words,g}});
 function setup(A,base){
-const SR=A.sampleRate,SOLO=typeof window!='undefined'&&window.SOLO;
+const SR=A.sampleRate;
 let bag=[];const BAGS=[],keep=n=>(bag.push(n),n);
 const G=(v,...to)=>{const g=keep(A.createGain());g.gain.value=v;to.forEach(n=>n&&g.connect(n));return g};
 const O=(type,f,t,end)=>{const o=keep(A.createOscillator());o.type=type;o.frequency.value=f;o.start(t);o.stop(end);return o};
@@ -83,8 +70,7 @@ const env=(g,t,a,v,d)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTim
 const comp=A.createDynamicsCompressor();comp.threshold.value=-16;comp.ratio.value=4;comp.attack.value=.004;comp.release.value=.2;
 const out=A.createGain();out.gain.value=.6;comp.connect(out);out.connect(A.destination);
 const duck=A.createGain();duck.connect(comp);
-const mus=A.createGain();mus.gain.value=SOLO=='voice'?0:1;mus.connect(duck);
-const vbus=A.createGain();vbus.gain.value=SOLO=='music'?0:1;vbus.connect(comp);
+const mus=A.createGain();mus.connect(duck);
 const cv=A.createConvolver(),ir=A.createBuffer(2,SR*2.2|0,SR);
 for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=(random()*2-1)*exp(-i/SR*2.6)*.5}
 cv.buffer=ir;const rv=A.createGain();rv.gain.value=.35;rv.connect(cv);cv.connect(mus);
@@ -92,10 +78,6 @@ const dl=A.createDelay(2);dl.delayTime.value=3*E;const fb=A.createGain();fb.gain
 const dpan=A.createStereoPanner();dpan.pan.value=.55;dl.connect(dlp);dlp.connect(fb);fb.connect(dl);dlp.connect(dpan);dpan.connect(mus);
 const dsend=A.createGain();dsend.gain.value=.28;dsend.connect(dl);
 const sec=A.createGain();sec.connect(mus);
-const cr=A.createWaveShaper(),cc=new Float32Array(2048);for(let i=0;i<2048;i++){const x=i/1023.5-1;cc[i]=Math.round(x*14)/14}cr.curve=cc;
-const vlp=A.createBiquadFilter();vlp.frequency.value=5200;const vhp=A.createBiquadFilter();vhp.type='highpass';vhp.frequency.value=160;
-const vpre=A.createGain();vpre.gain.value=2.4;vpre.connect(cr);cr.connect(vhp);vhp.connect(vlp);const vo=A.createGain();vo.gain.value=.3;vlp.connect(vo);vo.connect(vbus);
-const vr=A.createGain();vr.gain.value=.12;vlp.connect(vr);vr.connect(cv);
 const SC=[0,2,4,5,7,9,11],sm=d=>SC[(d%7+7)%7]+12*floor(d/7),mf=m=>440*2**((m-69)/12);
 let WR=0,R=Math.random;
 const tune=m=>mf(m)*2**((WR*(R()-.3))/1200);
@@ -117,17 +99,11 @@ const c=G(0,g);env(c,t,.001,.5,.01);N(t,.02,c)}
 function snr(t,v){const g=G(0,PN(-.1,sec),rv);env(g,t,.001,v,.1);N(t,.16,F('bandpass',2200,.8,g));const o=O('triangle',230,t,t+.1);o.frequency.exponentialRampToValueAtTime(150,t+.08);const g2=G(0,g);env(g2,t,.001,.7,.05);o.connect(g2)}
 function hat(t,v,p=0,f=8000){const g=G(0,PN(p,sec));env(g,t,.001,v,.028);N(t,.05,F('highpass',f,1,g))}
 function blk(t,m,v,p=0){const f=mf(m),g=G(0,PN(p,sec),rv);env(g,t,.001,v,.06);const o=O('sine',f,t,t+.1);o.frequency.exponentialRampToValueAtTime(f*.8,t+.06);o.connect(g);N(t,.03,F('bandpass',f*2,6,g))}
+function clap(t,v){for(let i=0;i<3;i++){const g=G(0,PN(.15,sec),rv);env(g,t+i*.011,.001,v*(i==2?1:.6),i==2?.12:.01);N(t+i*.011,.15,F('bandpass',1300,1.4,g))}}
+function reed(t,ms,v,d){const g=G(0,PN(0,sec),rv),lp=F('lowpass',1500,.7,g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.12);g.gain.setValueAtTime(v,t+d-.1);g.gain.linearRampToValueAtTime(0,t+d);
+ms.forEach(m=>{O('sawtooth',tune(m)*1.003,t,t+d+.05).connect(lp);O('square',tune(m)*.997,t,t+d+.05).connect(G(.5,lp))})}
+function kal(t,m,v,p=0){const f=tune(m),g=G(0,PN(p,sec),rv,dsend);env(g,t,.002,v,.45);O('sine',f,t,t+.55).connect(g);const g2=G(0,g);env(g2,t,.001,.6,.03);O('sine',f*5.9,t,t+.06).connect(g2)}
 function rat(t,n,v,f,dt=E/4){for(let i=0;i<n;i++)hat(t+i*dt,v*(.5+i/n*.6),(i%2?.4:-.4),f*(1+i*.12))}
-function speak(L,t0){
-const o=keep(A.createOscillator());o.type='sawtooth';o.frequency.value=L.ph[0][3];const vg=G(0),sum=G(1,vpre),ng=G(0,sum),nf=F('bandpass',3000,1.6,ng);
-o.connect(vg);const FB=[[5,1.3],[9,2.4],[12,1.8]].map(([q,a])=>{const b=F('bandpass',500,q,G(a,sum));vg.connect(b);return b});
-N(t0,L.end-L.t+.4,nf);const st=(p,v,t,k=.012)=>p.setTargetAtTime(v,t,k);
-for(const[c,tt,d,p]of L.ph){const t=t0+tt,v=VW[c],k=CN[c];st(o.frequency,p,t,.02);
-if(v){v.slice(0,3).forEach((f,i)=>st(FB[i].frequency,f*(1+L.g*.15),t,.015));st(vg.gain,v[4]||1,t);st(ng.gain,0,t,.008)}
-else{nf.frequency.setValueAtTime(k[0],t);const vv=k[2]&1?.3:0;st(vg.gain,vv,t,.008);
-if(k[2]<2)st(ng.gain,k[3],t,.01);else{st(ng.gain,0,t,.005);ng.gain.setValueAtTime(k[3],t+d*.6);st(ng.gain,0,t+d*.6+.012,.01)}}}
-const te=t0+L.end-L.t;st(vg.gain,0,te,.02);st(ng.gain,0,te,.02);o.start(t0);o.stop(te+.3);
-duck.gain.setTargetAtTime(.75,t0-.05,.04);duck.gain.setTargetAtTime(1,te+.1,.15)}
 function bar(b,t){
 const s=SI[b],k=b-SB[s],n=M[b],sx=n*2,R2=rng(b*7919+3);R=rng(b*131+7);WR=[0,0,4,8,12,16,26,60,22,10][s];
 const PR=[[0,5,3,4],[0,5,3,4],[0,5,3,4],[3,4,2,5],[0,3,1,4],[5,3,0,4],[0,2,3,4],[3,3],[0,5,3,4],[3,4,0,0]][s];
@@ -135,13 +111,13 @@ const K=62+(s==8&&k>15?1:0),cd=PR[k%PR.length],root=K+sm(cd)-(sm(cd)>7?12:0),ph=
 const ch=[0,2,4].map(i=>K+sm(cd+i));
 const at=i=>t+i*E16;
 sec.gain.setTargetAtTime(s==9?max(.15,1-max(0,k-6)*.14):s==7?.9:1,t,.3);
-LINES.forEach(L=>{if(L.t>=BS[b]-1e-6&&L.t<BS[b+1]-1e-6)speak(L,base+L.t)});
 const MS={0:["0.4.7..","7.4.2..","4.2.1.."],1:["0247.4.","7.42.0.","4.2.1.."],2:["7.97.b9","9.74.42","b.9.7.."],3:["4.20.47.9.","9.7.4.21..","7...4...2."],
 4:["0.4.7.4.","9.7.4."],5:["7..4..2.",".9..7..4","b..9..7."],6:["4..2..0","7..6..4","9..7.42"],8:["7.97.b9","9.74.42","b.9.7..","b.9.7.4.2."],9:["0247.4.","7.42.0.","4.2.1.."]}[s];
-if(MS){let m=MS[s==8?(n==10?3:ph%3):s==4?(n==6?1:0):ph==3?2:ph%2];
+const half=k*2>=SB[s+1]-SB[s],MB={2:["9.b.c.b","7.9.7.4","4.5.7.."],3:["7.9.b.9.7.","4.5.7.4.2.","0...2...4."],5:["4.7.9.b.","..b.9.7.",".4..7..9"],6:["2..4..7","9..7..4","2..1..0"],8:["9.b.c.b","7.9.7.4","4.5.7..","c.b.9.7.4."]}[s];
+if(MS){let m=(half&&MB?MB:MS)[s==8?(n==10?3:ph%3):s==4?(n==6?1:0):ph==3?2:ph%2];
 const ins=s==3?toy:s==2||s==4||s==8?glock:bell,oc=s==2||s==8?12:s==4?12:12,vv=s==0?.22:s==5?.2:.26;
-if(!(s==9&&k==11))for(let i=0;i<n;i++){const c=m[i%m.length];if(c=='.')continue;let st=parseInt(c,16);if(s>1&&s<9&&k*2>=SB[s+1]-SB[s]&&ph==1)st=(s%2?11:9)-st;
-let mm=K+oc+sm(cd+st)-(cd>3?12:0);if(R()<WR/200)mm+=1;if((s==5||s==8)&&R()<.14)for(let j=0;j<4;j++)ins(t+i*E+j*E/4,mm+j*(s==5?12:5),vv*(1-j*.18),(j%2-.5));else ins(t+i*E,mm,vv*(i?1:1.15),(i%3-1)*.35)}}
+if(!(s==9&&k==11))for(let i=0;i<n;i++){const c=m[i%m.length];if(c=='.')continue;let st=parseInt(c,16);if(s==4&&half&&ph==1)st=11-st;
+let mm=K+oc+sm(cd+st)-(cd>3?12:0);if(s==6&&k)kal(t+i*E+n*E*.5,mm+12,.07,.6);if(s<2)bell(t+i*E+.01,mm-3-(sm(cd+st)%12>4?1:0),.1,-.4);if(R()<WR/200)mm+=1;if((s==5||s==8)&&R()<.14)for(let j=0;j<4;j++)ins(t+i*E+j*E/4,mm+j*(s==5?12:5),vv*(1-j*.18),(j%2-.5));else ins(t+i*E,mm,vv*(i?1:1.15),(i%3-1)*.35)}}
 if(s==2&&k>3||s==5||s==8){const ar=[0,2,4,7,9,7,4,2];for(let i=0;i<sx;i++)if(R2()<(s==5?.45:.7))bell(at(i),K+24+sm(cd+ar[(i+k)%8])-(cd>3?12:0),.06,R2()*1.4-.7)}
 if(s==3||s==4){for(let i=0;i<n;i+=2)bell(t+i*E,74+sm(cd+[4,2,7,4,0][i/2%5])-(cd>3?12:0),.1,.4)}
 if(s<2||s==9&&k>8){for(let i=0;i<n;i++)blk(t+i*E,i%2?96:103,s==0?.05:.07,i%2?.5:-.5)}
@@ -153,30 +129,35 @@ f.frequency.setValueAtTime(500,t-.32);f.frequency.exponentialRampToValueAtTime(6
 if(b==110)[0,2,4,7,9,11,14].forEach((d,i)=>toy(t+i*E*.5,K+12+sm(d),.2,(i-3)*.25));
 if(s==8&&k%4>1){for(let i=0;i<n;i+=2)toy(t+i*E+E,K+sm(cd+[4,2,5,4,7][i/2%5]),.13,-.4)}
 if(s==9&&k==11){[62,66,69,74,76,81].forEach((m,i)=>bell(t+i*.025,m,.18,(i-2.5)*.2));blk(t,84,.2)}
-const drums=s==1&&k>=4||s>=2&&s<=6||s==8||s==9&&k<8;
+const drums=s==1&&k>=4||s>=2&&s<=6||s==8||s==9&&k<8,cut=(s==2||s==5||s==8)&&k%8==7?sx/2:sx;
+if(drums&&cut<sx){const g=G(0,PN(-.2,sec)),f=F('bandpass',800,1.5,g);g.gain.setValueAtTime(0,at(cut));g.gain.linearRampToValueAtTime(.22,at(sx)-.01);g.gain.linearRampToValueAtTime(0,at(sx));
+f.frequency.setValueAtTime(400,at(cut));f.frequency.exponentialRampToValueAtTime(7000,at(sx));N(at(cut),at(sx)-at(cut),f);for(let i=cut;i<sx;i++)kal(at(i),root+24+sm(i-cut),.08,(i%2-.5))}
 if(drums){
 const P={14:["x.....x.x.....","....x.......x."],20:["x.....x.........x...","............x.....x."],16:["x.....x...x.....","....x.......x..x"],12:["x.......x...","....x......."]}[sx];
 const busy=s==5||s==8?.35:s==2||s==3?.15:.05,soft=s==6||s==1;
-for(let i=0;i<sx;i++){
+for(let i=0;i<cut;i++){
 if(P[0][i]=='x'&&!(soft&&i))kick(at(i),s==1?.5:.85);
-if(P[1][i]=='x')soft?blk(at(i),79,.22,-.2):snr(at(i),.5);
+if(P[1][i]=='x'){soft?blk(at(i),79,.22,-.2):snr(at(i),.5);if(s==3||s==5||s==8)clap(at(i),.3)}
 if(i%2==0)hat(at(i),i%4?.1:.16,.25);else if(R2()<.35+busy)hat(at(i),.06,-.3,10000);
 if(!soft&&R2()<busy*.35)rat(at(i),3+floor(R2()*4),.1,5000+R2()*4000,E16/(2+floor(R2()*2)));
 if(s==5&&R2()<.12)snr(at(i)+E16/2,.18)}
-if(ph==3&&!soft&&s!=1)rat(at(sx-4),8,.16,3000,E16/2);
+if(ph==3&&!soft&&s!=1&&cut==sx)rat(at(sx-4),8,.16,3000,E16/2);
 }
+if(s==2&&k>7||s==6||s==8&&k%4<2)reed(t,ch.map(m=>m-12),s==6?.05:.04,n*E);
+if(s==4||s==6&&k>5){for(let i=1;i<n;i+=3)kal(t+i*E,K+12+sm(cd+[7,4,9,2][(i+k)%4]),.12,.5-(i%2))}
 if(s==3||s==5||s==8&&k>3){for(let i=0;i<sx;i++)if(R2()<(s==5?.28:.18))plink(at(i),root+12+sm([0,2,4,7][floor(R2()*4)]),.14,R2()-.5)}
 if(s==2&&k>7||s==4||s==8){const pp=sx==14?[3,7,11]:sx==20?[3,9,15]:sx==16?[3,7,11,14]:[3,9];pp.forEach(i=>organ(at(i),ch,.05,.12))}
 if(s==1&&k>=8||s>=2&&s<=6||s==8||s==9&&k<9){const bm=root-24+(root-24<36?12:0),pat=sx==14?[0,3,6,8,11]:sx==20?[0,4,6,10,12,16]:sx==16?[0,3,6,10,13]:[0,4,8];
-pat.forEach((i,j)=>bass(at(i),bm+(j%2&&R2()<.5?12:j==3?7:0),s==6?.3:.42,j==pat.length-1?E*1.3:E*.8))}
+if(ph==3&&s!=6)[0,7,12,7].forEach((d,j)=>bass(at(sx-4+j),bm+d,.3,E*.4));
+pat.filter(i=>ph<3||i<sx-4).forEach((i,j)=>bass(at(i),bm+(j%2&&R2()<.5?12:j==3?7:0),s==6?.3:.42,j==pat.length-1?E*1.3:E*.8))}
 }
 function sched(b){bag=[];
 if(b>4&&BAGS[b-5]){BAGS[b-5].forEach(n=>n.disconnect());BAGS[b-5]=0}
 BAGS[b]=bag;bar(b,base+BS[b])}
-bag=[];sched.out=out;return sched}
+bag=[];sched.out=out;sched.duck=duck;return sched}
 function live(A,from=0){const base=A.currentTime+.15-from,sched=setup(A,base);let b=0;while(b<BARS&&BS[b+1]<=from)b++;
 const tick=()=>{while(b<BARS&&base+BS[b]<A.currentTime+1.2)sched(b++)};tick();const iv=setInterval(tick,100);
-return{base,stop(){clearInterval(iv);sched.out.disconnect()}}}
+return{base,stop(){clearInterval(iv);sched.out.disconnect()},duck:v=>sched.duck.gain.setTargetAtTime(v,A.currentTime,.12)}}
 function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sched=setup(A,0);sched(0);
 for(let b=1;b<BARS;b++)A.suspend(((BS[b]-.6)*SR/128|0)*128/SR).then(()=>{sched(b);A.resume()});
 return A.startRendering()}
@@ -216,7 +197,7 @@ function lathe(pr,n){const v=[];for(let i=0;i<n;i++)for(let j=0;j<pr.length-1;j+
 for(const k of[0,1,2,0,2,3])v.push(...q[k])}return v}
 const SPH=lathe([...Array(9)].map((_,i)=>[sin(i/8*PI)*.5,-cos(i/8*PI)*.5]),14),CYL=lathe([[0,-.5],[.5,-.5],[.5,.5],[0,.5]],20),CONE=lathe([[0,-.5],[.5,-.5],[0,.5]],20);
 const MOB=[];{const nu=144,f=(u,s)=>{const r=1+s*.34*cos(u/2);return[r*cos(u),s*.34*sin(u/2),r*sin(u),u/(2*PI),s]};
-for(let i=0;i<nu;i++)for(let j=0;j<4;j++){const u0=i/nu*2*PI,u1=(i+1)/nu*2*PI,s0=j/2-1,s1=(j+1)/2-1,A=f(u0,s0),B=f(u1,s0),Cc=f(u1,s1),Dd=f(u0,s1);MOB.push(...A,...B,...Cc,...A,...Cc,...Dd)}}
+for(let i=0;i<nu;i++)for(let j=0;j<4;j++){const u0=i/nu*2*PI,u1=(i+1)/nu*2*PI,s0=j/2-1,s1=(j+1)/2-1,A=f(u0,s0),Dd=f(u0,s1),w=s=>i<nu-1?f(u1,s):[...f(0,-s).slice(0,3),1,s],B=w(s0),Cc=w(s1);MOB.push(...A,...B,...Cc,...A,...Cc,...Dd)}}
 const IB=gl.createBuffer(),F32=new Float32Array(24*12000);
 const MESH=[BOX,SPH,CYL,CONE,MOB].map(a=>{const vao=gl.createVertexArray();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());
 gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(a),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,20,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,2,gl.FLOAT,false,20,12);
@@ -232,7 +213,7 @@ vec3 d=W.xyz;if(E.w>.5)d-=2.*dot(d-E.xyz,vd)*vd;else d-=E.xyz*mg;gl_Position=V*W
 `in vec3 w,lp,sc;in vec4 c;in vec2 x;uniform mat4 L;uniform vec3 ld,bg;uniform float px,pt,st,sh,rv;uniform highp sampler2DShadow sm;out vec4 o;
 void main(){vec3 n=normalize(cross(dFdx(w),dFdy(w)));int f=int(c.a+.5);vec3 a=c.rgb;float s=1.;
 if(sh>0.){vec4 q=L*vec4(w+n*.03,1);q.xyz=q.xyz*.5+.5;q.z-=.002;s=texture(sm,q.xyz);}
-float df=max(dot(n,ld),0.)*s;
+float df=max(dot(n,ld),0.);
 if(f==4){if(x.x>rv)discard;float u=gl_FrontFacing?x.x*.5:.5+x.x*.5;a=mod(floor(x.x*40.+st),2.)<1.?vec3(.31,.82,.66):vec3(1,.84,.3);if(u<pt)a=vec3(1,.44,.66);if(abs(x.y)>.88)a*=.6;}
 vec3 col=a*(.62*vec3(.9,.9,1.05)+.45*df);
 if(f==2)col=a;
@@ -257,9 +238,10 @@ const bt=(b,e=0)=>BS[b]+e*E8;
 const barAt=t=>{let b=0;while(b<SONG.BARS-1&&BS[b+1]<=t)b++;return b};
 function pawn(Mb,c,sq=1){put(2,ch(Mb,Tm(0,.06,0),Sm(.56,.12,.56)),WHT,1);put(3,ch(Mb,Tm(0,.12+.3*sq,0),Sm(.44,.6*sq,.44)),c,1);put(1,ch(Mb,Tm(0,.2+.62*sq,0),Sm(.38)),c,1)}
 function gear(P,gc,R,a,c){P.push({me:2,p:gc,s:[2*R,.3,2*R],c,f:1,r:a});for(let i=0;i<8;i++){const q=a+i*PI/4;P.push({me:0,p:ad(gc,[cos(q)*R,0,-sin(q)*R]),s:[.5*R,.26,.42*R],c:pas(c,.35),f:0,r:q})}}
-const ST=[];{let p=[0,0,0];for(const[dx,dz,n]of[[1,0,10],[0,1,10],[-1,0,2],[0,-1,2]])for(let i=0;i<n;i++){ST.push(p);p=[p[0]+dx,p[1]+1/3,p[2]+dz]}}
+const ST=[];{let p=[0,0,0];for(const[dx,dz,n]of[[1,0,12],[0,1,12],[-1,0,4],[0,-1,4]])for(let i=0;i<n;i++){ST.push(p);p=[p[0]+dx,p[1]+.25,p[2]+dz]}}
+const NS=ST.length;
 const STC=mean(ST);
-function stairPos(s){const i=floor(s),f=s-i,j=(i%24+24)%24,a=ST[j],b=j==23?ad(ST[0],[8,8,8]):ST[j+1],g=ss(0,.7,f);return[ad(l3(a,b,g),[0,sin(PI*g)*.6,0]),1-.22*sin(PI*g)]}
+function stairPos(s){const i=floor(s),f=s-i,j=(i%NS+NS)%NS,a=ST[j],b=j==NS-1?ad(ST[0],[8,8,8]):ST[j+1],g=ss(0,.7,f);return[ad(l3(a,b,g),[0,sin(PI*g)*.5,0]),1-.22*sin(PI*g)]}
 const TRI=n=>{const P=[];for(let i=0;i<n;i++)P.push([i,0,0]);for(let i=0;i<n;i++)P.push([n,i,0]);for(let i=0;i<n;i++)P.push([n,n,i]);return P};
 function cons(P,cen,k,tau,mg){const n=P.length;P.forEach((q,i)=>{if(q.dy>50)return;const e=tau>0?ss(0,1,tau*1.8-i/n*.8):0,a=(k+e)*PI/2,rp=ryv(sb(q.p,cen),a);
 put(q.me,ch(Tm(cen[0]+rp[0],cen[1]+rp[1]+sin(PI*e)*1.5+(q.dy||0),cen[2]+rp[2]),Ry(a+(q.r||0)),Sm(...q.s)),q.c,q.f||0,Z4,mg?q.l||0:0)})}
@@ -288,27 +270,28 @@ for(let i=0;i<NP;i++){const tl=t5+i*E8,s=slot(i),tau=(t-tl)/(2*E8);if(tau<0)brea
 if(tau<1){if(i<8){const p=ad(l3([0,1.2,0],s,tau),[0,3.5*4*tau*(1-tau),0]);M=ch(Tv(p),Tm(0,.4,0),Rz(-2*PI*tau),Tm(0,-.4,0))}else M=ch(Tv(ad(s,[0,12*(1-tau)**2,0])),Ry(PI*(1-tau)))}
 else{const q=(tau-1)*2*E8;if(q<.35)CLK.push([s,q]);const k=1-.3*sin(q*24)*exp(-q*9);let y=0;if(t>bt(13)){y=.45*max(0,sin(PI*(e*.5-i*.13)))}M=ch(Tm(s[0],y,s[2]),Sm(1/sqrt(k),k,1/sqrt(k)))}
 piece(i,M);if(tau>1&&t<bt(16))TAGS.push([[s[0],1.35,s[2]],t>bt(10)+i*E8*.22?'∞':''+(i+1)])}}
-function sBack(t){const t0=bt(102);ground(0,0,0);cam.sh=1;
+function sBack(t){const t0=bt(102);ground(0,0,0);cam.sh=t>bt(107);
 const cur=NP-1-(t-t0)/(E8*.5);cam.c=[max(0,1.3*cur-1)+ss(bt(106),bt(108),t)*0,.5,0];cam.H=mx(7.5,4.6,ss(t0,bt(108),t));
 for(let i=0;i<NP;i++){const tl=t0+(NP-1-i)*E8*.5,s=slot(i),d=s[0],fd=.45+d/16,tau=(t-tl)/fd;if(tau>=1)continue;
 if(tau<0){piece(i,Tv(s));continue}const p=ad(l3(s,[0,.6,0],tau),[0,(2+d*.3)*4*tau*(1-tau),0]);piece(i,ch(Tv(p),Ry(2*PI*tau),Sm(1-tau*tau*.4)))}
 const fl=1-.97*ss(bt(110),bt(110,2.5),t),sr=1-ss(bt(110,4),bt(111,4),t);
 kitBox([3,2,1,0].map(i=>1-bk((t-bt(108,i))/(1.6*E8))),fl,sr,t>bt(109)&&t<bt(110)?.3*sin(PI*cl((t-bt(109))/(2*E8))):0)}
-function sStairs(t){const e=t/E8,t0=bt(16);cam.H=7.4;cam.sh=1;
-const yv=bk((t-bt(25,6))/(3*E8))-bk((t-bt(28,4))/(3*E8));cam.y=Y45+yv*PI/2;
-const up=ss(bt(29),bt(32),t)*14;if(yv>.98)TAGS.push([ad(sb(l3(ST[23],ad(ST[0],[8,8,8]),.5),STC),[0,1.8,0]),'DO NOT LOOK']);cam.c=[0,up+.5,0];
+function step(x,y,z,s,k,r){put(0,ch(Tm(x,y-2.6*s,z),Sm(1.3*s,5*s,1.3*s)),pas(CAN[(r*3)%8],.78),5);put(0,ch(Tm(x,y-.07*s,z),Sm(1.32*s,.14*s,1.32*s)),CAN[(r*3+(k&1))%8])}
+function sStairs(t){const e=t/E8,t0=bt(16);cam.sh=1;
+const yv=bk((t-bt(25,6))/(3*E8))-bk((t-bt(28,4))/(3*E8));cam.y=Y45+yv*PI/2;cam.H=7.4+ss(0,1,yv)*1.6;
+const up=ss(bt(29),bt(32),t)*14;if(yv>.98)TAGS.push([ad(sb(l3(ST[NS-1],ad(ST[0],[8,8,8]),.5),STC),[0,1.8,0]),'DO NOT LOOK']);cam.c=[0,up+.5,0];
 for(let r=0;r<3;r++){const tr=r?bt(28+r,3):t0;if(t<tr)break;
 ST.forEach((p,k)=>{const tk=tr+k*E8*(r?.25:1);if(t<tk)return;const dy=(1-bk((t-tk)/(1.3*E8)))*5,q=ad(sb(p,STC),[0,r*9,0]),ag=t-tk-.8*E8;if(!r&&ag>0&&ag<.35)CLK.push([q,ag]);
-put(0,ch(Tm(q[0],q[1]-2.5+dy,q[2]),Sm(1.6,5,1.6)),CAN[(floor(k/3)+r*3)%8],5)});
+step(q[0],q[1]+dy,q[2],1,k,r)});
 if(t>bt(22)+r*2)for(let i=0;i<10;i++){const[p]=stairPos(-(t-bt(22))/E8*.75+i*2.4+.35);put(1,ch(Tv(ad(sb(p,STC),[0,r*9+.25,0])),Sm(.42)),SKY,1)}
-[[RED,0,bt(20)],[COB,12,bt(21)],[LIL,6,bt(23)]].forEach(([c,o,ts])=>{if(t<ts+r*2)return;const[p,sq]=stairPos(tick((t-ts)/E8,1.4)+o);
+[[RED,0,bt(21)],[ORG,16,bt(21,4)],[LIL,8,bt(23)]].forEach(([c,o,ts])=>{if(t<ts+r*2)return;const[p,sq]=stairPos(tick((t-ts)/E8,1.4)+o);
 const q=ad(sb(p,STC),[0,r*9,0]);pawn(ch(Tv(q),Sm(.9)),c,sq);if(!r&&!o&&t>bt(21)&&t<bt(32))TAGS.push([ad(q,[0,1.7,0]),'YOU'])})}}
 const TP=TRI(5).map((p,i)=>({me:0,p,s:[1,1,1],c:[COB,PINK,LEM][floor(i/5)],l:i<3?1:i>12?2:0})),TC=mean(TRI(5));
-function sTri(t){const t0=bt(32);cam.sh=1;cam.H=5.6;cam.c=[...TC];ground(TC[0],-.5,TC[2]);
+function sTri(t){const t0=bt(32);cam.sh=t>bt(41,2);cam.H=5.6;cam.c=[...TC];ground(TC[0],-.5,TC[2]);
 TP.forEach((q,i)=>{const ag=t-t0-(i*2+2.9)*E8;if(ag>0&&ag<.35)CLK.push([q.p,ag]);q.dy=(1-bk((t-t0-(i*2+2)*E8)/(1.4*E8)))*7;if(t<t0+(i*2+2)*E8)q.dy=99});
 const tr=bt(41,5),j=floor((t-tr)/(5*E8));
-if(j<0){const yv=bk((t-bt(36,5))/(3*E8))-bk((t-bt(39,6))/(3*E8));cam.y=Y45+yv*PI/2;cam.m=yv==0;cons(TP,TC,0,0,cam.m);if(yv>.98)TAGS.push([[2.5,3.8,2],'NOT TOUCHING'])}
-else{const jj=min(j,5),tau=j>4?1:cl((t-tr-jj*5*E8)/(3*E8)),k=tau>=1?jj+1:jj;cam.y=Y45+(jj+bk(tau))*PI/2;cam.m=tau>=1;cons(TP,TC,k,tau<1?tau:0,cam.m)}}
+if(j<0){const yv=ss(bt(36,5),bt(37,1),t)-ss(bt(39,6),bt(40,2),t);cam.y=Y45+yv*PI/2;cam.m=yv==0;cons(TP,TC,0,0,cam.m);if(yv>.98)TAGS.push([[0,1.3,0],'START'],[[5,6.3,4],'END'])}
+else{const jj=min(j,5),tau=j>4?1:cl((t-tr-jj*5*E8)/(3*E8)),k=tau>=1?jj+1:jj,cy=ss(0,.7,tau);cam.y=Y45+(jj+cy)*PI/2;cam.m=cy==1;cons(TP,TC,k,tau<1?tau:0,cam.m)}}
 const PERM=[[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],[0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,1]];PERM.push(mul(PERM[1],PERM[1]));
 const FLIPS=[[44,0],[48,1],[50,2],[52,0],[54,1]].map(([b,g])=>[bt(b),g]);
 const BALLS=[[1.2,4.6,1],[1.9,3.4,.6],[.7,1.5,4.2],[1.6,.8,3.3],[4.4,1.1,1.7],[3.1,1.9,.8]];
@@ -330,11 +313,11 @@ for(let i=0;i<9;i++){const sp=fr(tick(e,2)/36+i/9)*3,g=floor(sp),f=sp-g,a=4.6,P3
 if(t>bt(45,4))pawn(ch(Tv(p),PERM[g],Tm(0,.12*abs(sin(PI*e)),0),Sm(.55)),CAN[(i+4)%8],1-.15*abs(sin(PI*e)))}}
 function sNeck(t){const e=t/E8,t0=bt(56),lt=t-t0;cam.sh=0;cam.gr=1;
 const iso=ss(bt(64,4),bt(65,4),t);cam.p=mx(.42,ISO,iso);cam.H=5.4;
-const lt2=max(0,t-bt(58)),rv=[cos(Y45),0,-sin(Y45)],c0=sc(rv,lt2*1.25+lt2*lt2*.02);cam.c=c0;const sp=2.7;
+const lt2=max(0,t-bt(58)),rv=[cos(Y45),0,-sin(Y45)],c0=sc(rv,lt2*1.25+lt2*lt2*.02);cam.c=c0;const sp=3.6;
 const ci=round(c0[0]/sp),cj=round(c0[2]/sp);
 for(let i=ci-6;i<=ci+6;i++)for(let j=cj-6;j<=cj+6;j++){const p=[i*sp,0,j*sp],d=sb(p,c0);if(abs(d[0]-d[2])>13||abs(d[0]+d[2])>11)continue;
 const sd=hs(i*7.3+j*1.7),a=mx(lt*1.1+sd*6,0,iso),fl=t>bt(58)&&((floor(e/2)+i+j)&1)?1:0,cc=CAN[((i+j*3)%8+8)%8],ex=fl?[...p,1]:Z4;
-const hero=!i&&!j,gr=hero?mx(2.4,1.3,ss(bt(57,4),bt(58),t)):1.3*bk((t-bt(58)-Math.hypot(d[0],d[2])*.06)/.3);if(gr<=0)continue;
+const hero=!i&&!j,gr=hero?mx(3.2,1.25,ss(bt(57,4),bt(58),t)):1.25*bk((t-bt(58)-Math.hypot(d[0],d[2])*.06)/.3);if(gr<=0)continue;
 const M=ch(Tv(p),Ry(a),Sm(gr));let ek=0;
 for(let k=0;k<3;k++)for(const u of[-.5,.5])for(const v of[-.5,.5]){const q=[0,0,0],s=[.055,.055,.055],ta=bt(56,1+ek++*.6);if(hero&&t<ta)continue;q[(k+1)%3]=u;q[(k+2)%3]=v;s[k]=1.055*(hero?bk((t-ta)/(1.2*E8)):1);
 if(hero&&t-ta<.35&&t-ta>.1)CLK.push([xf(M,q),t-ta-.1]);put(0,ch(M,Tv(q),Sm(...s)),k==1?INK:cc,2,ex)}
@@ -342,15 +325,15 @@ if(!hero||t>bt(57))put(0,ch(M,Tm(0,0,.5),Sm(1,1,.02*bk((t-bt(57))/.3))),pas(cc,.
 if(t>bt(59)&&t<bt(64,4)&&abs(d[0]-d[2])<5&&!((i+j*2)%3))TAGS.push([ad(p,[0,1.5,0]),t<bt(62)?'?':fl?'YES':'NO'])}}
 let PT=0,STR=0,RV=1;
 function sMob(t){const tt=min(t,bt(80)),e=tt/E8;cam.H=4.5;cam.c=[0,.2,0];cam.sh=1;
-const Ms=ch(Ry(tick(e,2.5)*PI/28),Rx(.38),Sm(3.3));put(4,Ms,[1,1,1],4);RV=ss(bt(68),bt(68,5),t);
-const u=4*PI*ss(0,1,cl((tick((tt-bt(68,4))/E8,2)/58)));PT=u/(4*PI);STR=tick(e,2);
+const u=4*PI*ss(0,1,cl((tick((tt-bt(68,4))/E8,2)/58))),al=PI*1.25-PI*ss(1.6*PI,2.4*PI,u);PT=u/(4*PI);STR=tick(e,2);
+const Ms=ch(Ry(PI/4),Rx(.12),Ry(-PI/4),Ry(u-al),Sm(3.3));put(4,Ms,[1,1,1],4);RV=ss(bt(68),bt(68,5),t);
 const P=[cos(u),0,sin(u)],du=[-sin(u),0,cos(u)],dv=[cos(u/2)*cos(u),sin(u/2),cos(u/2)*sin(u)],N=nm(cr(du,dv)),Tt=nm(du),B=cr(Tt,N);
-pawn(ch(Ms,basis(Tt,N,B,ad(P,sc(N,.012))),Sm(.15)),RED,1-.2*abs(sin(PI*e)));
+pawn(ch(Ms,basis(Tt,N,B,ad(P,sc(N,.012))),Sm(.24)),RED,1-.2*abs(sin(PI*e)));
 for(let i=0;i<16;i++){const v=i/16*4*PI+tick(e,2)*PI/24,du=[-sin(v),0,cos(v)],dv=[cos(v/2)*cos(v),sin(v/2),cos(v/2)*sin(v)],n=nm(cr(du,dv)),tt=nm(du),q=ad([cos(v),0,sin(v)],sc(n,.045)),sv=.2*(i%2?1:-1);
 put(0,ch(Ms,basis(tt,n,cr(tt,n),ad(q,sc(dv,sv))),Sm(.07)),CAN[i%8])}
-for(let i=0;i<5;i++){const a=i/5*2*PI+tick(e/2,2)*PI/10,p=[cos(a)*5.6,sin(a*2+e*.1)*.6-.5,sin(a)*5.6];put([0,1,3,2,0][i],ch(Tv(p),Ry(tick(e,2)*PI/4),Sm(.5)),CAN[i+3],i?1:0)}}
+}
 function level(j){const P=[],ty=j%4,c=k=>CAN[(k+j*3)%8];
-if(ty==0)ST.forEach((p,k)=>{const q=sc(sb(p,STC),.55);P.push({me:0,p:[q[0],q[1]-1.4,q[2]],s:[.9,2.8,.9],c:c(floor(k/3)),f:5})});
+if(ty==0)ST.forEach((p,k)=>{const q=sc(sb(p,STC),.55);P.push({me:0,p:[q[0],q[1]-1.43,q[2]],s:[.715,2.75,.715],c:pas(c(0),.78),f:5},{me:0,p:[q[0],q[1]-.04,q[2]],s:[.726,.077,.726],c:c(k&1)})});
 else if(ty==1){const T=TRI(4),m=mean(T);T.forEach((p,i)=>P.push({me:0,p:sc(sb(p,m),.85),s:[.85,.85,.85],c:c(floor(i/4)),l:i<3?1:i>9?2:0}))}
 else if(ty==3)P.push({me:4,p:[0,0,0],s:[2.4,2.4,2.4],c:[1,1,1],f:4});
 return P}
@@ -358,18 +341,18 @@ function sTower(t){const e=t/E8,t0=bt(82),lt=t-t0;cam.sh=1;cam.H=6.6;cam.gr=.5;
 const vy=lt*1.9;cam.c=[0,vy,0];
 cam.r=bk((t-bt(87))/(1.2*7*E8))*PI-bk((t-bt(98))/(1.2*7*E8))*PI;
 let k=0,tau=0;for(let b=84;b<102;b+=2){const ta=bt(b);if(t>=ta){const q=(t-ta)/(3*E8);if(q<1){tau=q;break}k++}}
-cam.y=Y45+(k+(tau?bk(tau):0))*PI/2;cam.m=tau==0;
+const cy=tau?ss(0,.7,tau):0;cam.y=Y45+(k+cy)*PI/2;cam.m=!tau||cy==1;
 const j0=max(0,floor((vy-16)/7)),j1=floor((vy+16)/7);
 PT=fr(t/9);STR=tick(e,2);RV=1;for(let j=j0;j<=j1;j++){const y=j*7,ty=j%4,P=level(j);
 if(ty==2){gear(P,[-1.2,0,.6],1.2,tick(e,2)*PI/8,CAN[(j+2)%8]);gear(P,[1.2,0,-.6],1.2,-tick(e,2)*PI/8+PI/8,CAN[(j+5)%8]);gear(P,[0,1.6,0],.8,tick(e/2,2)*PI/4,CAN[(j+1)%8])}
-P.forEach(q=>q.p=ad(q.p,[0,y,0]));cons(P,[0,y,0],k,tau,cam.m);
+P.forEach(q=>q.p=ad(q.p,[0,y,0]));cons(P,[0,y,0],ty<2?k:0,ty<2?tau:0,cam.m);
 if(ty==0){const a=(k+(tau?ss(0,1,tau):0))*PI/2;[[RED,0],[MINT,12]].forEach(([c,o])=>{const[p,sq]=stairPos(tick(e+j*5,1.4)+o),q=ryv(sc(sb(p,STC),.55),a);pawn(ch(Tm(q[0],q[1]+y,q[2]),Sm(.55)),c,sq);
 if(!o&&t>bt(91)&&t<bt(94)&&abs(q[1]+y-vy)<5)TAGS.push([[q[0],q[1]+y+1.1,q[2]],'SLOT A'])})}
 if(j==j0)towerExtra(t,vy,k,tau);
-if(ty==2)[[-1.2,.6],[1.2,-.6]].forEach(([x,z],i)=>{const q=ryv([x,0,z],(k+(tau?ss(0,1,tau):0))*PI/2);pawn(ch(Tm(q[0],y+.3+.3*abs(sin(PI*(e+i))),q[2]),Sm(.6)),i?LEM:PINK)})}}
+if(ty==2)[[-1.2,.6],[1.2,-.6]].forEach(([x,z],i)=>{const q=[x,0,z];pawn(ch(Tm(q[0],y+.3+.3*abs(sin(PI*(e+i))),q[2]),Sm(.6)),i?LEM:PINK)})}}
 function towerExtra(t,vy,k,tau){const e=t/E8,n=floor(ss(bt(94),bt(97),t)*6.99);
 for(let m=0;m<n;m++){const y=vy+(m%3-1)*4.2,P=TRI(3).map((p,i)=>({me:0,p:ad(sc(p,.4),[(m%2?3.6:-5.2),y-.6,(m%2?-5.2:3.6)]),s:[.4,.4,.4],c:CAN[(m*3+floor(i/3))%8],l:i<3?1:i>6?2:0}));cons(P,[0,y,0],k,tau,cam.m)}
-for(let i=0;i<40;i++){const y=vy+16-fr(hs(i)+vy/32)*32,a=hs(i*3)*7;put(0,ch(Tm(cos(a)*(6+hs(i+9)*4),y,sin(a)*(6+hs(i+9)*4)),Ry(e*.3+i),Rx(tick(e/2+i/7)*PI/2),Sm(.36,.04,.36)),CAN[i%8],1)}}
+}
 const SCN=[sBox,sBox,sStairs,sTri,sRoom,sNeck,sMob,sMob,sTower,sBack];
 const TITLES=['','OPEN THE BOX','BUILD A STAIRCASE','JOIN THE CORNERS','CHOOSE A DOWN','LOOK AT THE CUBE','PAINT THE RIBBON','','CLIMB','PUT IT ALL BACK'];
 let W=0,H=0,DPR=1;
@@ -384,13 +367,13 @@ function frame(t){resize();GR=[...Array(15)].map(()=>[]);TAGS=[];CLK=[];RV=1;cam
 const b=barAt(max(t,0)),s=SI[b];SCN[s](max(t,0));
 const asp=W/H,d=[cos(cam.p)*sin(cam.y),sin(cam.p),cos(cam.p)*cos(cam.y)],V=look(ad(cam.c,sc(d,90)),cam.c,[0,1,0]);
 const hh=cam.H*max(1,.75/asp*1.6),VP=ch(ortho(-hh*asp,hh*asp,-hh*1.12,hh*.88,1,260),Rz(cam.r),V);
-const LM=ch(ortho(-24,24,-24,24,1,160),look(ad(cam.c,sc(LD,70)),cam.c,[0,1,0]));
+const ldv=ryv(LD,cam.y-Y45),LM=ch(ortho(-24,24,-24,24,1,160),look(ad(cam.c,sc(ldv,70)),cam.c,[0,1,0]));
 const draw=drawGroups(0,cam.m?1:0);
 if(cam.sh){gl.bindFramebuffer(gl.FRAMEBUFFER,SFB);gl.viewport(0,0,SMS,SMS);gl.clear(gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.useProgram(PS);gl.uniformMatrix4fv(US.L,false,LM);draw(0);gl.bindFramebuffer(gl.FRAMEBUFFER,null)}
 gl.viewport(0,0,W,H);gl.clearColor(...PAPER,1);gl.clearStencil(0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|gl.STENCIL_BUFFER_BIT);
 gl.disable(gl.DEPTH_TEST);gl.useProgram(PB);gl.uniform3fv(UB.bg,PAPER);gl.uniform2f(UB.rs,W,H);gl.uniform1f(UB.gr,cam.gr);gl.bindVertexArray(EVAO);gl.drawArrays(gl.TRIANGLES,0,3);
 gl.enable(gl.DEPTH_TEST);gl.useProgram(PM);gl.uniformMatrix4fv(UM.V,false,VP);gl.uniformMatrix4fv(UM.L,false,LM);gl.uniform3fv(UM.vd,d);gl.uniform1f(UM.mg,cam.m?1:0);
-gl.uniform3fv(UM.ld,LD);gl.uniform3fv(UM.bg,PAPER);gl.uniform1f(UM.px,2*hh/H);gl.uniform1f(UM.pt,PT);gl.uniform1f(UM.st,STR);gl.uniform1f(UM.rv,RV);gl.uniform1f(UM.sh,cam.sh);
+gl.uniform3fv(UM.ld,ldv);gl.uniform3fv(UM.bg,PAPER);gl.uniform1f(UM.px,2*hh/H);gl.uniform1f(UM.pt,PT);gl.uniform1f(UM.st,STR);gl.uniform1f(UM.rv,RV);gl.uniform1f(UM.sh,cam.sh);
 gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,STX);gl.uniform1i(UM.sm,0);draw(1);
 overlay(t,b,s,VP)}
 const FONT='"Avenir Next",Futura,"Century Gothic","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
@@ -420,16 +403,16 @@ const st=['','1','2','3','4','5','6','6½','7','8'][s];
 if(s&&t<bt(111,4)){X.textAlign='left';const a=ss(BS[SB[s]],BS[SB[s]]+.3,t);X.globalAlpha=a;font(2.2*u,800);X.fillStyle=css(COB);X.fillText('STEP '+st+(TITLES[s]?'  ·  '+TITLES[s]:''),4*u,5*u);
 for(let i=0;i<8;i++){X.fillStyle=i<parseInt(st)?css(CAN[i]):'rgba(31,39,71,.15)';rr(4*u+i*3*u,8*u,2.2*u,2.2*u,.5*u);X.fill()}X.globalAlpha=1}
 const L=SONG.LINES;let li=-1;for(let i=0;i<L.length;i++)if(L[i].t<=t+.05)li=i;
-if(li>=0){const l=L[li],nx=L[li+1]?L[li+1].t:1e9,a=min(ss(l.t-.05,l.t+.15,t),1-ss(min(nx-.2,l.end+2.2),min(nx,l.end+2.6),t));
+if(li>=0){const l=L[li],nx=L[li+1]?L[li+1].t:1e9,sv=LIVE[li],te=!TTS?l.end:sv&&sv.done?sv.te:t+1,a=min(ss(l.t-.05,l.t+.15,t),1-ss(min(nx-.2,te+2.2),min(nx,te+2.6),t));
 if(a>0){const fs=3.3*u,pad=2.4*u,maxw=min(w*.84,95*u);font(fs,700);const sp=X.measureText(' ').width;
 let lines=[[]],lw=0,bw=7*u;for(const wd of l.words){const ww=X.measureText(wd.w).width;if(lw+ww>maxw-bw-2*pad&&lines[lines.length-1].length){lines.push([]);lw=0}lines[lines.length-1].push([wd,ww,lw]);lw+=ww+sp}
 const cw=min(maxw,max(...lines.map(r=>{const z=r[r.length-1];return z[2]+z[1]}))+bw+2*pad),chh=lines.length*fs*1.35+2*pad,cx=w/2-cw/2,cy=h-chh-5*u+(1-a)*3*u;
 X.globalAlpha=a;card(cx,cy,cw,chh,1.6*u,s==8?pas(PINK,.3):pas(COB,.25));
 const bx=cx+pad+2.6*u,by=cy+chh/2;X.fillStyle=css(s==8?PINK:COB);X.beginPath();X.arc(bx,by,2.8*u,0,7);X.fill();
 let bd=st||'★';if(s==8)bd=['7','8','7','A','∞','7½'][floor(t/E8/7)%6];font(2.6*u,800);X.textAlign='center';X.fillStyle='#fff';X.fillText(bd,bx,by+.1*u);
-font(fs,700);X.textAlign='left';let cur=-1;l.words.forEach((wd,i)=>{if(wd.t<=t)cur=i});
+font(fs,700);X.textAlign='left';const cur=curWord(li,t),talking=TTS?sv&&!sv.done:t<l.end+.1;
 lines.forEach((r,ri)=>r.forEach(([wd,ww,x0])=>{const i=l.words.indexOf(wd),x=cx+pad+bw+x0,y=cy+pad+fs*.68+ri*fs*1.35;
-if(i==cur&&t<l.end+.1){X.fillStyle=css(pas(PINK,.45));rr(x-.4*u,y-fs*.62,ww+.8*u,fs*1.24,.6*u);X.fill()}
+if(i==cur&&talking){X.fillStyle=css(pas(PINK,.45));rr(x-.4*u,y-fs*.62,ww+.8*u,fs*1.24,.6*u);X.fill()}
 X.fillStyle=i<=cur?css(INK):'#b4b7c6';let dx=0;if(l.g&&i==cur)dx=(hs(floor(t*30)+i)-.5)*l.g*1.2*u;X.fillText(wd.w,x+dx,y)}));X.globalAlpha=1}}
 if(s==7){const k=ss(bt(80),bt(81),t);X.setLineDash([1.2*u,1.2*u]);X.lineWidth=.5*u;X.strokeStyle=css(INK);X.beginPath();X.moveTo(0,h*.92);X.lineTo(w*k,h*.92-w*k*.55);X.stroke();X.setLineDash([]);
 font(5*u,400);X.save();X.translate(w*k,h*.92-w*k*.55);X.rotate(-.5);X.fillStyle=css(INK);X.fillText('✂',-2.5*u,0);X.restore()}
@@ -442,11 +425,37 @@ for(const k of[2,3,4,5,6,8,9]){const ts=BS[SB[k]],p=(t-ts)/.32;if(p<=-1||p>=1)co
 X.fillStyle=css(PAPER);X.strokeStyle=css(INK);X.lineWidth=.4*u;X.save();if(vert){const y=p<0?h*(1-e):0;X.fillRect(0,y,w,h*e);X.fillStyle=css(pas(COB,.6));X.fillRect(0,p<0?y:h*e-u,w,u)}
 else{const x=p<0?w*(1-e):0;X.fillRect(x,0,w*e,h);X.fillStyle=css(pas(PINK,.5));X.fillRect(p<0?x:w*e-u,0,u,h)}
 X.globalAlpha=e;font(14*u,800);X.textAlign='center';X.fillStyle=css(pas(COB,.75));X.fillText(['','','2','3','4','5','6','','7','8'][k],w/2,h/2);X.restore()}}
+const SS=window.speechSynthesis,SU=window.SpeechSynthesisUtterance,TTS=!!(SS&&SU&&!MUTE);let VOICE=null,SAID=0,ACT=[],LIVE=[],ENDED=0;
+function pickVoice(){const V=SS.getVoices(),en=V.filter(v=>/^en/i.test(v.lang));VOICE=null;
+for(const n of['Samantha','Google US English','Microsoft Aria','Microsoft Jenny','Karen','Moira','Tessa','Google UK English Female','Microsoft Zira','Serena'])if(!VOICE)VOICE=en.find(v=>v.name.includes(n));
+VOICE=VOICE||en.find(v=>v.localService)||en[0]||null}
+const PLAN=SONG.LINES.map((L,li)=>{const Rn=k=>hs(li*13.7+k),W=L.words,g=L.g,C=[];let a=0;
+W.forEach((w,i)=>{if(i==W.length-1||/-$/.test(w.w)||g&&/[.,?!]$/.test(w.w)||g>.2&&Rn(i)<g*.5){C.push({a,b:i+1});a=i+1}});
+C.forEach((c,j)=>{c.p=cl(1.3+(g?(Rn(j+40)-.5)*g*2.2:0),.3,2);c.r=cl(1.02+(g?(Rn(j+70)-.5)*g:0),.55,1.7)});
+if(g>=.45)C.unshift({a:0,b:min(2,W.length),p:1.3,r:1.02,cut:.35+Rn(9)*.25});
+if(g>=.55)C.splice(2,0,{...C[1]});
+return C});
+function sayFrom(li,j0){const L=SONG.LINES[li],P=PLAN[li],st=LIVE[li];
+for(let j=j0;j<P.length;j++){const c=P[j],ws=L.words.slice(c.a,c.b).map(w=>w.w.replace(/-$/,'')),u=new SU(ws.join(' ')),off=[];let o=0;ws.forEach(w=>{off.push(o);o+=w.length+1});
+if(VOICE){u.voice=VOICE;u.lang=VOICE.lang}else u.lang='en-US';u.pitch=c.p;u.rate=c.r;
+u.onstart=()=>{if(LIVE[li]!=st)return;st.c=c;st.cs=now();st.off=off;st.bd=0;st.w=c.a;song&&song.duck(.55);if(c.cut)ACT.push([st.cs+c.cut,()=>{if(LIVE[li]==st){SS.cancel();sayFrom(li,j+1)}}])};
+u.onboundary=e=>{if(LIVE[li]!=st||e.name&&e.name!='word')return;let k=0;off.forEach((x,i)=>{if(e.charIndex>=x)k=i});st.bd=1;st.w=c.a+k};
+u.onend=u.onerror=()=>{if(LIVE[li]==st&&j==P.length-1){st.done=1;st.te=now();song&&song.duck(1)}};
+SS.speak(u);if(c.cut)break}}
+function curWord(li,t){const L=SONG.LINES[li];let k=-1;if(!TTS){L.words.forEach((w,i)=>{if(w.t<=t)k=i});return k}
+const st=LIVE[li];if(!st||!st.c)return-1;if(st.done)return L.words.length-1;if(st.bd)return st.w;
+const ch=(t-st.cs)*st.c.r/.068;st.off.forEach((x,i)=>{if(ch>=x)k=i});return min(st.c.a+max(k,0),st.c.b-1)}
+function speech(t){
+while(SAID<SONG.LINES.length&&SONG.LINES[SAID].t<=t+.05){const L=SONG.LINES[SAID];if(L.t>t-1){SS.cancel();ACT=[];LIVE[SAID]={};song&&song.duck(1);sayFrom(SAID,0)}SAID++}
+ACT=ACT.filter(([at,f])=>at>t||f());
+if(t>SONG.LEN-3&&!ENDED){ENDED=1;SS.cancel();song&&song.duck(1)}}
+if(TTS){SS.cancel();addEventListener('pagehide',()=>SS.cancel());addEventListener('beforeunload',()=>SS.cancel())}
 let actx,song,p0,started=0;
 const now=()=>actx&&song?actx.currentTime-song.base:(performance.now()-p0)/1000+T0;
-function loop(){const t=started?now():0;frame(t);requestAnimationFrame(loop)}
+function loop(){const t=started?now():0;if(started&&TTS)speech(t);frame(t);requestAnimationFrame(loop)}
 p0=performance.now();loop();if(Q.has('scan'))window.__f=t=>{frame(t);return GR.reduce((a,g)=>a+g.length,0)};
 S.onclick=async()=>{if(started)return;S.style.display='none';
+if(TTS){pickVoice();SS.onvoiceschanged=pickVoice;const u=new SU(' ');u.volume=0;SS.speak(u)}
 if(!MUTE){try{actx=new AudioContext();await actx.resume();song=SONG.live(actx,T0)}catch(e){actx=0}}
 p0=performance.now();started=1};
 })();</script>

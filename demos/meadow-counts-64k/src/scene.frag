@@ -54,23 +54,23 @@ float kid(vec3 p,float ph,float s){p/=s;float w=sin(ph)*.14;
  return min(d,cap(p,vec3(.18*sign(p.x),.75,0),vec3(.42*sign(p.x),.6,0),.05))*s;}
 float mapM(vec3 p,out vec2 q){vec2 xy=p.xy-vec2(0,Rc);float r=length(xy);q=vec2(atan(xy.x,-xy.y)*Rc,p.z);float d=(Rc-hgt(q)-r)*.8;km=0.;
  // two children walking on the far side of the folded field, upside down
- if(Q.y>0.){vec3 k=vec3(-p.x,2.*Rc-p.y,p.z-Q.y);float kd=min(kid(k-vec3(.84,0,0),Q.z,2.),kid(k+vec3(.8,0,0),Q.z+2.,1.7));if(kd<d){d=kd;km=1.;}}
+ if(Q.y>0.){vec3 k=vec3(-p.x,2.*Rc-p.y,p.z-Q.y);float kd=min(kid(k-vec3(1.7,0,0),Q.z,4.),kid(k+vec3(1.6,0,0),Q.z+2.,3.4));if(kd<d){d=kd;km=1.;}}
  return d;}
-vec2 box(vec3 ro,vec3 rd,vec3 c,vec3 h,out vec3 n){vec3 m=1./rd,k=abs(m)*h,o=-m*(ro-c),t1=o-k,t2=o+k;
+vec2 box(vec3 ro,vec3 rd,vec3 c,vec3 h,out vec3 n){vec3 m=1./(rd+vec3(equal(rd,vec3(0)))*1e-7),k=abs(m)*h,o=-m*(ro-c),t1=o-k,t2=o+k;
  float tn=max(max(t1.x,t1.y),t1.z),tf=min(min(t2.x,t2.y),t2.z);n=-sign(rd)*step(t1.yzx,t1.xyz)*step(t1.zxy,t1.xyz);return vec2(tn,tn>tf||tf<0.?-1.:tf);}
 // the television in the field; its screen shows the previous frame, so it contains itself
 vec3 tv(vec3 ro,vec3 rd,vec3 p,vec3 n){vec3 l=p-vec3(0,.6,Q.x),c;
  vec2 s=(l.xy-vec2(-.225,0))/vec2(1.25,.86)+.5;
  if(n.z<-.5&&abs(s.x-.5)<.5&&abs(s.y-.5)<.5){vec2 v=s-.5;float cr=length(max(abs(v)-.44,0.));
   vec2 w=v*(1.-.12*dot(v,v))+.5;
-  c=textureLod(F,w,1.2).rgb*vec3(.86,1.,.92)*.93*(.82+.18*sin(w.y*900.))*ss(.06,.0,cr)*(1.-.6*dot(v,v));
+  c=textureLod(F,w,1.2).rgb*vec3(.86,1.,.92)*.93*(.88+.12*sin(w.y*400.)*ss(.5,.1,fwidth(w.y)*400.))*ss(.06,.0,cr)*(1.-.6*dot(v,v));
   c+=sky(reflect(rd,normalize(vec3(v*.4,-1))))*.07+.012;
  }else{float gr=.5+.5*sin(l.x*60.+fbm(l.xy*vec2(3.,20.))*6.);
   vec3 al=mix(vec3(.24,.12,.06),vec3(.38,.21,.1),gr);
   if(n.z<-.5){vec2 kp=l.xy-vec2(.66,.27);float kn=min(length(kp),length(kp-vec2(0,-.3)));
    al=mix(al,vec3(.6,.55,.45),ss(.1,.08,kn));if(abs(l.x-.66)<.2&&l.y<-.25&&l.y>-.5)al*=.6+.4*step(.5,fract(l.y*30.));
-   if(abs(s.x-.5)<.54&&abs(s.y-.5)<.55)al=vec3(.04);}
-  c=al*(H2*max(dot(n,D),0.)*1.3+H1*.5+H0*.1);c+=H2*pow(1.-abs(dot(n,rd)),3.)*.2;}
+   if(abs(s.x-.5)<.54&&abs(s.y-.5)<.55)al=vec3(.1,.08,.06);}
+  c=al*(H2*max(dot(n,D),0.)*1.3+H1*.5+H0*.1);c+=H2*pow(max(1.-abs(dot(n,rd)),0.),3.)*.2;}
  return c;}
 vec3 meadow(vec3 ro,vec3 rd){
  Rc=P.x;float t=.05,d;vec2 q;bool hit=false;
@@ -81,7 +81,7 @@ vec3 meadow(vec3 ro,vec3 rd){
  if(!hit)return sky(rd);
  vec3 p=ro+rd*t;vec2 e=vec2(.004*t+.02,0),qq;mapM(p,q);float kk=km;
  vec3 n=normalize(vec3(mapM(p+e.xyy,qq)-mapM(p-e.xyy,qq),mapM(p+e.yxy,qq)-mapM(p-e.yxy,qq),mapM(p+e.yyx,qq)-mapM(p-e.yyx,qq)));
- if(kk>.5)return mix(vec3(.09,.07,.065)*(H1+H2*.4)+H2*.25*pow(1.-abs(dot(n,rd)),2.),fc,1.-exp(-t*.0065));
+ if(kk>.5)return mix(vec3(.09,.07,.065)*(H1+H2*.4)+H2*.25*pow(max(1.-abs(dot(n,rd)),0.),2.),fc,1.-exp(-t*.0065));
  vec3 up=normalize(vec3(-p.x,Rc-p.y,0.));
  float g=fbm(q*.13),g2=vn(q*2.7),g3=vn(q*vec2(9.,1.5));
  vec3 al=mix(vec3(.58,.44,.17),vec3(.3,.35,.17),ss(.35,.7,g));
@@ -99,37 +99,40 @@ vec3 meadow(vec3 ro,vec3 rd){
  float dif=max(dot(n,D)*.6+.4,0.),amb=.5+.5*dot(n,up);
  vec3 c=al*(H2*dif*1.15+H1*.5*amb);
  c+=H2*al*pow(max(dot(rd,D),0.),3.)*(.4+.6*g2)*.9;
- return mix(c,fc,1.-exp(-t*.0065));}
-// ---------------- seed head zoom (2D, self-similar) ----------------
+ return mix(c,fc,1.-exp(-t*.0065*(1.-.65*P.y)));}
+// ---------------- seed head zoom (2D, exactly self-similar) ----------------
+// Every head is 256 Vogel seeds (r=sqrt n, golden angle) out to r=16, a petal ring to 20, dark backing beyond.
+// Every seed is a small flower: disc of florets to .7, petal ring to .87 (= 16/20 and 20/20 of a head, scaled by 1/23).
+// Seed K=21 holds a real head scaled by A = e^(i PH)/23; the camera zooms out about the fixed point of that map.
+vec2 cm(vec2 a,vec2 b){return vec2(a.x*b.x-a.y*b.y,a.x*b.y+a.y*b.x);}
+vec2 cdv(vec2 a,vec2 b){return cm(a,vec2(b.x,-b.y))/dot(b,b);}
+const vec3 PT=vec3(.95,.66,.2),BK=vec3(.1,.12,.08);
+// petal ring + backing, x = radius in disc units (petals .8..1), a = angle
+vec3 ring(float x,float a){float w=abs(fract(a/6.2832*34.)-.5)*2.,rr=(x-.8)*5.;
+ return mix(BK,PT*(.8+.2*cos(w*3.)),ss(.08,0.,w-(1.-rr*rr)*.92)*step(rr,1.));}
 vec3 seeds(vec2 uv){
- float lv=L/10.5,u=fract(lv);
- vec2 p=rot(.62*(u-2.))*uv*26.*pow(40.,u-1.)/40.;
- vec3 L2=normalize(vec3(-.5,.6,.65));
- vec3 c=vec3(0);float dep=0.;
- for(int l=0;l<4;l++){
-  float r=length(p);
-  if(r<.5){p=rot(.62)*p*40.;r=length(p);dep++;
-   if(r>16.){ // petal ring of a head
-    float a=atan(p.y,p.x),rr=(r-16.)/4.6;
-    float f=fract(a/6.2832*34.),f2=fract(a/6.2832*34.+.5),w=abs(f-.5)*2.,w2=abs(f2-.5)*2.;
-    float pm=ss(.05,0.,w-(1.-rr*rr)*.92),pm2=ss(.05,0.,w2-(1.-rr*rr*.8)*.85)*ss(1.05,.9,rr);
-    vec3 back=vec3(.1,.18,.17)*(1.-rr*.5);
-    vec3 pt=vec3(.95,.66,.2)*(.75+.25*cos(w*3.))*(.8+.2*vn(vec2(a*40.,r*3.)));
-    c=mix(back,pt*.8,pm2);c=mix(c,pt,pm*step(rr,1.));c*=.6+.4*ss(1.,.0,rr);
-    break;}
-   continue;}
-  vec4 v=vogel(p);float bn=v.z,e=v.y;vec2 bl=p-sqrt(bn)*vec2(cos(bn*2.39996),sin(bn*2.39996));float sr=sqrt(bn)/16.;
-  float dome=ss(0.,.45,e);vec3 n=normalize(vec3(bl*1.8*(1.-dome*.3),.6+dome));
-  float spi=.5+.5*sin(atan(bl.y,bl.x)*3.+length(bl)*16.);
-  vec3 al=mix(vec3(.4,.22,.09),vec3(.85,.6,.2),ss(.15,.95,sr))*(.8+.4*h1(vec2(bn,dep)));
-  al*=.85+.25*spi;
-  c=al*(max(dot(n,L2),0.)*1.4+.35)+pow(max(dot(reflect(-L2,n),vec3(0,0,1)),0.),12.)*.25*vec3(1,.8,.5);
-  c*=ss(0.,.12,e)*.7+.3;
-  if(r>16.5)c=mix(vec3(.08,.14,.13),vec3(.2,.26,.18),vn(p*.3)); // outside the outermost head (never on screen)
-  break;}
- return c*(1.25-.3*dot(uv,uv))+H2*.06;}
+ float u=fract(L/10.5),e=2.-u,SS=23.,PH=.7,K=21.;
+ vec2 A=vec2(cos(PH),sin(PH))/SS,cK=sqrt(K)*vec2(cos(K*2.39996),sin(K*2.39996)),zs=cdv(cK,vec2(1,0)-A);
+ vec2 z=zs+cm(vec2(cos(PH*e),sin(PH*e))*pow(SS,-e),uv*24.);
+ float px=48./R.y*pow(SS,-e);
+ // average colour of a whole head (= of one seed) seen from far away; solves avg=.485*avg+.163*PT+.352*BK
+ vec3 L2=normalize(vec3(-.5,.6,.65)),av=(.163*PT+.352*BK)/.515,ac=vec3(0),c=av,m=vec3(1);float b=1.;
+ for(int l=0;l<5;l++){
+  float r=length(z);
+  if(r>16.){c=ring(r/20.,atan(z.y,z.x));break;}
+  vec4 v=vogel(z);float n=v.z;vec2 d=z-sqrt(n)*vec2(cos(n*2.39996),sin(n*2.39996));float dl=length(d)/.87;
+  if(dl>=1.){c=BK;break;}
+  // every seed is a whole head, lit as one dome and tinted by its place in the parent head
+  vec3 nn=normalize(vec3(d/.87*1.3,1.-dl*.5));
+  m*=(max(dot(nn,L2),0.)*1.15+.3)*ss(1.,.9,dl)*(.75+.5*ss(.1,1.,sqrt(n)/16.))*(.85+.3*h1(vec2(n,7.)));
+  // fade to the flat average once a seed is a few pixels across; c = ac + b*(deeper)
+  float w=ss(1.5,4.,1.9/px);ac+=b*(1.-w)*m*av;b*=w;c=av;
+  if(w<=0.)break;
+  z=cdv(d,A);px*=SS;}
+ c=ac+b*m*c;
+ return c*max(1.6-.25*dot(uv,uv),0.)+H2*.05;}
 // ---------------- basalt columns ----------------
-float HC(vec2 id){float h=fbm(id*.11+3.,3)*4.4-1.2+h1(id)*.5;return clamp(floor(h*3.)/3.,-1.,3.2);}
+float HC(vec2 id){float h=fbm(id*.11+3.,3)*4.4-.8+h1(id)*.5;return clamp(floor(h*3.)/3.,-1.,3.2);}
 const float SC=1.7,WL=.35;
 // P.x: 0 = a plain of honeycomb, 1 = the stones have risen out of it
 float CH(vec2 id){return max(mix(.45,HC(id),P.x),WL);}
@@ -145,14 +148,14 @@ vec3 basalt(vec3 ro,vec3 rd){
  if(h.w<0.)return sky(rd);
  vec3 p=h.xyz;float m=P.x,raw=HC(hc.xy),hh=CH(hc.xy);bool top=hh-p.y<.012;
  vec2 g=hc.zw,e=vec2(.002,0);
- vec2 gn=normalize(vec2(hx(g+e)-hx(g-e),hx(g+e.yx)-hx(g-e.yx)));
+ vec2 gn=vec2(hx(g+e)-hx(g-e),hx(g+e.yx)-hx(g-e.yx));gn/=max(length(gn),1e-6);
  vec3 n=top?vec3(0,1,0):vec3(gn.x,0,gn.y);
  vec3 c;
  float sh=1.;{vec4 h2;vec4 s=cells(p+n*.02+vec3(0,.01,0),D,32,h2);if(s.w>0.)sh=.25;}
  float dif=max(dot(n,D),0.)*sh;
  if(top&&(raw<WL&&m>.5||hx(hc.zw)<.42*(1.-m))){ // pools of warm honey-light between the stones
-  vec3 rf=reflect(rd,n);float fr=pow(1.-max(-rd.y,0.),4.);
-  c=vec3(1.,.5,.13)*(.55+.25*vn(p.xz*3.+T*.3))+sky(rf)*(.25+.6*fr);
+  vec3 rf=reflect(rd,n);float fr=pow(max(1.+min(rd.y,0.),0.),4.);
+  c=vec3(1.,.55,.15)*(.9+.35*vn(p.xz*3.+T*.3))+sky(rf)*(.25+.6*fr);
  }else{
   float lich=ss(.5,.78,fbm(p.xz*.6+hc.xy));
   vec3 al=top?mix(vec3(.3,.26,.21),vec3(.62,.47,.18),lich):vec3(.16,.14,.13)*(.8+.4*vn(vec2(p.y*6.,atan(g.y,g.x)*3.)));
@@ -162,8 +165,8 @@ vec3 basalt(vec3 ro,vec3 rd){
   c=al*(H2*dif*1.5+H1*.45*ao+H0*.12);}
  float t=h.w;
  vec3 fc=mix(H0,H2,pow(max(dot(rd,D),0.),5.)*.5);
- c=mix(c,fc,1.-exp(-t*.011));
- c=mix(c,fc*1.05,ss(1.2,-.4,p.y)*.35*ss(5.,30.,t)); // low mist
+ c=mix(c,fc,1.-exp(-t*.0055));
+ c=mix(c,fc*1.05,ss(1.2,-.4,p.y)*.15*ss(5.,30.,t)); // low mist
  return c;}
 // ---------------- the poles that grow with distance ----------------
 const float KP=55.,DP=28.,XP=-4.5;
@@ -208,7 +211,7 @@ vec3 field(vec3 ro,vec3 rd){
 // ---------------- film leader ----------------
 vec3 leader(vec2 uv){float r=length(uv);
  vec3 c=vec3(.55,.48,.37)*(.75+.25*ss(1.3,0.,r));
- if(atan(uv.x,uv.y)/6.2832+.5<P.x)c*=.72;
+ if(atan(uv.x,uv.y+1e-7)/6.2832+.5<P.x)c*=.72;
  float l=ss(.01,0.,abs(r-.62))+ss(.01,0.,abs(r-.74))+ss(.006,0.,abs(uv.x))+ss(.006,0.,abs(uv.y));
  return mix(c,vec3(.08,.07,.06),min(l,1.)*.85)*P.y;}
 vec3 grass(vec3 c,vec2 uv){
