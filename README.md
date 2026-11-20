@@ -11,7 +11,9 @@ Locally:
 ```bash
 python3 -m http.server 8000      # from this folder
 ```
-Open http://localhost:8000. The page lists every demo with a play button and an "open in own window" link (use that for fullscreen). You can also open any `demos/*/dist/*.html` directly and click to start.
+Open http://localhost:8000. The page shows every demo as a thumbnail, and you can filter by size budget (16k, 64k) and by the model that built it. Clicking a thumbnail loads that demo. Only one demo runs at a time, so only one WebGL context is ever open. Each card has a fullscreen button, and on phones and tablets a demo opens fullscreen on its own. On iPhone, which has no fullscreen API, it fills the viewport instead. You can also open any `demos/*/dist/*.html` directly and click to start.
+
+Thumbnails are `demos/<folder>/thumb.png`, captured from each demo's start screen. To regenerate them after adding a demo to `index.html`, run `node tools/thumbs.mjs [folder]`. It needs Chrome and Node 22 or later.
 
 | Demo | Budget | Notes |
 |---|---|---|

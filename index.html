@@ -1,65 +1,122 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Demo Screening Room</title>
 <link rel=icon type="image/svg+xml" href="favicon.svg">
 <style>
-:root{--bg:#0c0a12;--card:#161320;--fg:#eee;--mut:#9a93ad;--acc:#ff71ce;--link:#7ff}
+:root{--bg:#0c0a12;--card:#161320;--fg:#eee;--mut:#9a93ad;--acc:#ff71ce;--link:#7ff;--line:#2a2438}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,system-ui,sans-serif;padding:24px 16px}
+body.lock{overflow:hidden}
 main{max-width:1500px;margin:0 auto}
-h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 24px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
-.card{background:var(--card);border-radius:8px;padding:12px}
+h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 16px}
+.filters{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin:0 0 20px;font-size:13px;color:var(--mut)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-left:6px}
+.seg button{background:none;border:0;color:var(--fg);font:inherit;padding:6px 12px;cursor:pointer;min-height:36px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--acc);color:#1a0d17;font-weight:600}
+#count{margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:16px}
+.card{background:var(--card);border-radius:8px;padding:12px}.card[hidden]{display:none}
 .card h2{font-size:16px;margin:0;color:var(--acc)}
-.meta{color:var(--mut);font-size:12px;margin:2px 0 8px}.meta a{color:var(--link)}
+.meta{color:var(--mut);font-size:12px;margin:2px 0 8px;display:flex;flex-wrap:wrap;gap:0 10px}
+.meta a,.meta button{color:var(--link);background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}
 .brief{font-size:13px;color:var(--mut);margin:8px 0 0}
 .stage{aspect-ratio:16/9;background:#000;border-radius:4px;overflow:hidden;position:relative}
-iframe{width:100%;height:100%;border:0}
-@media(max-width:480px){.grid{grid-template-columns:1fr}}
+.thumb{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
+.thumb[hidden]{display:none}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb::after{content:'';position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;
+ background:rgba(12,10,18,.72) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6.5v11l9-5.5z' fill='%23ff71ce'/%3E%3C/svg%3E") center/36px no-repeat;
+ box-shadow:0 0 0 2px rgba(255,113,206,.6);transition:transform .15s}
+.thumb:hover::after,.thumb:focus-visible::after{transform:scale(1.1)}
+.thumb:focus-visible{outline:2px solid var(--link);outline-offset:-2px}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.x{display:none;position:absolute;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));z-index:2;
+ width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:20px;cursor:pointer}
+.stage:fullscreen{border-radius:0}.stage:fullscreen .x,.stage.pfs .x{display:block}
+.stage.pfs{position:fixed;inset:0;z-index:99;width:100vw;height:100vh;height:100dvh;aspect-ratio:auto;border-radius:0}
 </style></head><body><main>
 <h1>Demo Screening Room</h1>
-<p class=s>Size-coded browser intros. Click a demo's screen to start it with sound; starting one resets the others. Open one in its own window for fullscreen.</p>
+<p class=s>Size-coded browser intros. Click a thumbnail to load that demo, then click its start screen to play with sound. Only one demo runs at a time. On phones and tablets a demo opens fullscreen.</p>
+<div class=filters>
+ <span>Size<span class=seg data-f=size><button data-v="">All</button><button data-v=16k>16k</button><button data-v=64k>64k</button></span></span>
+ <span>Built by<span class=seg data-f=agent><button data-v="">All</button><button data-v=opus-5.5-high>Opus 5.5 · high</button><button data-v=haiku-5.5-medium>Haiku 5.5 · medium</button></span></span>
+ <span id=count></span>
+</div>
 <div class=grid id=g></div>
 </main><script>
-// Add a demo: one line here. Paths are relative to this page.
+// Add a demo: one line here (title, shipped file, budget · size, brief). Paths are relative to this page.
+// The thumbnail is demos/<folder>/thumb.png (render it with: node tools/thumbs.mjs <folder>).
+// The agent comes from the file name's label: <name>.<model>-<effort>.html.
 const DEMOS=[
  ['ＶＡＰＯＲ ＭＡＬＬ','demos/vapor-mall/dist/vapor-mall.opus-5.5-high.html','64k · 45 KB','FPV flight through a vaporwave mall into the pocket of a smiling giant.'],
  ['Descensus','demos/descensus/dist/descensus.opus-5.5-high.html','64k · 30 KB','A slow descent into the deep sea: jellyfish, a whale, a sunken cathedral lit by an anglerfish.'],
  ['KAIJU','demos/kaiju-16k/dist/kaiju16k.opus-5.5-high.html','16k · 16 KB','Neon wireframe city at night, a tunnel run and a holographic KAIJU logo.'],
  ['Autumn Walk','demos/autumn-walk/dist/autumn-walk.opus-5.5-high.html','64k · 48 KB','A fox trots through an autumn forest to a cabin and a birthday cake for Mika.'],
- ['The Daily Flux','demos/daily-flux-16k/dist/the-daily-flux-16k.haiku-5.5-medium.html','16k · 13 KB · Haiku','Black-and-white 70s newspaper with headlines slamming in over muzak.'],
- ['ONE SECOND','demos/one-second-16k/dist/one-second-16k.haiku-5.5-medium.html','16k · 12 KB · Haiku','A marble bank lobby frozen mid-shootout. One second of time stretched across the piece, until it snaps.'],
- ['ONE SECOND','demos/one-second-64k/dist/one-second-64k.haiku-5.5-medium.html','64k · 30 KB · Haiku','A marble bank lobby frozen mid-shootout. One second of time stretched across the piece, until it snaps.'],
- ['INK & STEEL','demos/ink-and-steel-16k/dist/ink-and-steel-16k.haiku-5.5-medium.html','16k · 13 KB · Haiku','A rainy rooftop sword duel painted in sumi-e ink, with every clash splashing across the paper.'],
- ['INK & STEEL','demos/ink-and-steel-64k/dist/ink-and-steel-64k.haiku-5.5-medium.html','64k · 38 KB · Haiku','A rainy rooftop sword duel painted in sumi-e ink, with every clash splashing across the paper.'],
- ['RUST CONVOY','demos/rust-convoy-16k/dist/rust-convoy-16k.haiku-5.5-medium.html','16k · 12 KB · Haiku','War-rigs chase a fuel tanker across a salt flat at golden hour, ending in a canyon jump and fireball.'],
- ['RUST CONVOY','demos/rust-convoy-64k/dist/rust-convoy-64k.haiku-5.5-medium.html','64k · 28 KB · Haiku','War-rigs chase a fuel tanker across a salt flat at golden hour, ending in a canyon jump and fireball.'],
- ['TOY BOX WAR','demos/toy-box-war-16k/dist/toy-box-war-16k.haiku-5.5-medium.html','16k · 15 KB · Haiku','Plastic army men against stuffed animals on a bedroom floor, played straight as a war epic.'],
- ['TOY BOX WAR','demos/toy-box-war-64k/dist/toy-box-war-64k.haiku-5.5-medium.html','64k · 35 KB · Haiku','Plastic army men against stuffed animals on a bedroom floor, played straight as a war epic.'],
- ['SILENT FLEET','demos/silent-fleet-16k/dist/silent-fleet-16k.haiku-5.5-medium.html','16k · 13 KB · Haiku','Capital ships break apart silently above a gas giant, seen from one drifting escape pod.'],
- ['SILENT FLEET','demos/silent-fleet-64k/dist/silent-fleet-64k.haiku-5.5-medium.html','64k · 29 KB · Haiku','Capital ships break apart silently above a gas giant, seen from one drifting escape pod.'],
- ['KA-BOOM!','demos/ka-boom-16k/dist/ka-boom-16k.haiku-5.5-medium.html','16k · 14 KB · Haiku',"Pure kinetic typography: Swiss-poster words colliding to a 174 BPM drum'n'bass break."],
- ['KA-BOOM!','demos/ka-boom-64k/dist/ka-boom-64k.haiku-5.5-medium.html','64k · 26 KB · Haiku',"Pure kinetic typography: Swiss-poster words colliding to a 174 BPM drum'n'bass break."],
- ['DOMINO HOUSE','demos/domino-house-16k/dist/domino-house-16k.haiku-5.5-medium.html','16k · 9 KB · Haiku','One unbroken shot of a chain reaction through a pastel dollhouse, to a waltz that falls apart.'],
- ['DOMINO HOUSE','demos/domino-house-64k/dist/domino-house-64k.haiku-5.5-medium.html','64k · 35 KB · Haiku','One unbroken shot of a chain reaction through a pastel dollhouse, to a waltz that falls apart.'],
- ['THE TAPESTRY','demos/the-tapestry-16k/dist/the-tapestry-16k.haiku-5.5-medium.html','16k · 12 KB · Haiku','A medieval siege embroidered on a tapestry that comes alive, dragon fire burning through the cloth.'],
- ['THE TAPESTRY','demos/the-tapestry-64k/dist/the-tapestry-64k.haiku-5.5-medium.html','64k · 32 KB · Haiku','A medieval siege embroidered on a tapestry that comes alive, dragon fire burning through the cloth.'],
- ['TWISTER TAPE','demos/twister-tape-16k/dist/twister-tape-16k.haiku-5.5-medium.html','16k · 12 KB · Haiku','Recovered VHS footage of a tornado tearing through a plains town.'],
- ['TWISTER TAPE','demos/twister-tape-64k/dist/twister-tape-64k.haiku-5.5-medium.html','64k · 34 KB · Haiku','Recovered VHS footage of a tornado tearing through a plains town.'],
- ['INSERT COIN','demos/insert-coin-16k/dist/insert-coin-16k.haiku-5.5-medium.html','16k · 13 KB · Haiku','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.'],
- ['INSERT COIN','demos/insert-coin-64k/dist/insert-coin-64k.haiku-5.5-medium.html','64k · 58 KB · Haiku','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.']];
-const g=document.getElementById('g');
-// Browsers cap live WebGL contexts (~16 per page), so only demos near the viewport stay loaded.
-// A card that scrolls well away is unloaded, unless that demo is playing.
-const vis=new IntersectionObserver(es=>{for(const{target:f,isIntersecting:on}of es){
- const live=f.getAttribute('src')===f.dataset.src;
- if(on&&!live)f.src=f.dataset.src;else if(!on&&live&&!f.dataset.on)f.src='about:blank'}},{rootMargin:'300px 0px'});
-for(const[t,u,m,b]of DEMOS){const c=document.createElement('section');c.className='card';
- c.innerHTML=`<h2>${t}</h2><div class=meta>${m} · <a href="${u}" target=_blank>open in own window ↗</a></div>
- <div class=stage><iframe allow="autoplay; fullscreen" allowfullscreen data-src="${u}"></iframe></div><p class=brief>${b}</p>`;
- const f=c.querySelector('iframe');vis.observe(f);
- // one demo at a time: a click inside one reloads any other that has been started (back to its start screen)
- f.onload=()=>{try{f.contentWindow.addEventListener('pointerdown',()=>{
-  for(const o of document.querySelectorAll('iframe'))if(o!==f&&o.dataset.on){delete o.dataset.on;o.src=o.src}
-  f.dataset.on=1},true)}catch{}};
+ ['The Daily Flux','demos/daily-flux-16k/dist/the-daily-flux-16k.haiku-5.5-medium.html','16k · 13 KB','Black-and-white 70s newspaper with headlines slamming in over muzak.'],
+ ['ONE SECOND','demos/one-second-16k/dist/one-second-16k.haiku-5.5-medium.html','16k · 12 KB','A marble bank lobby frozen mid-shootout. One second of time stretched across the piece, until it snaps.'],
+ ['ONE SECOND','demos/one-second-64k/dist/one-second-64k.haiku-5.5-medium.html','64k · 30 KB','A marble bank lobby frozen mid-shootout. One second of time stretched across the piece, until it snaps.'],
+ ['INK & STEEL','demos/ink-and-steel-16k/dist/ink-and-steel-16k.haiku-5.5-medium.html','16k · 13 KB','A rainy rooftop sword duel painted in sumi-e ink, with every clash splashing across the paper.'],
+ ['INK & STEEL','demos/ink-and-steel-64k/dist/ink-and-steel-64k.haiku-5.5-medium.html','64k · 38 KB','A rainy rooftop sword duel painted in sumi-e ink, with every clash splashing across the paper.'],
+ ['RUST CONVOY','demos/rust-convoy-16k/dist/rust-convoy-16k.haiku-5.5-medium.html','16k · 12 KB','War-rigs chase a fuel tanker across a salt flat at golden hour, ending in a canyon jump and fireball.'],
+ ['RUST CONVOY','demos/rust-convoy-64k/dist/rust-convoy-64k.haiku-5.5-medium.html','64k · 28 KB','War-rigs chase a fuel tanker across a salt flat at golden hour, ending in a canyon jump and fireball.'],
+ ['TOY BOX WAR','demos/toy-box-war-16k/dist/toy-box-war-16k.haiku-5.5-medium.html','16k · 15 KB','Plastic army men against stuffed animals on a bedroom floor, played straight as a war epic.'],
+ ['TOY BOX WAR','demos/toy-box-war-64k/dist/toy-box-war-64k.haiku-5.5-medium.html','64k · 35 KB','Plastic army men against stuffed animals on a bedroom floor, played straight as a war epic.'],
+ ['SILENT FLEET','demos/silent-fleet-16k/dist/silent-fleet-16k.haiku-5.5-medium.html','16k · 13 KB','Capital ships break apart silently above a gas giant, seen from one drifting escape pod.'],
+ ['SILENT FLEET','demos/silent-fleet-64k/dist/silent-fleet-64k.haiku-5.5-medium.html','64k · 29 KB','Capital ships break apart silently above a gas giant, seen from one drifting escape pod.'],
+ ['KA-BOOM!','demos/ka-boom-16k/dist/ka-boom-16k.haiku-5.5-medium.html','16k · 14 KB',"Pure kinetic typography: Swiss-poster words colliding to a 174 BPM drum'n'bass break."],
+ ['KA-BOOM!','demos/ka-boom-64k/dist/ka-boom-64k.haiku-5.5-medium.html','64k · 26 KB',"Pure kinetic typography: Swiss-poster words colliding to a 174 BPM drum'n'bass break."],
+ ['DOMINO HOUSE','demos/domino-house-16k/dist/domino-house-16k.haiku-5.5-medium.html','16k · 9 KB','One unbroken shot of a chain reaction through a pastel dollhouse, to a waltz that falls apart.'],
+ ['DOMINO HOUSE','demos/domino-house-64k/dist/domino-house-64k.haiku-5.5-medium.html','64k · 35 KB','One unbroken shot of a chain reaction through a pastel dollhouse, to a waltz that falls apart.'],
+ ['THE TAPESTRY','demos/the-tapestry-16k/dist/the-tapestry-16k.haiku-5.5-medium.html','16k · 12 KB','A medieval siege embroidered on a tapestry that comes alive, dragon fire burning through the cloth.'],
+ ['THE TAPESTRY','demos/the-tapestry-64k/dist/the-tapestry-64k.haiku-5.5-medium.html','64k · 32 KB','A medieval siege embroidered on a tapestry that comes alive, dragon fire burning through the cloth.'],
+ ['TWISTER TAPE','demos/twister-tape-16k/dist/twister-tape-16k.haiku-5.5-medium.html','16k · 12 KB','Recovered VHS footage of a tornado tearing through a plains town.'],
+ ['TWISTER TAPE','demos/twister-tape-64k/dist/twister-tape-64k.haiku-5.5-medium.html','64k · 34 KB','Recovered VHS footage of a tornado tearing through a plains town.'],
+ ['INSERT COIN','demos/insert-coin-16k/dist/insert-coin-16k.haiku-5.5-medium.html','16k · 13 KB','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.'],
+ ['INSERT COIN','demos/insert-coin-64k/dist/insert-coin-64k.haiku-5.5-medium.html','64k · 58 KB','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.']];
+const AGENT={'opus-5.5-high':'Opus 5.5 · high','haiku-5.5-medium':'Haiku 5.5 · medium'};
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const g=document.getElementById('g'),touch=matchMedia('(pointer:coarse)').matches;
+let playing=null;
+
+// Only one demo is ever loaded, so only one WebGL context exists. Stopping a demo puts its thumbnail back.
+function stop(card){const st=card.querySelector('.stage');st.querySelector('iframe')?.remove();
+ st.querySelector('.thumb').hidden=false;if(playing===card)playing=null}
+function play(card,full){if(playing&&playing!==card)stop(playing);
+ const st=card.querySelector('.stage');if(!st.querySelector('iframe')){const f=document.createElement('iframe');
+  f.allow='autoplay; fullscreen';f.src=card.dataset.src;st.append(f);st.querySelector('.thumb').hidden=true;
+  f.onload=()=>{try{f.contentWindow.focus()}catch{}}}
+ playing=card;if(full||touch)enterFull(st)}
+
+// Fullscreen: the real Fullscreen API where it exists (desktop, Android, iPad), and a fixed full-viewport
+// overlay where it doesn't (iPhone Safari). Both show a close button.
+function enterFull(st){const req=st.requestFullscreen||st.webkitRequestFullscreen;
+ const pseudo=()=>{st.classList.add('pfs');document.body.classList.add('lock')};
+ if(!req)return pseudo();
+ try{const p=req.call(st);if(p&&p.then)p.then(()=>screen.orientation?.lock?.('landscape').catch(()=>{}),pseudo)}catch{pseudo()}}
+function exitFull(st){if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+ st.classList.remove('pfs');document.body.classList.remove('lock')}
+addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.pfs').forEach(exitFull)});
+
+for(const[t,u,m,b]of DEMOS){
+ const agent=(u.match(/\.([a-z]+-[\d.]+-[a-z]+)\.html$/)||[])[1]||'',size=m.split(' ')[0],thumb=u.split('/dist/')[0]+'/thumb.png';
+ const c=document.createElement('section');c.className='card';Object.assign(c.dataset,{src:u,size,agent});
+ c.innerHTML=`<h2>${esc(t)}</h2><div class=meta><span>${esc(m)} · ${AGENT[agent]||agent}</span>
+  <button class=fs type=button>⛶ fullscreen</button><a href="${u}" target=_blank>open in own window ↗</a></div>
+  <div class=stage><button class=thumb type=button aria-label="Play ${esc(t)} (${size})"><img src="${thumb}" alt="" loading=lazy width=640 height=360></button>
+  <button class=x type=button aria-label="Close fullscreen">✕</button></div><p class=brief>${esc(b)}</p>`;
+ const st=c.querySelector('.stage');
+ c.querySelector('.thumb').onclick=()=>play(c,false);
+ c.querySelector('.fs').onclick=()=>play(c,true);
+ c.querySelector('.x').onclick=()=>exitFull(st);
  g.append(c)}
+
+// Filters: size budget and the agent that built it, kept in the URL (?size=16k&agent=haiku-5.5-medium) so a view can be shared.
+const q=new URLSearchParams(location.search),F={size:q.get('size')||'',agent:q.get('agent')||''};
+function apply(){let n=0;for(const c of g.children){const on=(!F.size||c.dataset.size===F.size)&&(!F.agent||c.dataset.agent===F.agent);
+  c.hidden=!on;if(!on&&playing===c)stop(c);n+=on}
+ document.getElementById('count').textContent=`Showing ${n} of ${g.children.length}`;
+ for(const s of document.querySelectorAll('.seg'))for(const b of s.children)b.setAttribute('aria-pressed',b.dataset.v===F[s.dataset.f]);
+ const p=new URLSearchParams();for(const k in F)if(F[k])p.set(k,F[k]);const qs=p.toString();history.replaceState(null,'',qs?'?'+qs:location.pathname)}
+for(const s of document.querySelectorAll('.seg'))for(const b of s.children)b.onclick=()=>{F[s.dataset.f]=b.dataset.v;apply()};
+apply();
 </script></body></html>
