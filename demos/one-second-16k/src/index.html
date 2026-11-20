@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>ONE SECOND</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+canvas{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block;cursor:pointer}
+#n{position:fixed;left:18px;top:14px;font:600 12px/1 "Helvetica Neue",Arial,sans-serif;letter-spacing:.3em;color:#ccc;text-shadow:0 0 4px #000;pointer-events:none}
+#x{position:fixed;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:700 clamp(18px,4vw,34px)/1.2 "Helvetica Neue",Arial,sans-serif;letter-spacing:.2em;color:#fff;text-shadow:0 0 8px #000,0 0 3px #000;animation:b 1.2s steps(2) infinite;pointer-events:none}
+#tc{position:fixed;right:18px;bottom:14px;font:500 15px/1 ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;letter-spacing:.06em;color:#ddd;text-shadow:0 0 6px #000,0 0 2px #000;pointer-events:none}
+@keyframes b{50%{opacity:.2}}
+</style>
+</head>
+<body>
+<canvas id=c></canvas>
+<div id=n>ONE SECOND</div>
+<div id=x>CLICK TO RESUME TIME</div>
+<div id=tc>00:00.000</div>
+<script type=x-glsl id=s1>/*SCENE*/</script>
+<script type=x-glsl id=s2>/*POST*/</script>
+<script>/*MUSIC*/</script>
+<script>/*MAIN*/</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>TOY BOX WAR</title><style>
+*{margin:0}body{background:#0b0806;overflow:hidden;color:#f3e6cf;font-family:"Courier New",Courier,"Liberation Mono",monospace}
+canvas,#s,#e{position:fixed;inset:0}canvas{width:100%;height:100%}
+#t{position:fixed;left:0;right:0;bottom:12%;text-align:center;font-size:2.4vh;letter-spacing:.12em;text-shadow:0 0 6px #000,0 2px 8px #000}
+#s{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:radial-gradient(#2a1a10,#000 70%);cursor:pointer;text-align:center}
+#s b,#e b{font:normal 7vh Georgia,"Times New Roman",serif;letter-spacing:.08em;color:#f6dfb0}
+#s i,#e i{font-style:normal;font-size:2vh;letter-spacing:.2em;color:#c9ad80}
+#s u{text-decoration:none;font-size:2vh;letter-spacing:.3em;color:#f6dfb0;animation:k 1.2s steps(1) infinite}
+@keyframes k{50%{opacity:0}}
+#e{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:#000;opacity:0;pointer-events:none;transition:opacity 2.5s;text-align:center}
+</style>
+<canvas id=c></canvas><div id=t></div>
+<div id=s><b>TOY BOX WAR</b><i>A MOCK-EPIC ON A BEDROOM FLOOR</i><u>CLICK TO ENLIST</u></div>
+<div id=e><b>THE END</b><i>TOY BOX WAR</i></div>
+<script>/*MUSIC*/</script><script type=x-shader id=fs>/*SCENE*/</script><script type=x-shader id=fp>/*POST*/</script><script>/*MAIN*/</script>

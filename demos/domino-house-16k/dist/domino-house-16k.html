@@ -1,0 +1,74 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>DOMINO HOUSE</title><style>
+*{margin:0}body{background:#fdf6ec;overflow:hidden;font-family:"Avenir Next","Trebuchet MS",Verdana,sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+#t{position:fixed;left:0;right:0;bottom:8%;text-align:center;color:#fff;text-shadow:0 2px 10px #0008,0 0 3px #0006;pointer-events:none}
+#t b{display:block;font-size:6vh;letter-spacing:.12em}#t i{font-size:2.2vh;font-style:normal;letter-spacing:.3em}
+#s{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;background:#fff5;cursor:pointer;transition:opacity .6s}
+#s.x{opacity:0;pointer-events:none}
+#d{width:7vh;height:22vh;background:#fffbe9;border:.4vh solid #c9a;border-radius:.6vh;box-shadow:0 1vh 2vh #0003;transform-origin:50% 100%;transition:transform .4s ease-in}
+#s.x #d{transform:rotate(-70deg)}
+#s b{font-size:4vh;letter-spacing:.3em;color:#e0707a;animation:f 1.6s ease-in-out infinite}
+@keyframes f{50%{opacity:.35}}
+</style>
+<canvas id=c></canvas><div id=t></div>
+<div id=s><div id=d></div><b>TAP TO TIP</b></div>
+<script type=x-shader id=fs>#version 300 es
+ precision highp float;uniform vec2 R;uniform float T;uniform vec3 E,G;out vec4 o;float sm(float a,float b,float x){x=clamp((x-a)/(b-a),0.,1.);return x*x*(3.-2.*x);}float bx(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);}vec2 U(vec2 a,vec2 b){return a.x<b.x?a:b;}vec3 mp(float t){vec3 a=vec3(0,7.7,.3),b=vec3(-1.7,6.7,.3),c=vec3(.1,.3,.3);if(t<4.5||t>9.)return vec3(0,-30,0);if(t<5.3)return mix(a,b,(t-4.5)/.8);if(t<8.5)return mix(b,c,(t-5.3)/3.2);return c;}vec2 M(vec3 p){float f=sm(28.5,50.,T),th=1.6*f,c=cos(th),s=sin(th);vec3 q=vec3(p.x*c,p.y*(1.-.5*f),p.z+abs(p.x)*s);vec3 h=q;h.y-=3.*clamp(round(q.y/3.),0.,3.);vec2 d=vec2(bx(h,vec3(4,.1,1)),2.);d=U(d,vec2(bx(h-vec3(0,0,-1),vec3(4,1.5,.08)),1.));d=U(d,vec2(bx(h-vec3(-4,0,0),vec3(.08,1.5,1)),1.));d=U(d,vec2(bx(h-vec3(4,0,0),vec3(.08,1.5,1)),1.));vec2 r=q.xy-vec2(-1.3,3.6);d=U(d,vec2(bx(vec3(dot(r,vec2(.958,.2875)),dot(r,vec2(.2875,-.958)),q.z),vec3(.25,3.14,.5)),4.));d=U(d,vec2(bx(q-vec3(0,7.6,.9),vec3(.5,.25,.2)),4.));d=U(d,vec2(bx(q-vec3(3.9,.55,.3),vec3(.35,.25,.25)),3.));float a=sm(17.2,17.7,T)*1.2,lc=cos(a),ls=sin(a);vec2 l=q.xy-vec2(1.6,3.1);d=U(d,vec2(bx(vec3(lc*l.x+ls*l.y,-ls*l.x+lc*l.y-.5,q.z-.3),vec3(.05,.5,.05)),3.));float rc=.15*exp(-max(T-18.75,0.)*6.)*step(18.75,T);d=U(d,vec2(bx(q-vec3(-2.3,3.4,.3),vec3(.35,.25,.25)),8.));d=U(d,vec2(bx(q-vec3(-1.85-rc,3.5,.3),vec3(.4,.1,.1)),8.));float w=clamp((T-19.)/2.5,0.,1.);vec3 bp=mix(vec3(-1.45,3.5,.3),vec3(2.2,5.8,.3),w)+vec3(0,1.5*sin(3.14159*w),0);if(T<19.||T>21.5)bp=vec3(0,-30,0);d=U(d,vec2(length(q-bp)-.18,8.));float f2=sm(25.5,28.5,T),cy=6.5-5.3*f2;d=U(d,vec2(T<25.5?bx(q-vec3(0,(9.+cy)/2.,.3),vec3(.03,(9.-cy)/2.,.03)):1e3,4.));d=U(d,vec2(length(q-vec3(0,cy,.3))-.55,3.));vec3 m=mp(T);d=U(d,vec2(length(q-m)-.2,6.));float i=clamp(round((q.x-.25)/.17),0.,19.),lx=q.x-.25-.17*i,a2=clamp((T-9.-.2*i)*5.,0.,1.)*1.45,cs=cos(a2),sn=sin(a2),yy=q.y-.1;d=U(d,vec2(bx(vec3(lx*cs+yy*sn,-lx*sn+yy*cs-.25,q.z-.3),vec3(.03,.25,.12)),5.));float tt=clamp((T-15.)/2.25,0.,1.);vec3 tp=mix(vec3(3.9,1.3,.3),vec3(1.6,3.7,.3),tt)+vec3(0,2.*sin(3.14159*tt),0);if(T<15.||T>17.3)tp=vec3(0,-30,0);d=U(d,vec2(bx(q-tp,vec3(.2,.02,.2)),7.));return d;}vec3 C(float i){return i<1.5?vec3(.66,.9,.78):i<2.5?vec3(.98,.6,.55):i<3.5?vec3(.98,.92,.6):i<4.5?vec3(.66,.8,.98):i<5.5?vec3(.99,.97,.9):i<6.5?vec3(1.,.5,.6):i<7.5?vec3(.85,.6,.35):vec3(.9,.3,.35);}void main(){vec2 v=(gl_FragCoord.xy-.5*R)/R.y;vec3 ro=E,w=normalize(G-E),u=normalize(cross(w,vec3(0,1,0))),y=cross(u,w),rd=normalize(v.x*u+v.y*y+1.7*w),bg=mix(vec3(.9,.96,1.),vec3(1.,.93,.95),.5+.5*v.y);float t=0.;vec2 h=vec2(0);int k=0;for(;k<100;k++){h=M(ro+rd*t);if(h.x<.003*t||t>70.)break;t+=h.x*.8;}vec3 p=ro+rd*t,e=vec3(.002,0,0);vec3 n=normalize(vec3(M(p+e.xyy).x-M(p-e.xyy).x,M(p+e.yxy).x-M(p-e.yxy).x,M(p+e.yyx).x-M(p-e.yyx).x));vec3 c=C(h.y)*(.45+.55*max(dot(n,normalize(vec3(-.5,1,.7))),0.))*(.5+.5*(1.-float(k)/100.));if(t>=70.)c=bg;else c=mix(c,bg,1.-exp(-t*.025));for(int j=0;j<5;j++){float a=T-21.-float(j)*.9;if(a>0.&&a<2.2){vec2 d=v-vec2(.35*cos(float(j)*2.4)+.05,.22+.12*sin(float(j)*1.7)),q=vec2(length(d),atan(d.y,d.x));float r=a*.3,g=exp(-abs(q.x-r)*60.)+pow(.5+.5*cos(q.y*8.),8.)*exp(-abs(q.x-r)*14.);c+=(.5+.5*cos(vec3(0,2,4)+float(j)*1.3))*g*(1.-a/2.2);}}c*=1.-smoothstep(56.,61.,T);c*=1.-dot(v,v)*.35;c+=(fract(sin(dot(gl_FragCoord.xy,vec2(12.9,78.2)))*43758.5)-.5)*.02;o=vec4(c,1);}</script>
+<script>var SONG=(()=>{const BAR=1.5,BARS=41,LEN=62;
+function setup(A,base){const SR=A.sampleRate;let bag=[];const BAGS=[],K=n=>(bag.push(n),n),
+G=(v,...o)=>{const g=K(A.createGain());g.gain.value=v;o.map(x=>g.connect(x));return g},
+O=(y,f,t,e,...o)=>{const n=K(A.createOscillator());n.type=y;n.frequency.value=f;n.start(t);n.stop(e);o.map(x=>n.connect(x));return n},
+E=(g,t,d,v)=>{const p=g.gain;p.setValueAtTime(0,t);p.linearRampToValueAtTime(v,t+.003);p.exponentialRampToValueAtTime(1e-4,t+d)},
+mf=m=>440*2**((m-69)/12),
+comp=A.createDynamicsCompressor(),M=G(.5,comp),cv=A.createConvolver(),RV=G(.3,cv),
+NB=(()=>{const b=A.createBuffer(1,SR*.03|0,SR),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b})(),
+IR=(()=>{const b=A.createBuffer(2,SR*2|0,SR);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length)**3}return b})();
+cv.buffer=IR;cv.connect(M);comp.connect(A.destination);
+const cel=(t,m,v,d=1.2)=>{const g=G(0,M,RV);O('sine',mf(m),t,t+d,g);O('sine',mf(m)*4,t,t+.3,g);E(g,t,d,v)},
+box=(t,m,v)=>{const g=G(0,M,RV);O('triangle',mf(m),t,t+1,g);O('sine',mf(m)*2,t,t+.4,g);E(g,t,1,v)},
+pz=(t,m,v)=>{const g=G(0,M);O('triangle',mf(m),t,t+.25,g);E(g,t,.2,v)},
+clk=(t,v)=>{const s=K(A.createBufferSource());s.buffer=NB;const f=K(A.createBiquadFilter());f.type='highpass';f.frequency.value=2800;s.connect(f);f.connect(G(v,M));s.start(t);s.stop(t+.03)},
+boom=t=>{const g=G(0,M),o=O('sine',120,t,t+.6,g);o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(35,t+.5);E(g,t,.6,.8)},
+CH=[[60,64,67],[57,60,64],[53,57,60],[55,59,62]];
+function bar(b,t){const c=CH[b&3],N=b<12?3:b<17?6:9;
+ if(b>=33){if(b==40)box(t,84,.3);return}
+ if(b>=20){for(let i=0;i<12;i++){const u=t+i*BAR/12;pz(u,36+(Math.random()*48|0),.14);if(i%2)cel(u,60+(Math.random()*24|0),.05,.4)}if(b==20)boom(t);return}
+ pz(t,c[0]-12,.45);pz(t+BAR/3,c[1],.1);pz(t+2*BAR/3,c[2],.1);
+ for(let i=0;i<N;i++)cel(t+i*BAR/N,c[i%3]+12+12*((i/3|0)%2),b<3?.07:.1);
+ if(b>=3&&b<6)for(let i=0;i<6;i++)box(t+i*BAR/6,88-(b-3)*6-i*2,.12);
+ for(let i=0;i<20;i++){const s=9+i*.2;if(s>=b*BAR&&s<(b+1)*BAR)clk(t+s-b*BAR,.5)}
+ if(b==10)cel(t,88,.2);
+ if(b==11){clk(t+BAR/2,.8);pz(t+BAR/2,79,.3)}
+ if(b==12)boom(t+BAR/2);
+ if(b>=14&&b<17)for(let i=0;i<N;i++)cel(t+i*BAR/N,96+(Math.random()*12|0),.06,.6);
+ if(b==17||b==18)for(let i=0;i<6;i++)cel(t+i*BAR/6,96-i*3-(b-17)*12,.1,.9)}
+function sched(b){bag=[];if(BAGS[b-3]){BAGS[b-3].map(n=>n.disconnect());BAGS[b-3]=0}BAGS[b]=bag;bar(b,base+b*BAR)}
+sched.out=comp;return sched}
+function live(A,from=0){const base=A.currentTime+.15-from,sched=setup(A,base);let b=Math.ceil(from/BAR-.001);
+ const tick=()=>{while(b<BARS&&base+b*BAR<A.currentTime+1.2)sched(b++)};tick();const iv=setInterval(tick,100);
+ return{base,stop(){clearInterval(iv);sched.out.disconnect()}}}
+function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sched=setup(A,0);sched(0);
+ for(let b=1;b<BARS;b++)A.suspend(((b*BAR-.5)*SR/128|0)*128/SR).then(()=>{sched(b);A.resume()});
+ return A.startRendering()}
+return{live,render,BAR,BARS,LEN}})();
+</script>
+<script>const C=document.getElementById('c'),g=C.getContext('webgl2'),$=i=>document.getElementById(i),
+S=$('s'),CAP=[[.5,4.4,'DOMINO HOUSE','A ROLLING CHAIN REACTION'],[52,1e9,'THANK YOU','EVERY DOMINO LANDED']],
+sm=(a,b,x)=>{x=Math.min(Math.max((x-a)/(b-a),0),1);return x*x*(3-2*x)};
+const p=g.createProgram();
+[[35633,'#version 300 es\nin vec2 a;void main(){gl_Position=vec4(a,0,1);}'],[35632,$('fs').text]].forEach(([k,s])=>{const h=g.createShader(k);g.shaderSource(h,s);g.compileShader(h);g.attachShader(p,h)});
+g.bindAttribLocation(p,0,'a');g.linkProgram(p);g.useProgram(p);
+g.bindBuffer(34962,g.createBuffer());g.bufferData(34962,new Float32Array([-1,-1,3,-1,-1,3]),35044);
+g.enableVertexAttribArray(0);g.vertexAttribPointer(0,2,5126,0,0,0);
+const U=(n,...v)=>g['uniform'+v.length+'f'](g.getUniformLocation(p,n),...v);
+function rs(){const s=Math.min(1,1280/innerWidth);C.width=innerWidth*s|0;C.height=innerHeight*s|0;g.viewport(0,0,C.width,C.height)}
+onresize=rs;rs();
+let song=null,actx,ci=-1;
+function fr(){requestAnimationFrame(fr);const t=song?Math.max(actx.currentTime-song.base,0):0;
+U('R',C.width,C.height);U('T',t);
+U('E',0,4+1.5*sm(24,50,t),19-4*sm(3,26,t)+3*sm(38,50,t));U('G',0,3.7+1.5*sm(24,50,t),0);
+g.drawArrays(4,0,3);
+const k=song?CAP.findIndex(c=>t>=c[0]&&t<c[1]):-1;
+if(k!=ci){ci=k;$('t').innerHTML=k<0?'':`<b>${CAP[k][2]}</b><i>${CAP[k][3]}</i>`}}
+S.onclick=async()=>{if(song)return;actx=new AudioContext();await actx.resume();song=SONG.live(actx,0);S.className='x'};
+fr();</script>

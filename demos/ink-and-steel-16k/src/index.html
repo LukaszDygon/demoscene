@@ -1,0 +1,22 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>墨と鋼 INK &amp; STEEL</title><style>
+:root{--f:"Kaiti SC",STKaiti,KaiTi,"Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP","Noto Serif SC",serif;--p:#f4ecd6;--k:#17140f;--v:#d8382b}
+*{margin:0;box-sizing:border-box}html,body{height:100%;background:var(--p);overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#s,#e{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;transition:opacity 1.2s;pointer-events:none}
+#s{cursor:pointer;pointer-events:auto}#e{opacity:0}
+.sl{font:700 min(5.2vh,9vw)/1.15 var(--f);color:#f6ecd8;background:var(--v);padding:1.4vh 1.2vh;writing-mode:vertical-rl;letter-spacing:.25em;box-shadow:inset 0 0 0 .35vh #f6ecd8;border-radius:.4vh;transform:rotate(-1.5deg)}
+#s i,#e i{font:400 min(1.9vh,3.4vw)/1 Georgia,serif;letter-spacing:.4em;color:var(--k)}
+#s small{font:400 1.4vh Georgia,serif;letter-spacing:.5em;color:#8a7f6a;margin-top:3vh}
+#cap{position:fixed;left:0;right:0;bottom:9vh;text-align:center;color:var(--k);pointer-events:none;text-shadow:0 0 .6vh var(--p),0 0 1.8vh var(--p),0 0 2.8vh var(--p)}
+#cj{font:400 min(6.4vh,11vw)/1 var(--f);letter-spacing:.3em}
+#ce{display:block;margin-top:1.6vh;font:400 min(1.9vh,3.4vw)/1.4 Georgia,serif;letter-spacing:.35em}
+.a{animation:r 1.1s ease-out both}
+@keyframes r{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+</style>
+<canvas id=c></canvas>
+<div id=cap><div id=cj></div><span id=ce></span></div>
+<div id=e><div class=sl>墨と鋼</div><i>INK &amp; STEEL</i></div>
+<div id=s><div class=sl>墨と鋼</div><i>INK &amp; STEEL</i><small>CLICK</small></div>
+<script>/*MUSIC*/</script>
+<script type=x-shader id=f>/*SCENE*/</script>
+<script>/*MAIN*/</script>

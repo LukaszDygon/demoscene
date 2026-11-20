@@ -1,0 +1,236 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>KA-BOOM!</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#fff;touch-action:none;user-select:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+</style></head><body><canvas id=c></canvas>
+<script>// KA-BOOM! soundtrack, 174 BPM. A synthesized amen-style break (kick/snare/hats) is rendered into one bar and
+// chopped into 16ths or 32nds; reese bass, square stabs, a sub drone, boom and crash. Scheduled bar by bar.
+var SONG=(()=>{
+const BPM=174,BEAT=60/BPM,BAR=4*BEAT,BARS=66,LEN=BARS*BAR+3;
+const ROOT=[73.42,73.42,58.27,65.41,87.31,87.31,58.27,65.41];
+const CH=[[146.83,174.61,220],[146.83,174.61,220],[233.08,293.66,349.23],[261.63,329.63,392],[174.61,220,261.63],[174.61,220,261.63],[233.08,293.66,349.23],[261.63,329.63,392]];
+function setup(A,base){
+const SR=A.sampleRate,PI=Math.PI;
+let bag=[];const BAGS=[],keep=n=>(bag.push(n),n);
+let sd=7;const rn=()=>(sd=sd*16807%2147483647)/1073741823.5-1;
+const G=(v,...to)=>{const g=keep(A.createGain());g.gain.value=v;to.forEach(n=>g.connect(n));return g};
+const comp=A.createDynamicsCompressor();comp.connect(A.destination);
+const master=G(.6,comp);
+const rev=keep(A.createConvolver()),ir=A.createBuffer(2,SR*2|0,SR);
+for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=rn()*(1-i/d.length)**3}
+rev.buffer=ir;rev.connect(master);
+const bus=G(1,master,rev);
+const mkb=n=>A.createBuffer(1,n,SR),NB=BAR*SR|0;
+const BK=mkb(NB),SN=mkb(NB),BM=mkb(3*SR|0),CR=mkb(2*SR|0);
+const put=(b,t0,dur,f)=>{const d=b.getChannelData(0),s=t0*SR|0;for(let i=0,n=dur*SR|0;i<n&&s+i<d.length;i++)d[s+i]+=f(i/SR)};
+const S16=BAR/16;
+for(let s=0;s<16;s++)put(BK,s*S16,.04,t=>rn()*Math.exp(-90*t)*(s&1?.12:.3));
+[0,10].forEach(s=>put(BK,s*S16,.5,t=>Math.sin(2*PI*(40*t+5*(1-Math.exp(-40*t))))*Math.exp(-11*t)));
+[[4,1],[12,1],[7,.35],[11,.35],[15,.3]].forEach(([s,v])=>put(SN,s*S16,.25,t=>v*(.8*rn()*Math.exp(-22*t)+.6*Math.sin(2*PI*190*t)*Math.exp(-30*t))));
+put(BM,0,3,t=>Math.sin(2*PI*(25*t+15*(1-Math.exp(-2*t))))*Math.exp(-1.1*t)*.9);
+put(CR,0,2,t=>rn()*Math.exp(-2.2*t)*.35);
+const slice=(buf,t,i,div,v)=>{const s=keep(A.createBufferSource());s.buffer=buf;s.connect(G(v,bus));s.start(t,i*BAR/div,BAR/div)};
+const chop=(b,t,div,v,sn)=>{const h=div/2;for(let s=0;s<div;s++){const i=b%4==3&&s>=h?h+(s*5+b)%h:s,u=t+s*BAR/div;slice(BK,u,i,div,v);if(sn)slice(SN,u,i,div,v)}};
+const play=(buf,t,v)=>{const s=keep(A.createBufferSource());s.buffer=buf;s.connect(G(v,bus));s.start(t)};
+const tone=(t,f,dur,v)=>{const o=keep(A.createOscillator()),g=keep(A.createGain());o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+Math.min(.5,dur/3));g.gain.linearRampToValueAtTime(0,t+dur);o.connect(g);g.connect(bus);o.start(t);o.stop(t+dur)};
+const reese=(t,f,dur,cut,v)=>{const lp=keep(A.createBiquadFilter()),g=keep(A.createGain());lp.type='lowpass';lp.Q.value=4;lp.frequency.setValueAtTime(cut,t);lp.frequency.exponentialRampToValueAtTime(cut/4,t+dur);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.setValueAtTime(v,t+dur-.03);g.gain.linearRampToValueAtTime(0,t+dur);lp.connect(g);g.connect(bus);[.993,1.007].forEach(d=>{const o=keep(A.createOscillator());o.type='sawtooth';o.frequency.value=f*d;o.connect(lp);o.start(t);o.stop(t+dur)})};
+const stab=(t,ch,dur,v)=>ch.forEach(f=>{const o=keep(A.createOscillator()),lp=keep(A.createBiquadFilter()),g=keep(A.createGain());o.type='square';o.frequency.value=f;lp.frequency.setValueAtTime(2500,t);lp.frequency.exponentialRampToValueAtTime(300,t+dur);g.gain.setValueAtTime(v/ch.length,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(lp);lp.connect(g);g.connect(bus);o.start(t);o.stop(t+dur)});
+function bar(b,t){
+const B=BEAT,S=BAR/16,r=ROOT[b%8],ch=CH[b%8];
+// 0-3 silence: metronome ticks and a sub drone that swells
+if(b<4){for(let i=0;i<4;i++)tone(t+i*B,3000,.03,.04);tone(t,36.7,BAR,.02*b+.02)}
+// impacts: crash at CRASH, RUN-less entries, BOOM, bulldozer, KA-BOOM, shatter
+if(b===4||b===20||b===36||b===48||b===52)play(CR,t,.8);
+if(b===16||b===36||b===48)play(BM,t,.9);
+// break: full amen, double-time chop in FASTER and KA-BOOM, kick+hats only in PILE, silent in the slow-mo hang
+if(b>=4&&b<52&&!(b>=18&&b<20)){if(b>=24&&b<32)chop(b,t,16,.9,0);else chop(b,t,(b>=10&&b<16)||b>=48?32:16,.9,1)}
+// end card: half-time kick
+if(b>=54&&b<66){slice(BK,t,0,16,.9);slice(BK,t+2*B,0,16,.8)}
+// reese bass, filter opening through PILE, drive for the bulldozer
+if(b>=6&&b<66&&!(b>=18&&b<20)){const cut=b<24?500:b<32?500*2**((b-24)/4):b<36?900:1400,v=b>=54?.12:.22;[0,6,8,14].forEach(s=>reese(t+s*S,r,S*3,cut,v))}
+// stabs on the offbeats
+if((b>=8&&b<16)||(b>=20&&b<36)||(b>=40&&b<52))[1,3].forEach(k=>stab(t+k*B,ch,B*.8,.2));
+// slow-mo hang: a held minor pad under the silence
+if(b===18||b===19)ch.forEach(f=>tone(t,f,BAR*1.02,.03));
+// fade out into a Picardy-third D major chord
+if(b===62){master.gain.setValueAtTime(.6,t);master.gain.linearRampToValueAtTime(0,t+BAR*4)}
+if(b===64)[146.83,185,220].forEach(f=>tone(t,f,BAR*2,.05));
+}
+const sched=b=>{bag=[];if(b>2&&BAGS[b-3]){BAGS[b-3].forEach(n=>n.disconnect());BAGS[b-3]=0}BAGS[b]=bag;bar(b,base+b*BAR)};
+sched.out=comp;return sched}
+// live: schedule each bar ~1.2 s ahead so sound starts within a fraction of a second of the click
+function live(A,from=0){const base=A.currentTime+.15-from,sched=setup(A,base);let b=Math.ceil(from/BAR-.001);
+const tick=()=>{while(b<BARS&&base+b*BAR<A.currentTime+1.2)sched(b++)};tick();const iv=setInterval(tick,100);
+return{base,stop(){clearInterval(iv);sched.out.disconnect()}}}
+// offline: the same code, with bars injected via suspend() so the graph stays small
+function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sched=setup(A,0);sched(0);
+for(let b=1;b<BARS;b++)A.suspend(((b*BAR-.5)*SR/128|0)*128/SR).then(()=>{sched(b);A.resume()});
+return A.startRendering()}
+return{live,render,BPM,BEAT,BAR,BARS,LEN}})();
+</script>
+<script>const CANVAS=document.getElementById('c');
+const gl=CANVAS.getContext('webgl2',{antialias:false,alpha:false});
+const C=1.25,DZW=7,FOV=40*Math.PI/180,DM=8,N=360,RED=[.9,.1,.07],BEAT=SONG.BEAT,BAR=SONG.BAR;
+const SRC={lv:"#version 300 es\nlayout(location=0) in vec2 q;\nlayout(location=1) in vec4 P;\nlayout(location=2) in vec4 R;\nlayout(location=3) in vec4 U;\nlayout(location=4) in vec4 K;\nuniform mat4 uProj;\nuniform vec3 uEye;\nout vec2 vt;\nflat out float vc;\nvoid main(){\nfloat cx=cos(R.x),sx=sin(R.x),cy=cos(R.y),sy=sin(R.y),cz=cos(R.z),sz=sin(R.z);\nmat3 M=mat3(cz,sz,0.,-sz,cz,0.,0.,0.,1.)*mat3(cy,0.,-sy,0.,1.,0.,sy,0.,cy)*mat3(1.,0.,0.,0.,cx,sx,0.,-sx,cx);\nvec3 w=P.xyz+M*vec3(q*P.w,0.);\ngl_Position=uProj*vec4(w-uEye,1.);\nvt=U.xy+vec2(q.x+.5,.5-q.y)*U.zw;\nvc=K.x;\n}",lf:"#version 300 es\nprecision highp float;\nuniform sampler2D uA;\nuniform vec3 uInk;\nuniform vec3 uPaper;\nuniform vec3 uRed;\nin vec2 vt;\nflat in float vc;\nout vec4 o;\nvoid main(){\nif(texture(uA,vt).a<.5)discard;\no=vec4(vc<.5?uInk:(vc<1.5?uRed:uPaper),1.);\n}",fsq:"#version 300 es\nvoid main(){\nvec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));\ngl_Position=vec4(p*2.-1.,0.,1.);\n}",bg:"#version 300 es\nprecision highp float;\nuniform vec2 uRes;\nuniform vec2 uHalf;\nuniform vec2 uCam;\nuniform float uT;\nuniform float uGrid;\nuniform float uTear;\nuniform float uBend;\nuniform float uRule;\nuniform float uDots;\nuniform float uDotX;\nuniform vec3 uInk;\nuniform vec3 uPaper;\nuniform vec3 uRed;\nout vec4 o;\nvoid main(){\nfloat C=1.25;\nvec2 p=(gl_FragCoord.xy/uRes*2.-1.)*uHalf+uCam;\nfloat rw=floor(p.y/C);\nfloat h=fract(sin(rw*12.9898+floor(uT*3.))*43758.5453);\np.x+=uBend*sin(p.y*.7+uT*1.7)*.4*(1.+h)+step(1.-uTear*.5,h)*(h-.5)*uTear*3.;\nvec2 g=abs(fract(p/C+.5)-.5)*C;\nfloat l=max(step(g.x,.018),step(g.y,.018))*uGrid;\nvec3 c=mix(uPaper,uInk,l);\nif(abs(p.y-uRule)<.04)c=uRed;\nfloat r=uDots*.45*clamp((uDotX+4.-p.x)/4.,0.,1.)*step(uDotX,p.x);\nif(r>0.&&length(fract(p*3.)-.5)<r)c=uRed;\no=vec4(c,1.);\n}",post:"#version 300 es\nprecision highp float;\nuniform sampler2D uS;\nuniform sampler2D uP;\nuniform vec2 uRes;\nuniform float uPer;\nuniform float uT;\nuniform float uFl;\nout vec4 o;\nfloat hs(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233))+uT)*43758.5453);}\nvoid main(){\nvec2 uv=gl_FragCoord.xy/uRes;\nvec3 c=mix(texture(uS,uv).rgb,texture(uP,uv).rgb,uPer);\nc=abs(c-uFl)+(hs(gl_FragCoord.xy)-.5)*.05;\no=vec4(c,1.);\n}"};
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ!-#',CW=160,COLS=8,ROWS=4,PQ='SILENCECRASHRUNFASTERBOOM';
+const AC=document.createElement('canvas');AC.width=COLS*CW;AC.height=ROWS*CW;
+const ax=AC.getContext('2d');ax.fillStyle='#fff';ax.font='bold 180px Helvetica, Arial, "Liberation Sans", sans-serif';ax.textAlign='center';ax.textBaseline='middle';
+[...CHARS].forEach((ch,i)=>{const x=(i%COLS)*CW,y=((i/COLS)|0)*CW;if(ch==='#')ax.fillRect(x,y,CW,CW);else ax.fillText(ch,x+CW/2,y+CW/2+6)});
+const uvOf=ch=>{const i=CHARS.indexOf(ch),c=i%COLS,r=(i/COLS)|0;return[c/COLS,r/ROWS,1/COLS,1/ROWS]};
+const mkSh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(o);return o};
+const prog=(v,f)=>{const p=gl.createProgram();gl.attachShader(p,mkSh(gl.VERTEX_SHADER,v));gl.attachShader(p,mkSh(gl.FRAGMENT_SHADER,f));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw gl.getProgramInfoLog(p);return p};
+const pL=prog(SRC.lv,SRC.lf),pB=prog(SRC.fsq,SRC.bg),pP=prog(SRC.fsq,SRC.post);
+const un=(p,names)=>Object.fromEntries(names.map(n=>[n,gl.getUniformLocation(p,n)]));
+const uL=un(pL,['uProj','uEye','uA','uInk','uPaper','uRed']),uB=un(pB,['uRes','uHalf','uCam','uT','uGrid','uTear','uBend','uRule','uDots','uDotX','uInk','uPaper','uRed']),uQ=un(pP,['uS','uP','uRes','uPer','uT','uFl']);
+const vao=gl.createVertexArray();gl.bindVertexArray(vao);
+const qb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,qb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-.5,-.5,.5,-.5,-.5,.5,.5,.5]),gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+const ib=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferData(gl.ARRAY_BUFFER,N*64,gl.DYNAMIC_DRAW);
+for(let a=1;a<=4;a++){gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,4,gl.FLOAT,false,64,(a-1)*16);gl.vertexAttribDivisor(a,1)}
+const atlas=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,atlas);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,AC);
+['TEXTURE_MIN_FILTER','TEXTURE_MAG_FILTER'].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,gl[p],gl.LINEAR));
+['TEXTURE_WRAP_S','TEXTURE_WRAP_T'].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,gl[p],gl.CLAMP_TO_EDGE));
+const inst=new Float32Array(N*16);
+let W,H,S,SD,ST,PV;
+function size(){const d=Math.min(devicePixelRatio||1,1.5);W=Math.round(innerWidth*d);H=Math.round(innerHeight*d);CANVAS.width=W;CANVAS.height=H;
+const tx=()=>{const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,W,H,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+['TEXTURE_MIN_FILTER','TEXTURE_MAG_FILTER'].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,gl[p],gl.NEAREST));
+['TEXTURE_WRAP_S','TEXTURE_WRAP_T'].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,gl[p],gl.CLAMP_TO_EDGE));return t};
+PV=tx();ST=tx();S=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,S);
+gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,ST,0);
+SD=gl.createRenderbuffer();gl.bindRenderbuffer(gl.RENDERBUFFER,SD);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,W,H);
+gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,SD);gl.bindFramebuffer(gl.FRAMEBUFFER,null)}
+size();addEventListener('resize',size);
+const pool=Array.from({length:N},()=>({m:0}));   // m: 0 free, 1 spring letter, 2 shard
+const rnd=()=>Math.random()*2-1,rot=()=>(Math.random()*4|0)*Math.PI/2;
+function letter(ch,tx,ty,tz,sz,col,o){const q=pool.find(p=>!p.m);if(!q)return null;
+const f=o.from||[rnd()*C,rnd()*C,0],rz=o.rot||0;
+Object.assign(q,{m:1,p:[tx+f[0],ty+f[1],tz+f[2]],v:[0,0,0],r:[0,0,rz],w:[0,0,0],tp:[tx,ty,tz],tr:[0,0,rz],s:sz,ts:sz,uv:uvOf(ch),c:col,k:o.k||90,keep:o.keep?1:0,blade:o.blade?1:0,life:0});
+return q}
+function txt(s,cx,cy,dx,dy,o={}){const n=s.length;
+for(let i=0;i<n;i++){if(s[i]===' ')continue;const f=i-(n-1)/2;letter(s[i],cx+f*dx,cy+f*dy,o.z||0,o.sz||1,o.col||0,o)}}
+function shatter(o,cx,cy,spd){const P=[...o.p],R=[...o.r],uv=o.uv,s=o.s,c=o.c;o.m=0;
+for(let i=0;i<2;i++)for(let j=0;j<2;j++){const q=pool.find(p=>!p.m);if(!q)return;
+const px=P[0]+(i-.5)*s/2,py=P[1]+(j-.5)*s/2,dx=px-cx,dy=py-cy,L=Math.hypot(dx,dy)||1,sp=spd*(.6+Math.random()*.8);
+Object.assign(q,{m:2,p:[px,py,P[2]],v:[dx/L*sp,dy/L*sp,-Math.random()*spd*.3],r:R,w:[rnd()*4.5,rnd()*4.5,rnd()*4.5],s:s/2,ts:s/2,
+uv:[uv[0]+i*uv[2]/2,uv[1]+j*uv[3]/2,uv[2]/2,uv[3]/2],c,k:0,keep:0,blade:0,life:2.5+Math.random()*2.5})}}
+const cutAll=()=>{for(const o of pool)if(o.m===1&&!o.keep)o.m=0};
+const burst=(cx,cy,spd,all)=>{for(const o of pool)if(o.m===1&&!o.blade&&(all||!o.keep))shatter(o,cx,cy,spd)};
+const blast=(cx,cy,spd)=>{for(const o of pool)if(o.m===2){const dx=o.p[0]-cx,dy=o.p[1]-cy,L=Math.hypot(dx,dy)||1;o.v[0]+=dx/L*spd;o.v[1]+=dy/L*spd}};
+function step(dt){for(const o of pool){if(!o.m)continue;
+if(o.m===1){for(let i=0;i<3;i++){o.v[i]+=(o.k*(o.tp[i]-o.p[i])-DM*o.v[i])*dt;o.p[i]+=o.v[i]*dt;o.w[i]+=(o.k*(o.tr[i]-o.r[i])-DM*o.w[i])*dt;o.r[i]+=o.w[i]*dt}
+o.s+=(o.ts-o.s)*Math.min(1,dt*10)}
+else{const d=Math.exp(-.8*dt);for(let i=0;i<3;i++){o.v[i]*=d;o.p[i]+=o.v[i]*dt;o.w[i]*=d;o.r[i]+=o.w[i]*dt}if((o.life-=dt)<=0)o.m=0}}}
+let flip=0,grid=0,tear=0,bend=0,rule=-99,sh=0,flashReq=0,flashAt=-9,ts=1,bx=-9,lastB=-1,lastNow=0,song=null,actx=null;
+const heights=[0,0,0,0,0,0,0,0];
+function cue(B){
+const b=B>>2,k=B&3,R=rnd;
+flip=0;grid=0;tear=0;bend=0;rule=-99;
+if(b<4){if(B===0)txt('SILENCE',0,0,C,0,{sz:1.15});return}
+if(b<8){grid=.5;tear=.1;
+if(B===16){burst(0,0,8,0);txt('CRASH',0,0,C,0,{sz:1.15,from:[0,0,-30],k:160});sh=1.5;flashReq=1;return}
+cutAll();flip=B&1;sh=.35;rule=B&1?2.6:-2.6;
+const L=B&3;
+if(L===0)txt('CRASH',0,0,C,0,{sz:1.15});
+else if(L===1)txt('CRASH',0,0,0,-C*1.02,{sz:1});
+else if(L===2)txt('CRASH',R()*1.2,R()*1.2,C,0,{sz:1.5,rot:rot()});
+else txt('CRASH',0,0,C*.9,0,{sz:1.2,rot:Math.PI/2});
+return}
+if(b<16){grid=.7;tear=.15;rule=B&1?-2.2:2.2;cutAll();flip=B&1;sh=.35;
+const lead=((B-32)%8-4)*C,lag=b<12?2.4*C:1.25*C;
+txt('RUN',lead,0,C,0,{sz:1.2});
+txt('FASTER',lead-lag,-C*1.05,C,0,{sz:1,col:1});
+txt('FASTER!!',lead-2*lag,C*1.05,C,0,{sz:1});
+return}
+if(b<24){grid=.6;tear=.25;bend=.1;
+if(B===64){cutAll();txt('BOOM',0,0,C,0,{sz:1.6});sh=.6;return}
+if(B===66){burst(0,0,9,0);sh=1.5;flashReq=1;return}
+if(b<20)return;
+if(B===80){blast(0,0,10);flashReq=1}
+cutAll();flip=B&1;sh=.5;
+txt('BOOM',R()*1.2,R()*1.2,C*1.1,0,{sz:1.4+Math.random()*.4,rot:rot()});
+if(k===2){burst(0,0,6,0);flashReq=1}
+return}
+if(b<32){grid=.8;tear=.05;
+if(B===96){cutAll();for(const o of pool)if(o.m===2)o.m=0;heights.fill(0)}
+const i=B-96,c=i&7,h=heights[c]++;
+letter(PQ[i%PQ.length],-3.5*C+c*C,-3.2+h*C*.95,0,1,0,{from:[0,7,0],keep:1,k:60});
+flip=B&1;sh=.12;return}
+if(b<40){grid=.9;
+if(B===128){burst(0,-5,6,1);sh=1.2;flashReq=1;return}
+if(B<134){txt('NONONONO',0,3.1-(B-128)*C,C,0,{sz:1,keep:1,from:[R()*6,0,0],k:70});sh=.3;return}
+if(B===144){txt('######',-9,0,0,C,{sz:1.25,col:1,keep:1,blade:1,k:200});sh=1;flashReq=1;return}
+if(B<152)return;
+if(B===152)for(const o of pool)if(o.blade)o.m=0;
+cutAll();flip=B&1;sh=.6;grid=.8;
+txt('NO',R()*2,R(),C,0,{sz:2.2,rot:rot()});
+return}
+if(b<48){grid=1;tear=(B-160)/32;bend=(B-160)/64;rule=R()*3;
+cutAll();flip=B&1;sh=.4;
+txt('KA-',R()*3,R()*2,C*1.2,0,{sz:1.1+Math.random()*.6,rot:rot(),col:k===2?1:0});
+return}
+if(b<52){grid=.6;tear=.3+(B-192)/40;cutAll();flip=B&1;sh=.5;
+if(B===192){txt('KA-BOOM!',0,0,C,0,{sz:1.45,from:[0,0,-30],k:160});sh=2;flashReq=1;return}
+const L=(B-192)&3;
+if(L===1){txt('KA-',0,1.5,1.7,0,{sz:2});txt('BOOM!',0,-1.2,1.7,0,{sz:2});flashReq=1}
+else if(L===2)txt('KA-BOOM!',0,0,0,C*.85,{sz:1.1,rot:Math.PI/2});
+else txt('KA-BOOM!',0,0,C,0,{sz:1.45});
+return}
+if(b<54){grid=1;tear=1;bend=.5;
+if(B===208){burst(0,0,9,0);sh=2.5;flashReq=1}
+return}
+if(B===216){cutAll();
+letter('#',2.4,1.1,0,4.8,1,{keep:1,from:[0,6,0],k:50});
+txt('END',2.4,1.1,C*.9,0,{sz:1.3,col:2,keep:1,from:[0,6,0],k:50});
+txt('KA-BOOM!',0,-2.6,C,0,{sz:1.1,keep:1,from:[0,-6,0],k:50});
+sh=1;flashReq=1}
+}
+const persp=(f,a,n,fa)=>{const t=1/Math.tan(f/2);return new Float32Array([t/a,0,0,0,0,t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0])};
+function draw(tt,per,fl,cam,eyeZ,asp,dots,dotX){
+const ink=flip?[1,1,1]:[.04,.04,.04],paper=flip?[.04,.04,.04]:[1,1,1];
+gl.bindFramebuffer(gl.FRAMEBUFFER,S);gl.viewport(0,0,W,H);gl.disable(gl.DEPTH_TEST);
+gl.useProgram(pB);
+gl.uniform2f(uB.uRes,W,H);gl.uniform2f(uB.uHalf,DZW,DZW/asp);gl.uniform2f(uB.uCam,cam[0],cam[1]);gl.uniform1f(uB.uT,tt);
+gl.uniform1f(uB.uGrid,grid);gl.uniform1f(uB.uTear,tear);gl.uniform1f(uB.uBend,bend);gl.uniform1f(uB.uRule,rule);
+gl.uniform1f(uB.uDots,dots);gl.uniform1f(uB.uDotX,dotX);
+gl.uniform3fv(uB.uInk,ink);gl.uniform3fv(uB.uPaper,paper);gl.uniform3fv(uB.uRed,RED);
+gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
+gl.enable(gl.DEPTH_TEST);gl.useProgram(pL);gl.bindVertexArray(vao);
+gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlas);
+gl.uniformMatrix4fv(uL.uProj,false,persp(FOV,asp,.5,200));gl.uniform3f(uL.uEye,cam[0],cam[1],eyeZ);
+gl.uniform3fv(uL.uInk,ink);gl.uniform3fv(uL.uPaper,paper);gl.uniform3fv(uL.uRed,RED);
+let n=0;for(const o of pool){if(!o.m)continue;inst.set([o.p[0],o.p[1],o.p[2],o.s,o.r[0],o.r[1],o.r[2],1,o.uv[0],o.uv[1],o.uv[2],o.uv[3],o.c,0,0,0],n*16);n++}
+gl.bindBuffer(gl.ARRAY_BUFFER,ib);gl.bufferSubData(gl.ARRAY_BUFFER,0,inst,0,n*16);
+gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,n);
+gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,W,H);gl.disable(gl.DEPTH_TEST);
+gl.useProgram(pP);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,ST);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,PV);
+gl.uniform1i(uQ.uS,0);gl.uniform1i(uQ.uP,1);gl.uniform2f(uQ.uRes,W,H);gl.uniform1f(uQ.uPer,per);gl.uniform1f(uQ.uT,tt);gl.uniform1f(uQ.uFl,fl);
+gl.drawArrays(gl.TRIANGLES,0,3);
+gl.bindTexture(gl.TEXTURE_2D,PV);gl.copyTexSubImage2D(gl.TEXTURE_2D,0,0,0,0,0,W,H);
+}
+function frame(now){
+requestAnimationFrame(frame);
+const tt=now/1000,dt=Math.min(.05,(now-(lastNow||now))/1000);lastNow=now;
+const T=song?actx.currentTime-song.base:-1;
+let cut=0;
+if(T>=0){const Bn=Math.floor(T/BEAT);while(lastB<Bn){lastB++;cue(lastB);cut=1}}
+if(flashReq){flashAt=tt;flashReq=0}
+ts+=((T>=18*BAR&&T<20*BAR?.03:1)-ts)*Math.min(1,dt*12);
+const bulldoz=T>=36*BAR&&T<38*BAR;
+if(bulldoz){bx=-9+18*(T-36*BAR)/(2*BAR);for(const o of pool)if(o.blade)o.tp[0]=bx}
+step(dt*ts);
+if(bulldoz)for(const o of pool)if(o.m===1&&o.keep&&!o.blade&&o.p[0]<bx&&o.p[0]>bx-1.2)shatter(o,bx-4,o.p[1],7);
+sh*=Math.exp(-dt*6);
+const kk=sh*.3,cam=[kk*Math.sin(tt*53)+.08*Math.sin(tt*.4),kk*Math.sin(tt*41+1)];
+const asp=W/H,eyeZ=DZW/(Math.tan(FOV/2)*asp)+.2*Math.sin(tt*.3);
+draw(tt,cut?0:(ts<.5?.75:.4),tt-flashAt<.07?1:0,cam,eyeZ,asp,bulldoz?.8:0,bulldoz?bx:-99);
+}
+letter('#',0,1.1,0,4.2,1,{keep:1,from:[0,0,0]});
+txt('PRESS TO',0,-1.9,C,0,{sz:1,keep:1,from:[0,0,0]});
+txt('DETONATE',0,-3,C,0,{sz:1,keep:1,from:[0,0,0]});
+function go(){if(actx)return;actx=new AudioContext();
+actx.resume().then(()=>{for(const o of pool)if(o.m===1)shatter(o,0,-3,6);song=SONG.live(actx,0);lastB=-1})}
+addEventListener('pointerdown',go);
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter')go()});
+requestAnimationFrame(frame);</script>
+</body></html>

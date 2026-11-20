@@ -1,0 +1,78 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>墨と鋼 INK &amp; STEEL</title><style>
+:root{--f:"Kaiti SC",STKaiti,KaiTi,"Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP","Noto Serif SC",serif;--p:#f4ecd6;--k:#17140f;--v:#d8382b}
+*{margin:0;box-sizing:border-box}html,body{height:100%;background:var(--p);overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#s,#e{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;transition:opacity 1.2s;pointer-events:none}
+#s{cursor:pointer;pointer-events:auto}#e{opacity:0}
+.sl{font:700 min(5.2vh,9vw)/1.15 var(--f);color:#f6ecd8;background:var(--v);padding:1.4vh 1.2vh;writing-mode:vertical-rl;letter-spacing:.25em;box-shadow:inset 0 0 0 .35vh #f6ecd8;border-radius:.4vh;transform:rotate(-1.5deg)}
+#s i,#e i{font:400 min(1.9vh,3.4vw)/1 Georgia,serif;letter-spacing:.4em;color:var(--k)}
+#s small{font:400 1.4vh Georgia,serif;letter-spacing:.5em;color:#8a7f6a;margin-top:3vh}
+#cap{position:fixed;left:0;right:0;bottom:9vh;text-align:center;color:var(--k);pointer-events:none;text-shadow:0 0 .6vh var(--p),0 0 1.8vh var(--p),0 0 2.8vh var(--p)}
+#cj{font:400 min(6.4vh,11vw)/1 var(--f);letter-spacing:.3em}
+#ce{display:block;margin-top:1.6vh;font:400 min(1.9vh,3.4vw)/1.4 Georgia,serif;letter-spacing:.35em}
+.a{animation:r 1.1s ease-out both}
+@keyframes r{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+</style>
+<canvas id=c></canvas>
+<div id=cap><div id=cj></div><span id=ce></span></div>
+<div id=e><div class=sl>墨と鋼</div><i>INK &amp; STEEL</i></div>
+<div id=s><div class=sl>墨と鋼</div><i>INK &amp; STEEL</i><small>CLICK</small></div>
+<script>var SONG=(()=>{const BAR=60/72*4,BARS=20,LEN=BARS*BAR+4,mf=m=>440*2**((m-69)/12);
+function setup(A,base){const SR=A.sampleRate;let bag=[];const BAGS=[],K=n=>(bag.push(n),n),cn=(n,...o)=>(o.forEach(x=>n.connect(x)),n),
+G=(v,...o)=>{const g=K(A.createGain());g.gain.value=v;return cn(g,...o)},
+E=(g,t,a,v,d)=>{const p=g.gain;p.setValueAtTime(0,t);p.linearRampToValueAtTime(v,t+a);p.exponentialRampToValueAtTime(1e-4,t+a+d)},
+O=(y,f,t,e,d)=>{const o=K(A.createOscillator());o.type=y;o.frequency.setValueAtTime(f,t);o.start(t);o.stop(e);return cn(o,d)},
+F=(y,f,q,...o)=>{const x=K(A.createBiquadFilter());x.type=y;x.frequency.value=f;x.Q.value=q;return cn(x,...o)};
+const NB=A.createBuffer(1,SR*2,SR),nz=NB.getChannelData(0);for(let i=0;i<nz.length;i++)nz[i]=Math.random()*2-1;
+const N=(t,e,d)=>{const s=K(A.createBufferSource());s.buffer=NB;s.loop=1;s.start(t);s.stop(e);return cn(s,d)};
+const comp=A.createDynamicsCompressor(),M=G(.3,comp),RV=A.createConvolver(),IR=A.createBuffer(2,SR*2.5|0,SR);
+for(let c=0;c<2;c++){const d=IR.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length)**3}
+RV.buffer=IR;cn(RV,G(.3,M));cn(comp,A.destination);
+const rain=A.createBufferSource();rain.buffer=NB;rain.loop=1;rain.start(base);rain.stop(base+LEN);cn(rain,F('highpass',2500,.6,G(.07,M)));
+const PL=(t,m,v)=>{const P=SR/mf(m)|0,n=SR*2,b=A.createBuffer(1,n,SR),y=b.getChannelData(0);
+ for(let i=0;i<n;i++)y[i]=i<P?Math.random()*2-1:i>P?.4985*(y[i-P]+y[i-P-1]):0;
+ const s=K(A.createBufferSource());s.buffer=b;s.start(t);return cn(s,G(v,M,RV))},
+TK=(t,v)=>{const g=G(0,M);E(g,t,.002,v,.7);O('sine',120,t,t+.8,g).frequency.exponentialRampToValueAtTime(42,t+.35);N(t,t+.04,F('highpass',2500,.7,g))},
+CL=(t,v)=>{const g=G(0,M,RV);E(g,t,.001,v,.6);[2310,3140,4870].forEach(f=>O('sine',f,t,t+.7,g));N(t,t+.12,F('bandpass',3500,3,g))},
+CK=t=>{const g=G(0,M,RV);E(g,t,.001,.8,.5);O('sine',180,t,t+.4,g).frequency.exponentialRampToValueAtTime(45,t+.2);N(t,t+.2,F('bandpass',1400,1.5,g))},
+SW=(t,d)=>{const g=G(0,M,RV),f=F('bandpass',300,2,g);f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(5000,t+d);E(g,t,.05,.35,d);N(t,t+d+.1,f)},
+FL=(t,m,d,v)=>{const g=G(0,M,RV);E(g,t,.25,v,d);O('sine',mf(m),t,t+d+.3,g);N(t,t+d,F('bandpass',mf(m)*2,9,G(.2,g)))};
+const EV=[],at=(b,f)=>EV.push([b,f]),Z=(b,k,m,v)=>at(b+k/4,t=>PL(t,m,v)),DR=(b,k,v)=>at(b+k/4,t=>TK(t,v));
+Z(0,0,62,.5);Z(0,2.5,57,.35);Z(1,1,55,.4);Z(1,3,50,.4);Z(2,0,55,.45);Z(2,2,62,.35);Z(3,0,50,.5);Z(3,2,59,.35);
+at(2,t=>FL(t,62,BAR*1.6,.2));
+const FM=[62,64,67,62,59,57,62,64,59],P8=[62,57,59,64,62,55,57,59];
+for(let b=5;b<14;b++){for(let k=0;k<8;k++)Z(b,k/2,P8[(k+b)%8],.28);DR(b,0,.7);DR(b,2,.5);at(b,t=>FL(t,FM[b-5],BAR*.8,.2))}
+[5,6.5,8,10,11.5].forEach(b=>at(b,t=>{CL(t,.35);TK(t,.9)}));
+[7,9,11].forEach(b=>at(b,CK));
+at(15,t=>PL(t,38,.6));at(15.6,t=>{SW(t,.35);TK(t,1)});at(16,t=>{PL(t,38,.7);TK(t,.6)});at(16.25,CK);at(16.8,CK);at(17,t=>PL(t,74,.6));
+Z(18,0,62,.3);Z(18.5,2,57,.25);Z(19,0,50,.3);at(18,t=>FL(t,62,BAR*1.8,.16));
+M.gain.setValueAtTime(.5,base+19*BAR);M.gain.linearRampToValueAtTime(0,base+20*BAR);
+const sched=b=>{bag=[];if(b>2&&BAGS[b-3]){BAGS[b-3].forEach(n=>n.disconnect());BAGS[b-3]=0}
+ EV.forEach(([e,f])=>{if(Math.floor(e)===b)f(base+e*BAR)});BAGS[b]=bag};
+bag=[];sched.out=comp;return sched}
+function live(A,from=0){const base=A.currentTime+.15-from,sc=setup(A,base);let b=Math.ceil(from/BAR-.001);
+ const tick=()=>{while(b<BARS&&base+b*BAR<A.currentTime+1.2)sc(b++)};tick();const iv=setInterval(tick,100);
+ return{base,stop(){clearInterval(iv);sc.out.disconnect()}}}
+function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sc=setup(A,0);sc(0);
+ for(let b=1;b<BARS;b++)A.suspend(((b*BAR-.5)*SR/128|0)*128/SR).then(()=>{sc(b);A.resume()});
+ return A.startRendering()}
+return{live,render,BAR,BARS,LEN}})();</script>
+<script type=x-shader id=f>#version 300 es
+precision highp float;uniform vec2 R;uniform float B,K,T;out vec4 O;const vec3 CU[3]=vec3[3](vec3(7.,-.22,.2),vec3(9.,.3,.25),vec3(11.,-.05,.3));const vec3 SP[5]=vec3[5](vec3(5.,-.15,.15),vec3(6.5,.2,-.1),vec3(8.,-.3,.1),vec3(10.,.1,.2),vec3(11.5,-.2,-.12));float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}float fb(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p=p*2.03+7.1;a*=.5;}return v;}float sm(float a,float b,float x){x=clamp((x-a)/(b-a),0.,1.);return x*x*(3.-2.*x);}float ov(float a,float b){return a+(1.-a)*b;}vec2 rt(vec2 v,float a){float c=cos(a),s=sin(a);return vec2(c*v.x-s*v.y,s*v.x+c*v.y);}float sg(vec2 p,vec2 a,vec2 b,float r){vec2 e=b-a,q=p-a;float t=clamp(dot(q,e)/dot(e,e),0.,1.);return length(q-e*t)-r;}float ik(float d,vec2 p,float r){float e=d+r*(n(p*40.)-.5);return max(1.-smoothstep(-.003,.003,e),.22*(1.-smoothstep(0.,.05,e))*n(p*9.));}float fig(vec2 q,float hat,float sw){vec2 r=q+vec2(.02*q.y*sin(q.y*9.+T*3.),0.);float d=max(abs(r.x)-.035-.065*pow(clamp(q.y/.42,0.,1.),1.5),max(-q.y,q.y-.42));d=min(d,length(q-vec2(0,.47))-.045);d=min(d,sg(q,vec2(0,.36),vec2(.1,.3),.028));d=min(d,sg(q,vec2(.1,.3),vec2(.1,.3)+.34*vec2(cos(sw),sin(sw)),.007));if(hat>0.)d=min(d,min(length(vec2(r.x/.17,(r.y-.515)/.022))-1.,max(abs(r.x)-.09*(.57-r.y)/.05,max(r.y-.57,.515-r.y))));return d;}float fg(vec2 p,vec2 o,float s,float hat,float sw,float l,float f){vec2 q=p-o;q.x*=s;q=rt(q,l-f*1.5708);return ik(fig(q,hat,sw),p,.02);}float mt(vec2 p,float y,float a,float s,float al){float r=y+a*(fb(vec2(p.x*1.3+s,s))-.5);return al*min(1.,ik(p.y-r,p,.02)+.3*exp(-abs(p.y-r)*70.));}float bm(vec2 p,float sp,float w,float sd,float dm){float D=0.,c0=floor(p.x/sp);for(int j=-1;j<2;j++){float c=c0+float(j),cx=(c+.2+.6*h(vec2(c,sd)))*sp,ww=w*(.6+.8*h(vec2(c,sd+1.)));float d=abs(p.x-cx)-ww*(1.+.5*step(.93,fract(p.y*2.5+h(vec2(c,sd+2.)))));d=max(d,-.26-p.y);D=ov(D,ik(d,p,.03)*dm);}return D;}float spl(vec2 p,vec3 s){float dt=B-s.x;if(dt<0.||dt>2.5)return 0.;vec2 q=p-s.yz;float a=atan(q.y,q.x),r=length(q);float R=.6*(1.-exp(-dt*7.))*(.7+.5*n(vec2(a*1.3+s.x,s.x*3.)));float m=1.-smoothstep(R-.02,R+.02,r+.05*(n(p*18.)-.5));for(int i=0;i<6;i++){float an=h(vec2(float(i),s.x))*6.283;m=max(m,1.-smoothstep(.008,.014,length(p-(s.yz+vec2(cos(an),sin(an))*R*1.5))));}return m*(1.-.7*sm(.6,2.5,dt));}float fl(vec2 p,vec3 s){float dt=B-s.x;if(dt<0.||dt>1.6)return 0.;float m=0.;for(int i=0;i<8;i++){float fi=float(i);vec2 v=vec2(h(vec2(fi,s.x))-.5,h(vec2(fi,s.y))*.8);vec2 q=s.yz+v*dt*vec2(1.5,1.)-vec2(0.,.5*dt*dt);float rr=.009*(1.-dt/1.6);m=max(m,1.-smoothstep(rr*.5,rr,length(p-q)));}return m;}float cm(vec2 p){float m=0.;for(int i=0;i<3;i++){vec3 s=CU[i];if(B>s.x)m=max(m,step(abs(p.x-s.y),.025)*step(s.z,p.y));}return m;}float rn(vec2 p){float x=(p.x+p.y*.2)*240.,i=floor(x),s=h(vec2(i,4.));float y=fract(s-T*(.5+s*.4))*1.6-.8;return step(abs(fract(x)-.5),.12)*step(0.,p.y-y)*step(p.y-y,.12)*step(.6,s)*.3;}vec2 S(vec2 p){float D=.12*sm(-.1,.5,p.y)*fb(p*vec2(1.5,3.)+3.),V=0.;float cx=step(4.9,B)*step(B,14.5)*(h(vec2(floor(B),7.))-.5)*.5;vec2 w=p+vec2(cx,0.);bool A=B>4.9&&B<8.&&mod(floor(B),2.)>.5;float g=-.26,fy=B<5.?-.238:A?-.2:g;float ax=mix(mix(-.3,-.22+.08*sin(B*2.),step(5.,B)),-.08,sm(13.5,14.5,B));float bx=mix(mix(.3,.22-.08*sin(B*2.+.8),step(5.,B)),.08,sm(13.5,14.5,B));float hp=.22*sin(1.5708*clamp((B-14.5)/.5,0.,1.));float ln=B<5.?0.:B<14.5?.15:mix(-.2,0.,sm(16.5,17.5,B));float sw=B<5.?.15:B<14.5?.5+.4*sin(B*5.):mix(1.3,.1,sm(16.5,17.5,B));D=ov(D,mt(w,.05-.5*(1.-sm(0.,2.5,B)),.14,4.,.22));if(B<5.){D=ov(D,mt(w,-.08,.08,8.,.45));D=ov(D,ik(w.y-(-.24+.12*pow(abs(w.x)*1.2,4.)),w,.03)*.55);}else if(A){float i=floor(w.x*1.6+.5),lx=w.x-i/1.6,yy=-.22+.25*h(vec2(i,11.))+.12*pow(abs(lx)*3.3,2.);D=ov(D,ik(max(w.y-yy,abs(lx)-.3),w,.02)*.4);}else{D=ov(D,bm(w,.11,.01,10.,.3));D=ov(D,bm(w,.19,.018,20.,.5));D=ov(D,bm(w,.34,.03,30.,.72)*(1.-cm(w)));D=ov(D,ik(w.y-g,w,.03)*.45);}if(B>=5.){for(int i=0;i<4;i++){float fi=float(i);vec2 bp=vec2(-.55+fi*.37,g);float th=1.5708*.92*sm(16.25+fi*.12,17.25+fi*.12,B);vec2 lq=rt(w-bp,th);D=ov(D,ik(max(abs(lq.x)-.02,max(-lq.y,lq.y-1.4)),w,.03)*.8);}}D*=1.-.4*smoothstep(.5,.8,fb(vec2(p.x*1.6+B*.12,p.y*3.)));for(int i=0;i<5;i++)D=ov(D,.6*spl(p,SP[i]));float fL=sm(16.,16.8,B),hL=hp*(1.-fL),hR=hp*(1.-sm(16.2,17.2,B));D=ov(D,fg(w,vec2(ax,fy+hL),1.,0.,sw,ln,fL));D=ov(D,fg(w,vec2(bx,fy+hR),-1.,1.,sw,ln,0.));D=ov(D,rn(p));if(B>15.6){float sx=mix(-1.,1.,sm(15.6,15.9,B));D=ov(D,ik(abs(p.y-.18-.01*sin(p.x*5.))-(.004+.012*(1.-abs(p.x)*.9)),p,.005)*step(p.x,sx)*(1.-.4*sm(16.5,18.,B)));}float dy=mix(.18,-.24,sm(16.2,17.,B));V=max(V,step(16.2,B)*step(B,17.)*(1.-smoothstep(-.002,.002,length(p-vec2(-.1,dy))-.011)));float rr=.005+.13*sm(17.,18.,B);V=max(V,step(17.,B)*.9*(1.-smoothstep(rr-.01,rr+.01,length(p-vec2(-.1,-.24))+.03*(n(p*30.)-.5))));for(int i=0;i<3;i++)D=ov(D,fl(w,CU[i]));return vec2(clamp(D,0.,1.),V);}void main(){vec2 p=(gl_FragCoord.xy-.5*R)/R.y;vec2 s=vec2(0.);float wp=step(4.9,B)*step(B,14.5)*(1.-sm(0.,.18,fract(B)));if(B>=0.){s=S(p);if(wp>0.)s=mix(s,(S(p+vec2(.1*wp,0))+S(p-vec2(.1*wp,0)))*.5,wp);}float D=s.x,V=s.y;if(K>=0.&&K<1.4){float st=mix(-1.2,1.2,sm(0.,.6,K));D=ov(D,ik(abs(p.y-.02*sin(p.x*3.))-.05*(1.-abs(p.x)*.5),p,.04)*step(p.x,st)*(1.-sm(.9,1.4,K)));}vec3 pap=vec3(.955,.925,.84)*(.93+.07*fb(p*2.5))*(.975+.025*h(gl_FragCoord.xy));vec3 c=pap*(1.-.93*clamp(D,0.,1.));c=mix(c,vec3(.86,.2,.13),V);c=mix(c,pap,sm(19.,20.,B));O=vec4(c,1.);}</script>
+<script>const D=document,$=i=>D.getElementById(i),C=$('c'),g=C.getContext('webgl2');
+const CAP=[[.6,'雨の屋根','RAIN ON THE ROOF'],[3.5,'静','STILLNESS'],[5,'一合','ONE CLASH'],[6,'竹林','BAMBOO GROVE'],[9,'疾風','GALE'],[12,'呼吸','BREATH'],[14.5,'止','STILL'],[15.6,'一閃','ONE FLASH'],[17,'一滴','ONE DROP'],[18.6,'終','FIN']];
+const VS='#version 300 es\nvoid main(){vec2 p=vec2(gl_VertexID&1,gl_VertexID>>1)*4.-1.;gl_Position=vec4(p,0,1);}';
+const sh=(t,s)=>{const o=g.createShader(t);g.shaderSource(o,s);g.compileShader(o);if(!g.getShaderParameter(o,g.COMPILE_STATUS))console.error(g.getShaderInfoLog(o));return o},
+pr=g.createProgram();g.attachShader(pr,sh(g.VERTEX_SHADER,VS));g.attachShader(pr,sh(g.FRAGMENT_SHADER,$('f').text));g.linkProgram(pr);if(!g.getProgramParameter(pr,g.LINK_STATUS))console.error(g.getProgramInfoLog(pr));g.useProgram(pr);
+const U=n=>g.getUniformLocation(pr,n),uR=U('R'),uB=U('B'),uK=U('K'),uT=U('T');
+let A=0,sg=0,t0=-1,ci=-2;
+function go(){if(A)return;A=new AudioContext();A.resume();sg=SONG.live(A,0);t0=performance.now();$('s').style.opacity=0;setTimeout(()=>$('s').remove(),1500)}
+D.onpointerdown=go;
+function cap(B){let i=-1;CAP.forEach((c,j)=>{if(B>=c[0])i=j});if(i===ci)return;ci=i;const e=$('cap');e.classList.remove('a');
+if(i>=0){$('cj').textContent=CAP[i][1];$('ce').textContent=CAP[i][2];void e.offsetWidth;e.classList.add('a')}}
+function fr(now){requestAnimationFrame(fr);
+const t=now/1e3,B=sg?(A.currentTime-sg.base)/SONG.BAR:-1,K=t0<0?-1:(now-t0)/1e3;
+g.uniform2f(uR,C.width,C.height);g.uniform1f(uB,B);g.uniform1f(uK,K);g.uniform1f(uT,t);
+g.drawArrays(g.TRIANGLES,0,3);cap(B);$('e').style.opacity=B>=18.6?1:0}
+function rs(){const s=Math.min(1,1280/innerWidth);C.width=innerWidth*s|0;C.height=innerHeight*s|0;g.viewport(0,0,C.width,C.height)}
+onresize=rs;rs();requestAnimationFrame(fr);</script>

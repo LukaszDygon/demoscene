@@ -1,0 +1,201 @@
+(()=>{
+const S=SONG,E=S.E,T=S.T,cv=document.getElementById('c'),$=i=>document.getElementById(i);
+const gl=cv.getContext('webgl2',{antialias:true});
+if(!gl){document.body.innerHTML='<p style="padding:2em;font:20px serif">WebGL2 is required.</p>';return}
+const cl=x=>Math.min(1,Math.max(0,x)),sl=p=>p*p*(3-2*p),ph=(a,b,t)=>cl((t-T(a))/(T(b)-T(a)));
+const hs=(i,j)=>{const x=Math.sin(i*127.1+j*311.7)*43758.5453;return x-Math.floor(x)};
+const WHT=[.99,.98,.96],CR=[.98,.94,.86],SAL=[.98,.58,.52],MINT=[.66,.91,.8],BUT=[1,.9,.5],BLU=[.68,.82,.98],WOOD=[.96,.82,.64],PIN=[.98,.74,.82],SILV=[.86,.88,.93],GRN=[.56,.86,.7],GOLD=[.97,.84,.5],STEEL=[.5,.55,.66],TOAST=[.93,.66,.36],MARB=[.55,.75,.95];
+// ---- matrices (column-major) ----
+const mm=(a,b)=>{const o=[];for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s}return o};
+const TR=(x,y,z)=>[1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1];
+const RZ=a=>{const c=Math.cos(a),s=Math.sin(a);return[c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1]};
+const RY=a=>{const c=Math.cos(a),s=Math.sin(a);return[c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]};
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],nrm=a=>{const l=Math.hypot(...a);return a.map(v=>v/l)};
+const look=(e,c)=>{const f=nrm(sub(c,e)),s=nrm(cr(f,[0,1,0])),u=cr(s,f);
+ return[s[0],u[0],-f[0],0,s[1],u[1],-f[1],0,s[2],u[2],-f[2],0,-dot(s,e),-dot(u,e),dot(f,e),1]};
+const persp=(fy,a,n,f)=>{const t=1/Math.tan(fy/2);return[t/a,0,0,0,0,t,0,0,0,0,(f+n)/(n-f),-1,0,0,2*f*n/(n-f),0]};
+// ---- shaders ----
+const VSF=`#version 300 es
+void main(){gl_Position=vec4(vec2(gl_VertexID&1,gl_VertexID>>1)*4.-1.,0.,1.);}`;
+const BGF=`#version 300 es
+precision highp float;uniform vec2 R;out vec4 o;
+void main(){vec2 u=gl_FragCoord.xy/R;vec3 a=vec3(.6,.82,.97),b=vec3(1.,.93,.84);
+vec3 s=mix(b,a,smoothstep(.15,1.,u.y));float d=length((u-vec2(.5,.45))*vec2(1.,.6));
+s=mix(s,vec3(1.,.98,.93),.45*exp(-d*d*3.));o=vec4(s,1.);}`;
+const OVS=`#version 300 es
+in vec3 p,n;uniform mat4 V,M;out vec3 wn,wp;
+void main(){vec4 w=M*vec4(p,1.);wp=w.xyz;wn=mat3(M)*n;gl_Position=V*w;}`;
+const OFS=`#version 300 es
+precision highp float;in vec3 wn,wp;uniform vec3 C,CP;uniform float S,Em;out vec4 o;
+void main(){vec3 n=normalize(wn),L=normalize(vec3(.45,.9,.6)),Vd=normalize(CP-wp),h=normalize(L+Vd);
+float d=max(dot(n,L),0.),hm=.5+.5*n.y;
+vec3 amb=mix(vec3(.8,.72,.8),vec3(1.,.97,.92),hm);
+vec3 c=C*(amb*.7+d*.5)+S*pow(max(dot(n,h),0.),48.)+C*Em;
+float f=smoothstep(34.,70.,length(wp-CP));
+o=vec4(mix(c,vec3(.92,.94,.99),f*.35),1.);}`;
+const PVS=`#version 300 es
+in vec4 a;in vec4 c;uniform mat4 V;uniform float uS;out vec4 vc;
+void main(){vec4 q=V*vec4(a.xyz,1.);gl_Position=q;gl_PointSize=a.w*uS/max(q.w,.1);vc=c;}`;
+const PFS=`#version 300 es
+precision mediump float;in vec4 vc;out vec4 o;
+void main(){vec2 q=gl_PointCoord*2.-1.;float g=clamp(1.-dot(q,q),0.,1.);g*=g;o=vec4(vc.rgb*vc.a*g,1.);}`;
+const PROG=(v,f)=>{const p=gl.createProgram();for(const[t,s]of[[gl.VERTEX_SHADER,v],[gl.FRAGMENT_SHADER,f]]){const h=gl.createShader(t);gl.shaderSource(h,s);gl.compileShader(h);if(!gl.getShaderParameter(h,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(h));gl.attachShader(p,h)}
+ gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))console.error(gl.getProgramInfoLog(p));return p};
+const UL=(p,n)=>{p.u=p.u||{};return p.u[n]||(p.u[n]=gl.getUniformLocation(p,n))};
+const BGP=PROG(VSF,BGF),OP=PROG(OVS,OFS),PP=PROG(PVS,PFS);
+// ---- meshes (all baked at load; scale lives in the vertices so normals stay exact) ----
+const VD=[];
+const mesh=f=>{const s=VD.length/6;f();return[s,VD.length/6-s]};
+const Q=(a,b,c,d,n)=>{for(const p of[a,b,c,a,c,d])VD.push(p[0],p[1],p[2],n[0],n[1],n[2])};
+function BOX(w,h,d){const x=w/2,y=h/2,z=d/2;
+ Q([x,-y,-z],[x,y,-z],[x,y,z],[x,-y,z],[1,0,0]);Q([-x,-y,z],[-x,y,z],[-x,y,-z],[-x,-y,-z],[-1,0,0]);
+ Q([-x,y,-z],[-x,y,z],[x,y,z],[x,y,-z],[0,1,0]);Q([-x,-y,z],[-x,-y,-z],[x,-y,-z],[x,-y,z],[0,-1,0]);
+ Q([-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z],[0,0,1]);Q([x,-y,-z],[-x,-y,-z],[-x,y,-z],[x,y,-z],[0,0,-1])}
+function SPH(r,sg,st){const P=(i,j)=>{const th=Math.PI*i/st,f=2*Math.PI*j/sg;return[Math.sin(th)*Math.cos(f),Math.cos(th),Math.sin(th)*Math.sin(f)]};
+ for(let i=0;i<st;i++)for(let j=0;j<sg;j++)for(const[a,b]of[[i,j],[i+1,j],[i+1,j+1],[i,j],[i+1,j+1],[i,j+1]]){const p=P(a,b);VD.push(p[0]*r,p[1]*r,p[2]*r,p[0],p[1],p[2])}}
+function CYL(r,h,sg){const hh=h/2,V=(p,n)=>VD.push(p[0],p[1],p[2],n[0],n[1],n[2]);
+ for(let j=0;j<sg;j++){const a0=2*Math.PI*j/sg,a1=2*Math.PI*(j+1)/sg,c0=Math.cos(a0),s0=Math.sin(a0),c1=Math.cos(a1),s1=Math.sin(a1);
+  const n0=[c0,0,s0],n1=[c1,0,s1],A=[c0*r,-hh,s0*r],Bp=[c1*r,-hh,s1*r],Cp=[c1*r,hh,s1*r],D=[c0*r,hh,s0*r];
+  for(const[p,n]of[[A,n0],[Bp,n1],[Cp,n1],[A,n0],[Cp,n1],[D,n0]])V(p,n);
+  for(const[p,n]of[[[0,hh,0],[0,1,0]],[D,[0,1,0]],[Cp,[0,1,0]],[[0,-hh,0],[0,-1,0]],[Bp,[0,-1,0]],[A,[0,-1,0]]])V(p,n)}}
+const SC={};const sph=r=>SC[r]||(SC[r]=mesh(()=>SPH(r,10,6)));
+// ---- scene objects: {m: matrix or t=>matrix, ms: mesh, c: colour, g: fold side (-1 left, +1 right), sp, em} ----
+const OB=[];
+const O=(m,ms,c,g,sp,em)=>OB.push({m,ms,c,g:g===undefined?0:g,sp:sp||0,em:em||0});
+const bx=(x0,x1,y0,y1,z0,z1,c,g)=>{const cx=(x0+x1)/2;O(TR(cx,(y0+y1)/2,(z0+z1)/2),mesh(()=>BOX(x1-x0,y1-y0,z1-z0)),c,g===undefined?(cx<0?-1:1):g)};
+const sbx=(x0,x1,y0,y1,z0,z1,c)=>{bx(x0,x1,y0,y1,z0,z1,c);bx(-x1,-x0,y0,y1,z0,z1,c)};
+// house shell: cutaway, no front wall
+bx(-8.5,0,-.5,11,-2.5,-2.1,MINT);
+bx(0,8.5,-.5,11,-2.5,-2.1,BLU);
+sbx(-8.7,-8.5,-.5,11,-2.5,2.1,CR);
+bx(-8.7,0,-.5,0,-2.5,2.1,WOOD);
+bx(0,8.7,-.5,0,-2.5,2.1,WOOD);
+bx(-.8,0,7.5,8,-2.5,2.1,WOOD);
+bx(0,8.7,7.5,8,-2.5,2.1,WOOD);
+bx(-8.9,0,11,11.4,-2.5,2.4,SAL,-1);
+bx(0,8.9,11,11.4,-2.5,2.4,SAL,1);
+// stairs: sixteen steps from the top floor down to the parlour
+for(let k=0;k<16;k++){const x1=-.8-.4*k;bx(x1-.4,x1,-.5,7.5-.5*k,-.7,.7,k&1?PIN:CR,-1)}
+// top-right bedroom and the dresser with the drawer
+bx(1.4,3.2,8,9.6,-1.6,.4,BUT,1);
+bx(4.6,7.8,8,8.7,-1.8,.2,MINT,1);
+bx(4.8,5.6,8.7,8.95,-1.8,-1.5,WHT,1);
+const DW=mesh(()=>BOX(1.6,.7,.3));
+O(t=>TR(2.3,8.55,.55+.9*sl(ph(E.drawer,E.drawer+.5,t))),DW,SAL,1);
+// marble: in the drawer, falls out, rolls to the stairs, bounces down them, stops at domino one
+const MB=t=>{
+ if(t<T(E.drop))return[2.3,8.45,.55+.9*sl(ph(E.drawer,E.drawer+.5,t))];
+ if(t<T(3.8))return[2.3,8.45-.2*Math.pow(ph(E.drop,3.8,t),2),1.45];
+ if(t<T(E.stairs)){const p=ph(3.8,E.stairs,t);return[2.3-3.1*p,8.25,1.45-1.45*p]}
+ if(t<T(E.dom)){const p=ph(E.stairs,E.dom,t);return[-.8-6.2*p,.25+7.5*(1-p)+.25*Math.abs(Math.sin(16*Math.PI*p)),0]}
+ return[-7,.25,0]};
+O(t=>TR(...MB(t)),sph(.25),MARB,-1,.8);
+// parlour: sofa, dominoes, toaster
+bx(-8.4,-7.4,0,.9,-2,-.6,SAL,-1);
+bx(-8.4,-7.4,.9,1.7,-2,-1.7,SAL,-1);
+bx(-2.3,-1.5,0,.6,.6,1.2,SILV,-1);
+bx(-2.1,-1.7,.6,.66,.8,1,STEEL,-1);
+const DM=mesh(()=>BOX(.08,1,.5));
+const TP=(x,z,t0)=>t=>mm(TR(x+.04,0,z),mm(RZ(-(Math.PI/2-.03)*sl(cl((t-t0)/.25))),TR(-.04,.5,0)));
+const DC=[WHT,SAL,MINT];
+for(let i=0;i<18;i++)O(TP(-6.7+i*.182,.9,T(E.dom+i/3)),DM,DC[i%3],-1,.15);
+O(TP(0,4.5,T(E.tap)),DM,WHT,1,.15);
+// toast flies from the toaster to the lever
+const TOASTM=mesh(()=>BOX(.6,.08,.6));
+O(t=>{const p=ph(E.pop,E.lever,t);if(t<T(E.pop)||p>=1)return TR(0,-50,0);return mm(TR(-1.9+1.4*p,.9+1.4*p+2*p*(1-p),.9),RZ(4*p))},TOASTM,TOAST,-1);
+// hall: lever, post, chandelier
+bx(-.12,.12,0,2.2,.7,.9,BUT,1);
+const LV=mesh(()=>BOX(1,.14,.22));
+O(t=>mm(TR(0,2.2,.8),mm(RZ(.7*sl(ph(E.lever,E.lever+.3,t))),TR(-.5,0,0))),LV,BUT,1);
+const tc=T(E.cut),tr=T(E.crash);
+const CHY=t=>t<tc?5.9:5.9-5.4*Math.pow(cl((t-tc)/(tr-tc)),2);
+const CHR=t=>t<tr?0:.5*sl(cl((t-tr)/.3));
+const G=t=>mm(TR(0,CHY(t),0),RZ(CHR(t)));
+O(t=>t<tc?TR(0,6.7,0):TR(0,-50,0),mesh(()=>CYL(.02,1.6,6)),SILV,-1);
+const LC=(m,ms,c,sp,em)=>O(t=>mm(G(t),m),ms,c,-1,sp,em);
+const RG1=mesh(()=>CYL(.75,.06,16)),RG2=mesh(()=>CYL(.45,.06,12));
+LC(TR(0,-.1,0),sph(.28),GOLD,.6);
+LC(TR(0,-.25,0),RG1,GOLD,.4);
+LC(TR(0,-.7,0),RG2,GOLD,.4);
+for(let k=0;k<8;k++)LC(TR(.75*Math.cos(k*Math.PI/4),-.42,.75*Math.sin(k*Math.PI/4)),sph(.1),WHT,.9,.25);
+for(let k=0;k<6;k++)LC(TR(.45*Math.cos(k*Math.PI/3),-.95,.45*Math.sin(k*Math.PI/3)),sph(.1),BLU,.9,.25);
+// conservatory: cannon, crate, plant
+bx(1.2,2.4,0,.5,.5,1.3,BUT,1);
+O(t=>{const dc=t-T(E.cannon),rc=dc>0?.3*Math.exp(-dc*8):0;return mm(TR(1.8,.7,.9),mm(RZ(-.9),TR(0,-rc,0)))},mesh(()=>CYL(.16,1.1,12)),STEEL,1);
+const CBALL=sph(.18);
+O(t=>{const p=ph(E.cannon,E.hit,t);if(t<T(E.cannon)||p>=1)return TR(0,-50,0);return TR(2.23+2.97*p,1.04-.14*p+1.8*p*(1-p),.9)},CBALL,STEEL,1,.5);
+bx(4.8,5.6,0,.8,.4,1.2,SAL,1);
+O(TR(6.6,.25,-.5),mesh(()=>CYL(.4,.5,12)),SAL,1);
+O(TR(6.6,1.3,-.5),sph(.7),GRN,1,.05);
+O(TR(6.1,1.9,-.3),sph(.45),GRN,1,.05);
+// ---- fold: each half swings about the spine like a pop-up book closing ----
+const PHI=t=>(Math.PI/2)*sl(ph(E.fold,E.fold2,t));
+// ---- GL buffers ----
+const vb=gl.createBuffer(),va=gl.createVertexArray(),ev=gl.createVertexArray();
+gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(VD),gl.STATIC_DRAW);
+gl.bindVertexArray(va);
+const ap=gl.getAttribLocation(OP,'p'),an=gl.getAttribLocation(OP,'n');
+gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,3,gl.FLOAT,false,24,0);
+gl.enableVertexAttribArray(an);gl.vertexAttribPointer(an,3,gl.FLOAT,false,24,12);
+const pb=gl.createBuffer(),pa=gl.createVertexArray();
+gl.bindVertexArray(pa);gl.bindBuffer(gl.ARRAY_BUFFER,pb);
+const aa=gl.getAttribLocation(PP,'a'),ac=gl.getAttribLocation(PP,'c');
+gl.enableVertexAttribArray(aa);gl.vertexAttribPointer(aa,4,gl.FLOAT,false,32,0);
+gl.enableVertexAttribArray(ac);gl.vertexAttribPointer(ac,4,gl.FLOAT,false,32,16);
+gl.bindVertexArray(null);
+// ---- particles: fireworks, glass shards, motes ----
+const P=[],PAL=[SAL,MINT,BUT,BLU,PIN,WHT],BP=[[3.2,4.6],[6.2,3.2],[4.2,4.2],[2.4,2.6],[6.6,4.9],[4,2.4],[2,5],[5.6,3.9]];
+const put=(x,y,z,s,c,a)=>P.push(x,y,z,s,c[0],c[1],c[2],a);
+function parts(t){P.length=0;
+ for(let i=0;i<60;i++)put((hs(i,1)-.5)*16,((hs(i,2)+t*.02*(.5+hs(i,3)))%1)*11,hs(i,4)*6-2,.07,WHT,.35);
+ S.BURST.forEach((bb,i)=>{const d=t-T(bb),Q0=BP[i];
+  if(d<0){const p=ph(bb-.4,bb,t);if(p>0)put(5.2+(Q0[0]-5.2)*p,1.1+(Q0[1]-1.1)*p,.8,.16,WHT,1);return}
+  const life=1.4;if(d>life)return;
+  for(let j=0;j<36;j++){const k=i*40+j,th=6.2832*hs(k,1),fi=Math.acos(2*hs(k,2)-1),sp=.9+1.1*hs(k,3),dx=Math.sin(fi)*Math.cos(th),dy=Math.cos(fi),dz=Math.sin(fi)*Math.sin(th)*.25;
+   put(Q0[0]+dx*sp*d,Q0[1]+dy*sp*d-1.1*d*d,.8+dz*sp*d,.3*(1-d/life)+.1,PAL[(i+j)%6],1-d/life)}});
+ const td=t-tr;
+ if(td>0&&td<2.5)for(let j=0;j<40;j++){const vx=(hs(j,7)-.5)*3.6,vy=1+hs(j,8)*3.2,vz=(hs(j,9)-.5)*3;put(vx*td,Math.max(.1,.5+vy*td-4.9*td*td),vz*td,.12,j&1?WHT:BLU,1-td/2.5)}}
+// ---- camera: centred on the spine, dollying with the chain ----
+const KF=[[0,36,7,6],[3,30,6,5],[7,24,3,1.5],[10,21,2.2,1.2],[13,20,3,2.5],[16,26,4,3],[19,28,5,4.5],[22,25,6,6.5],[24,22,4.5,4],[28,30,6,5],[35,40,7,6]];
+function kf(b){let i=0;while(i<KF.length-2&&b>KF[i+1][0])i++;const a=KF[i],c=KF[i+1],s=sl(cl((b-a[0])/(c[0]-a[0])));return[a[1]+(c[1]-a[1])*s,a[2]+(c[2]-a[2])*s,a[3]+(c[3]-a[3])*s]}
+const zo=()=>Math.max(1,.9/(cv.width/cv.height));
+function cam(t){const k=kf(S.B(t));return{e:[0,k[1],k[0]*zo()],c:[0,k[2],0]}}
+const TC=[0,.5,4.5],te=()=>[0,1.5,6.5*zo()];
+// ---- captions and end card ----
+const CAP=[[0,3,'Prologue','one domino, one tap'],[3,7,'I · Drawer','a marble is set loose'],[7,13,'II · Parlour','dominoes, one beat apiece'],[13,15,'III · Toaster','toast takes flight'],[15,16,'IV · Cannon','the lever gives way'],[16,22,'V · Fireworks','the conservatory lights up'],[22.5,24,'VI · Chandelier','everything comes down'],[24,28.5,'VII · Pop-up','the house folds shut']];
+const ck=document.querySelector('#cp .k'),cl2=document.querySelector('#cp .l'),cp=$('cp'),en=$('en'),ti=$('ti');let cur=-1;
+function caps(b){let j=-1;CAP.forEach((c,i)=>{if(b>=c[0]&&b<c[1])j=i});
+ if(j!==cur&&j>=0){cur=j;ck.textContent=CAP[j][2];cl2.textContent=CAP[j][3]}
+ cp.style.opacity=j>=0?Math.min(1,(b-CAP[j][0])*3,(CAP[j][1]-b)*3):0;
+ en.style.opacity=cl(b-33.5)}
+// ---- clock and start ----
+let actx=null,song=null;
+const now=()=>song?Math.max(0,actx.currentTime-song.base):0;
+async function go(){if(actx)return;actx=new AudioContext();await actx.resume();song=S.live(actx);ti.style.opacity=0}
+addEventListener('pointerdown',go);addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')go()});
+// ---- resize ----
+function rs(){const d=Math.min(devicePixelRatio||1,1.5);cv.width=innerWidth*d|0;cv.height=innerHeight*d|0}
+addEventListener('resize',rs);rs();
+// ---- frame ----
+function frame(){requestAnimationFrame(frame);
+ const t=now(),b=S.B(t),started=!!song,w=started?sl(cl(t/1.2)):0;
+ const c=cam(t),T0=te(),e=T0.map((v,i)=>v+(c.e[i]-v)*w),tg=TC.map((v,i)=>v+(c.c[i]-v)*w);
+ const Vm=look(e,tg),Pm=persp(.8,cv.width/cv.height,.5,400),VP=mm(Pm,Vm),phi=PHI(t),FL=RY(phi),FR=RY(-phi);
+ gl.viewport(0,0,cv.width,cv.height);gl.clearColor(1,.95,.88,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ gl.disable(gl.DEPTH_TEST);gl.disable(gl.BLEND);gl.useProgram(BGP);gl.bindVertexArray(ev);
+ gl.uniform2f(UL(BGP,'R'),cv.width,cv.height);gl.drawArrays(gl.TRIANGLES,0,3);
+ gl.enable(gl.DEPTH_TEST);gl.useProgram(OP);gl.bindVertexArray(va);
+ gl.uniformMatrix4fv(UL(OP,'V'),false,VP);gl.uniform3fv(UL(OP,'CP'),e);
+ for(const o of OB){let M=typeof o.m==='function'?o.m(t):o.m;if(o.g)M=mm(o.g<0?FL:FR,M);
+  gl.uniformMatrix4fv(UL(OP,'M'),false,M);gl.uniform3fv(UL(OP,'C'),o.c);gl.uniform1f(UL(OP,'S'),o.sp);gl.uniform1f(UL(OP,'Em'),o.em);
+  gl.drawArrays(gl.TRIANGLES,o.ms[0],o.ms[1])}
+ P.length=0;parts(t);
+ if(P.length){gl.useProgram(PP);gl.bindVertexArray(pa);gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.DYNAMIC_DRAW);
+  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);gl.depthMask(false);
+  gl.uniformMatrix4fv(UL(PP,'V'),false,VP);gl.uniform1f(UL(PP,'uS'),cv.height*Pm[5]*.5);
+  gl.drawArrays(gl.POINTS,0,P.length/8);gl.depthMask(true);gl.disable(gl.BLEND)}
+ if(started)caps(b);
+}
+frame();
+})();

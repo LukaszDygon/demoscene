@@ -1,0 +1,30 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>SILENT FLEET</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:pointer;color:#e8d8c0}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.o{position:fixed;left:0;right:0;text-align:center;pointer-events:none;transition:opacity .6s}
+#win{position:fixed;inset:0;pointer-events:none;border-radius:clamp(12px,4vmin,48px);
+box-shadow:inset 0 0 0 clamp(10px,2.6vmin,28px) #07090b,inset 0 0 0 clamp(13px,3.2vmin,34px) #2c343b,inset 0 0 140px 50px rgba(0,0,0,.8)}
+#ti{top:30%}
+#ti h1{font:300 min(11vw,88px)/1 "Helvetica Neue",Arial,"DejaVu Sans",sans-serif;letter-spacing:.2em;margin:0 0 0 .2em;text-shadow:0 0 18px #000}
+#ti p{font:400 min(3.4vw,14px)/1.6 ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;letter-spacing:.3em;text-transform:uppercase;margin:1.2em 0 0;opacity:.75;text-shadow:0 0 10px #000}
+#ti .k{margin-top:2.6em;animation:bl 2.8s ease-in-out infinite}
+@keyframes bl{50%{opacity:.2}}
+#cap{bottom:12%;font:500 min(3.2vw,16px)/1.4 ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;letter-spacing:.14em;color:#ffb866;opacity:0;
+text-shadow:0 0 6px #000,0 0 14px #000,0 0 26px rgba(40,10,0,.9)}
+#hud{top:7vh;text-align:left;padding-left:min(9vw,44px);opacity:0;font:600 min(2.6vw,14px)/1.7 ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;letter-spacing:.2em;color:#9fe6ff;text-shadow:0 0 6px #000}
+#hud .w{color:#ff8a6a}
+#wo{inset:0;background:#fff;opacity:0}
+#en{top:34%;opacity:0}
+#en h2{font:300 min(9vw,70px)/1 "Helvetica Neue",Arial,"DejaVu Sans",sans-serif;letter-spacing:.3em;margin:0 0 0 .3em;text-shadow:0 0 18px #000}
+#en p{font:400 min(3.4vw,15px)/1.6 ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;letter-spacing:.2em;text-transform:uppercase;margin:.8em 0;text-shadow:0 0 10px #000}
+#en .k{margin-top:2.4em;font-size:min(2.6vw,12px);opacity:.55}
+</style></head><body><canvas id=c></canvas><div id=win></div>
+<div class=o id=hud><div>POD 7</div><div>O2 <span id=o2>100%</span></div></div>
+<div class=o id=cap></div>
+<div class=o id=ti><h1>SILENT FLEET</h1><p>battle in orbit</p><p class=k>touch the glass to board pod 7</p></div>
+<div class=o id=wo></div>
+<div class=o id=en><h2>SILENT FLEET</h2><p>there is no sound in vacuum</p><p class=k>SILENTIUM &middot; 64K &middot; MMXXVI</p></div>
+<script>/*MUSIC*/</script>
+<script>/*MAIN*/</script>
+</body></html>
