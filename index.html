@@ -23,7 +23,7 @@ h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 16px}
 .stage{aspect-ratio:16/9;background:#000;border-radius:4px;overflow:hidden;position:relative}
 .thumb{all:unset;cursor:pointer;position:absolute;inset:0;display:block}
 .thumb[hidden]{display:none}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb video{width:100%;height:100%;object-fit:cover;display:block}
 .thumb::after{content:'';position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;
  background:rgba(12,10,18,.72) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 6.5v11l9-5.5z' fill='%23ff71ce'/%3E%3C/svg%3E") center/36px no-repeat;
  box-shadow:0 0 0 2px rgba(255,113,206,.6);transition:transform .15s}
@@ -78,14 +78,22 @@ const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&qu
 const g=document.getElementById('g'),touch=matchMedia('(pointer:coarse)').matches;
 let playing=null;
 
+// Previews: a looping WebM of each start screen (poster = thumb.png). A clip loads and plays only while its card
+// is on screen, and every clip pauses while a demo runs. With reduced motion, or no WebM support, the poster stays.
+const still=matchMedia('(prefers-reduced-motion: reduce)').matches||!document.createElement('video').canPlayType('video/webm; codecs="vp9"');
+const onScreen=new Set();
+function preview(v){if(still)return;if(onScreen.has(v)&&!playing&&!v.closest('[hidden]')){if(!v.src)v.src=v.dataset.src;v.play().catch(()=>{})}else v.pause()}
+const previews=new IntersectionObserver(es=>{for(const e of es){e.isIntersecting?onScreen.add(e.target):onScreen.delete(e.target);preview(e.target)}});
+const previewAll=()=>document.querySelectorAll('.thumb video').forEach(preview);
+
 // Only one demo is ever loaded, so only one WebGL context exists. Stopping a demo puts its thumbnail back.
 function stop(card){const st=card.querySelector('.stage');st.querySelector('iframe')?.remove();
- st.querySelector('.thumb').hidden=false;if(playing===card)playing=null}
+ st.querySelector('.thumb').hidden=false;if(playing===card){playing=null;previewAll()}}
 function play(card,full){if(playing&&playing!==card)stop(playing);
  const st=card.querySelector('.stage');if(!st.querySelector('iframe')){const f=document.createElement('iframe');
   f.allow='autoplay; fullscreen';f.src=card.dataset.src;st.append(f);st.querySelector('.thumb').hidden=true;
   f.onload=()=>{try{f.contentWindow.focus()}catch{}}}
- playing=card;if(full||touch)enterFull(st)}
+ playing=card;previewAll();if(full||touch)enterFull(st)}
 
 // Fullscreen: the real Fullscreen API where it exists (desktop, Android, iPad), and a fixed full-viewport
 // overlay where it doesn't (iPhone Safari). Both show a close button.
@@ -98,13 +106,13 @@ function exitFull(st){if(document.fullscreenElement||document.webkitFullscreenEl
 addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.pfs').forEach(exitFull)});
 
 for(const[t,u,m,b]of DEMOS){
- const agent=(u.match(/\.([a-z]+-[\d.]+-[a-z]+)\.html$/)||[])[1]||'',size=m.split(' ')[0],thumb=u.split('/dist/')[0]+'/thumb.png';
+ const agent=(u.match(/\.([a-z]+-[\d.]+-[a-z]+)\.html$/)||[])[1]||'',size=m.split(' ')[0],thumb=u.split('/dist/')[0]+'/thumb';
  const c=document.createElement('section');c.className='card';Object.assign(c.dataset,{src:u,size,agent});
  c.innerHTML=`<h2>${esc(t)}</h2><div class=meta><span>${esc(m)} · ${AGENT[agent]||agent}</span>
   <button class=fs type=button>⛶ fullscreen</button><a href="${u}" target=_blank>open in own window ↗</a></div>
-  <div class=stage><button class=thumb type=button aria-label="Play ${esc(t)} (${size})"><img src="${thumb}" alt="" loading=lazy width=640 height=360></button>
+  <div class=stage><button class=thumb type=button aria-label="Play ${esc(t)} (${size})"><video muted loop playsinline disablepictureinpicture preload=none poster="${thumb}.png" data-src="${thumb}.webm" width=640 height=360></video></button>
   <button class=x type=button aria-label="Close fullscreen">✕</button></div><p class=brief>${esc(b)}</p>`;
- const st=c.querySelector('.stage');
+ const st=c.querySelector('.stage');previews.observe(c.querySelector('video'));
  c.querySelector('.thumb').onclick=()=>play(c,false);
  c.querySelector('.fs').onclick=()=>play(c,true);
  c.querySelector('.x').onclick=()=>exitFull(st);
@@ -116,7 +124,7 @@ function apply(){let n=0;for(const c of g.children){const on=(!F.size||c.dataset
   c.hidden=!on;if(!on&&playing===c)stop(c);n+=on}
  document.getElementById('count').textContent=`Showing ${n} of ${g.children.length}`;
  for(const s of document.querySelectorAll('.seg'))for(const b of s.children)b.setAttribute('aria-pressed',b.dataset.v===F[s.dataset.f]);
- const p=new URLSearchParams();for(const k in F)if(F[k])p.set(k,F[k]);const qs=p.toString();history.replaceState(null,'',qs?'?'+qs:location.pathname)}
+ const p=new URLSearchParams();for(const k in F)if(F[k])p.set(k,F[k]);const qs=p.toString();history.replaceState(null,'',qs?'?'+qs:location.pathname);previewAll()}
 for(const s of document.querySelectorAll('.seg'))for(const b of s.children)b.onclick=()=>{F[s.dataset.f]=b.dataset.v;apply()};
 apply();
 </script></body></html>
