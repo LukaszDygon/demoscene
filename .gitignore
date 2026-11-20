@@ -3,3 +3,4 @@ __pycache__/
 node_modules/
 *.png
 demos/kaiju-16k/dist/dev.html
+!demos/*/thumb.png
