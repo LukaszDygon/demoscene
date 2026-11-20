@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: deep-sea-ambient-64k
+expected_outcome: |
+  A single self-contained HTML intro under 65536 bytes with music under 16384 bytes that starts on click, plays ~90 s without errors, and visually follows the deep-sea brief (dark teal palette, jellyfish, whale, cathedral, Latin captions, gentle camera) rather than the template's vaporwave look.

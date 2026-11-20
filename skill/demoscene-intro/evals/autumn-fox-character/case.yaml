@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: autumn-fox-character
+expected_outcome: |
+  A single-file intro under 64 KB (music under 16 KB) that runs without errors, with an autumn forest, a recognizable low-poly fox shown clearly at least once, a third-person follow camera, the cabin-window transition to a cake, haiku captions with translations, lo-fi music, and a Happy Birthday Mika end card.

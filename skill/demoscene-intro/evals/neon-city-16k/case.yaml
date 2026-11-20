@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: neon-city-16k
+expected_outcome: |
+  A working intro in ~/demos/kaiju16k whose built HTML is under 16384 bytes with soundtrack code under 4096 bytes, playing ~60 s of synthwave with a night neon city flythrough, katakana billboards and a KAIJU hologram finale, with no runtime errors.

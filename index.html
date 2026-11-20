@@ -1,0 +1,39 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Demo Screening Room</title>
+<style>
+:root{--bg:#0c0a12;--card:#161320;--fg:#eee;--mut:#9a93ad;--acc:#ff71ce;--link:#7ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,system-ui,sans-serif;padding:24px 16px}
+main{max-width:1500px;margin:0 auto}
+h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
+.card{background:var(--card);border-radius:8px;padding:12px}
+.card h2{font-size:16px;margin:0;color:var(--acc)}
+.meta{color:var(--mut);font-size:12px;margin:2px 0 8px}.meta a{color:var(--link)}
+.brief{font-size:13px;color:var(--mut);margin:8px 0 0}
+.stage{aspect-ratio:16/9;background:#000;border-radius:4px;overflow:hidden;position:relative}
+.stage button{all:unset;position:absolute;inset:0;display:grid;place-items:center;cursor:pointer;color:var(--fg);font-size:15px}
+.stage button:hover{background:#ffffff10}
+iframe{width:100%;height:100%;border:0}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<h1>Demo Screening Room</h1>
+<p class=s>Size-coded browser intros. Press play (one at a time, as each synthesizes its own audio), then click inside to start the sound, or open one in its own window for fullscreen.</p>
+<div class=grid id=g></div>
+</main><script>
+// Add a demo: one line here. Paths are relative to this page.
+const DEMOS=[
+ ['ＶＡＰＯＲ ＭＡＬＬ','demos/vapor-mall/dist/vapor-mall.html','64k · 45 KB','FPV flight through a vaporwave mall into the pocket of a smiling giant.'],
+ ['Descensus','demos/descensus/dist/descensus.html','64k · 30 KB','A slow descent into the deep sea: jellyfish, a whale, a sunken cathedral lit by an anglerfish.'],
+ ['KAIJU','demos/kaiju-16k/dist/kaiju16k.html','16k · 16 KB','Neon wireframe city at night, a tunnel run and a holographic KAIJU logo.'],
+ ['Autumn Walk','demos/autumn-walk/dist/autumn-walk.html','64k · 48 KB','A fox trots through an autumn forest to a cabin and a birthday cake for Mika.'],
+ ['The Daily Flux','demos/daily-flux-16k/dist/the-daily-flux-16k.html','16k · 13 KB · Haiku','Black-and-white 70s newspaper with headlines slamming in over muzak.']];
+const g=document.getElementById('g');
+for(const[t,u,m,b]of DEMOS){const c=document.createElement('section');c.className='card';
+ c.innerHTML=`<h2>${t}</h2><div class=meta>${m} · <a href="${u}" target=_blank>open in own window ↗</a></div>
+ <div class=stage><button>▶ play</button></div><p class=brief>${b}</p>`;
+ // load the iframe only on demand, so the page doesn't start five WebGL contexts at once
+ c.querySelector('button').onclick=e=>{for(const f of document.querySelectorAll('iframe'))f.replaceWith(Object.assign(document.createElement('button'),{textContent:'▶ play',onclick:f.parentNode.btn}));
+  const s=e.currentTarget.parentNode;s.btn=e.currentTarget.onclick;s.innerHTML=`<iframe allow="autoplay; fullscreen" allowfullscreen src="${u}"></iframe>`};
+ g.append(c)}
+</script></body></html>
