@@ -23,6 +23,7 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 | [Descensus](demos/descensus) | 64k | Deep-sea descent, raymarched |
 | [KAIJU](demos/kaiju-16k) | 16k | Neon city at night with a raymarched monster, one shader |
 | [The Tapestry](demos/the-tapestry-64k) | 64k | Medieval siege embroidered on a living tapestry |
+| [INSERT COIN](demos/insert-coin-64k) | 64k | Pixel brawler attract mode, fight run by a simulation |
 | [The Meadow Counts](demos/meadow-counts-64k) | 64k | IDM: warm 70s school film, 88 BPM boom-bap, silent-film intertitles |
 | [RECURSOR](demos/recursor-64k) | 64k | IDM: 170 BPM acid drill'n'bass, 4D and hyperbolic geometry |
 | [PLEASE ASSEMBLE](demos/please-assemble-64k) | 64k | IDM: TTS announcer, impossible objects, 7/8 and 5/4 |
