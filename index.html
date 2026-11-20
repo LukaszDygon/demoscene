@@ -26,7 +26,7 @@ h1{font-size:20px;margin:0}p.s{color:var(--mut);margin:4px 0 16px}
 <p class=s>Size-coded browser intros. Pick one to open it, then click its start screen to play with sound.</p>
 <div class=filters>
  <span>Size<span class=seg data-f=size><button data-v="">All</button><button data-v=16k>16k</button><button data-v=64k>64k</button></span></span>
- <span>Built by<span class=seg data-f=agent><button data-v="">All</button><button data-v=opus-5.5-high>Opus 5.5 · high</button><button data-v=haiku-5.5-medium>Haiku 5.5 · medium</button></span></span>
+ <span>Built by<span class=seg data-f=agent><button data-v="">All</button><button data-v=opus-5.5-high>Opus 5.5 · high</button><button data-v=opus-5.5-medium>Opus 5.5 · medium</button><button data-v=haiku-5.5-medium>Haiku 5.5 · medium</button></span></span>
  <span id=count></span>
 </div>
 <div class=grid id=g></div>
@@ -46,8 +46,11 @@ const DEMOS=[
  ['KA-BOOM!','demos/ka-boom-64k/dist/ka-boom-64k.haiku-5.5-medium.html','64k · 26 KB',"Pure kinetic typography: Swiss-poster words colliding to a 174 BPM drum'n'bass break."],
  ['THE TAPESTRY','demos/the-tapestry-64k/dist/the-tapestry-64k.haiku-5.5-medium.html','64k · 32 KB','A medieval siege embroidered on a tapestry that comes alive, dragon fire burning through the cloth.'],
  ['INSERT COIN','demos/insert-coin-16k/dist/insert-coin-16k.haiku-5.5-medium.html','16k · 13 KB','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.'],
- ['INSERT COIN','demos/insert-coin-64k/dist/insert-coin-64k.haiku-5.5-medium.html','64k · 58 KB','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.']];
-const AGENT={'opus-5.5-high':'Opus 5.5 · high','haiku-5.5-medium':'Haiku 5.5 · medium'};
+ ['INSERT COIN','demos/insert-coin-64k/dist/insert-coin-64k.haiku-5.5-medium.html','64k · 58 KB','An attract-mode run of an original pixel brawler, with chunky CRT pixels and chiptune.'],
+ ['THE MEADOW COUNTS','demos/meadow-counts-64k/dist/meadow-counts-64k.opus-5.5-medium.html','64k · 46 KB','A half-remembered 70s school film: sunflowers of sunflowers, honeycomb rising into basalt, a horizon that folds into the sky, to dusty 88 BPM boom-bap.'],
+ ['RECURSOR','demos/recursor-64k/dist/recursor-64k.opus-5.5-medium.html','64k · 42 KB','A manic 170 BPM acid fall through nested tesseracts, a Menger descent and hyperbolic honeycombs, called out by a crushed machine voice.'],
+ ['PLEASE ASSEMBLE','demos/please-assemble-64k/dist/please-assemble-64k.opus-5.5-medium.html','64k · 47 KB',"A toy speech chip walks you through assembling Penrose stairs, Necker cubes and a Möbius ribbon on graph paper, in 7/8 and 5/4."]];
+const AGENT={'opus-5.5-high':'Opus 5.5 · high','opus-5.5-medium':'Opus 5.5 · medium','haiku-5.5-medium':'Haiku 5.5 · medium'};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // VP8 WebM is decoded in software, which sidesteps flaky hardware VP9 decoders; H.264 MP4 covers browsers without WebM (older Safari, iPhone).

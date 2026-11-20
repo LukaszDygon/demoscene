@@ -13,6 +13,8 @@ const src=fs.readFileSync(path.join(root,'index.html'),'utf8').match(/const DEMO
 const demos=(0,eval)(src).map(d=>d[1]).filter(u=>u.includes(filter));
 const CH=[process.env.CHROME,'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/usr/bin/google-chrome','/usr/bin/chromium'].find(p=>p&&fs.existsSync(p));
 const W=640,H=360,FPS=30,LOOP=4,FADE=1,WARM=+process.env.WARM||3000;   // loop length and cross-fade in seconds
+// REALTIME=1 captures on the wall clock instead: some heavy pages wedge headless Chrome's compositor under virtual time.
+const RT=!!process.env.REALTIME;
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'thumbs-'));const port=9300+Math.floor(Math.random()*600);
 const chrome=spawn(CH,['--headless=new',`--user-data-dir=${tmp}/prof`,`--remote-debugging-port=${port}`,`--window-size=${W},${H}`,'--hide-scrollbars','about:blank'],{stdio:'ignore'});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -26,18 +28,18 @@ try{
   await call('Page.enable');await call('Emulation.setDeviceMetricsOverride',{width:W,height:H,deviceScaleFactor:1,mobile:false});
   // Under virtual time Chrome runs requestAnimationFrame only every few steps; drive it from the virtual clock
   // instead so the demo renders a fresh frame for every capture.
-  await call('Page.addScriptToEvaluateOnNewDocument',{source:`requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),${1000/FPS})`});
+  if(!RT)await call('Page.addScriptToEvaluateOnNewDocument',{source:`requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),${1000/FPS})`});
   for(const u of demos){
     const dir=path.join(root,u.split('/dist/')[0]),frames=fs.mkdtempSync(path.join(tmp,'f-'));
-    await call('Emulation.setVirtualTimePolicy',{policy:'pause'});
+    const n=(LOOP+FADE)*FPS,shot=async()=>{const r=await Promise.race([call('Page.captureScreenshot',{format:'jpeg',quality:92}),sleep(30000)]);
+      if(!r)throw new Error(`${u}: screenshot hung (try REALTIME=1)`);return Buffer.from(r.result.data,'base64')};
+    const save=(i,b)=>fs.writeFileSync(path.join(frames,String(i).padStart(4,'0')+'.jpg'),b);
+    if(!RT)await call('Emulation.setVirtualTimePolicy',{policy:'pause'});
     await call('Page.navigate',{url:pathToFileURL(path.join(root,u)).href});
-    await advance(WARM);                                   // let the start screen settle (fade-ins, shader warm-up)
-    const n=(LOOP+FADE)*FPS;
-    for(let i=0;i<n;i++){
-      await advance(1000/FPS);
-      const data=(await call('Page.captureScreenshot',{format:'jpeg',quality:92})).result.data;
-      fs.writeFileSync(path.join(frames,String(i).padStart(4,'0')+'.jpg'),Buffer.from(data,'base64'));
-    }
+    if(RT){await sleep(WARM);                               // wall clock: shoot as fast as Chrome allows, repeating a frame when a shot runs long
+      const t0=Date.now();for(let k=0;k<n;){const b=await shot(),upto=Math.min(n,Math.floor((Date.now()-t0)*FPS/1000)+1);while(k<upto)save(k++,b)}}
+    else{await advance(WARM);                               // let the start screen settle (fade-ins, shader warm-up)
+      for(let i=0;i<n;i++){await advance(1000/FPS);save(i,await shot())}}
     // seamless loop: play seconds FADE..LOOP+FADE, cross-fading the last FADE seconds into seconds 0..FADE
     const vf=`[0:v]split[a][b];[a]trim=start=${FADE},setpts=PTS-STARTPTS,fps=${FPS}[main];[b]trim=end=${FADE},setpts=PTS-STARTPTS,fps=${FPS}[head];`+
              `[main][head]xfade=transition=fade:duration=${FADE}:offset=${LOOP-FADE},format=yuv420p[v]`;

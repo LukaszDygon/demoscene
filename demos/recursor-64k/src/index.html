@@ -1,0 +1,33 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>RECURSOR</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:pointer;color:#fff}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
+.o{position:fixed;left:0;right:0;text-align:center;pointer-events:none;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace;text-transform:uppercase;text-shadow:0 0 3px #000,0 0 8px #000}
+#ti{top:30%;transition:opacity .15s steps(3)}
+#ti h1{position:relative;display:inline-block;margin:0;font:900 min(14vw,128px)/1 "Arial Black","Helvetica Neue",Helvetica,Arial,"DejaVu Sans",sans-serif;letter-spacing:-.02em;color:#fff}
+#ti h1:before,#ti h1:after{content:"RECURSOR";position:absolute;inset:0;mix-blend-mode:screen}
+#ti h1:before{color:#ccff0d;animation:g1 1.7s steps(1) infinite}
+#ti h1:after{color:#ff0ad8;animation:g2 2.3s steps(1) infinite}
+@keyframes g1{0%{clip-path:inset(10% 0 70% 0);transform:translate(-6px)}20%{clip-path:inset(60% 0 20% 0);transform:translate(9px)}40%{clip-path:inset(0 0 100% 0)}75%{clip-path:inset(40% 0 45% 0);transform:translate(-14px)}}
+@keyframes g2{0%{clip-path:inset(75% 0 5% 0);transform:translate(7px)}30%{clip-path:inset(0 0 100% 0)}55%{clip-path:inset(20% 0 66% 0);transform:translate(-9px)}80%{clip-path:inset(0 0 100% 0)}}
+#ti p{margin:.9em 0;font-size:min(3.6vw,17px);letter-spacing:.45em}
+#ti .k{margin-top:3em;display:inline-block;background:#ccff0d;color:#000;text-shadow:none;padding:.35em .8em;animation:bl 1.2s steps(2) infinite}
+#ti .w{font-size:min(2.6vw,11px);letter-spacing:.25em;opacity:.6;margin-top:2.4em}
+@keyframes bl{50%{background:#fff}}
+#hd{top:14px;left:16px;right:auto;text-align:left;font-size:min(2.6vw,12px);letter-spacing:.18em;opacity:.8}
+#lg{top:44px;left:16px;right:auto;text-align:left;white-space:pre;font-size:min(2.6vw,12px);letter-spacing:.12em;color:#ccff0d;text-transform:none}
+#nr{bottom:11%;padding:0 16px;font-size:min(5vw,30px);font-weight:700;letter-spacing:.14em;line-height:1.9}
+#nr b{background:#ccff0d;color:#000;text-shadow:none;padding:.08em .35em;margin:0 .1em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#cd{top:40%;font:900 min(15vw,150px)/1 "Arial Black","Helvetica Neue",Helvetica,Arial,"DejaVu Sans",sans-serif;color:#fff;mix-blend-mode:difference;text-shadow:none;letter-spacing:-.03em}
+#en{top:38%;opacity:0;transition:opacity .2s steps(2)}
+#en h2{margin:0;font:900 min(10vw,72px)/1 "Arial Black","Helvetica Neue",Helvetica,Arial,"DejaVu Sans",sans-serif}
+#en p{font-size:min(3.4vw,15px);letter-spacing:.4em;margin:1.2em 0}
+#en .k{font-size:min(2.6vw,11px);opacity:.6}
+</style></head><body><canvas id=c></canvas>
+<div class=o id=ti><h1>RECURSOR</h1><p>five depths &middot; no bottom</p><p class=k>[ click / space ] fall inward</p><p class=w>sound on &middot; contains rapid cuts and inversions</p></div>
+<div class=o id=hd></div><div class=o id=cd></div><div class=o id=lg></div><div class=o id=nr></div>
+<div class=o id=en><h2>RECURSOR</h2><p>end of recursion</p><p>depth &infin; &rarr; 0</p><p class=k>64k &middot; 170 bpm &middot; mmxxvi</p></div>
+<script>/*VOICE*/</script>
+<script>/*MUSIC*/</script>
+<script>/*MAIN*/</script>
+</body></html>

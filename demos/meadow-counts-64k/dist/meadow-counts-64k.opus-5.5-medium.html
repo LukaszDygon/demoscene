@@ -1,0 +1,352 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>The Meadow Counts</title>
+<style>html,body{margin:0;height:100%;background:#120e0a;overflow:hidden;cursor:pointer}canvas{position:fixed;inset:0;width:100%;height:100%;display:block}</style>
+</head><body><canvas id=c></canvas>
+<script>var SONG=(()=>{
+const BPM=88,BAR=240/BPM,BEAT=60/BPM,S16=BEAT/4,BARS=74,LEN=BARS*BAR+4;
+const mf=m=>440*2**((m-69)/12);
+const hb=(b,k)=>{const x=Math.sin(b*12.9898+k*78.233)*43758.5453;return x-Math.floor(x)};
+const st=s=>s*S16+(s&1?S16*.22:0);
+const CH={d:[38,53,57,60,64],b:[34,50,53,57,62],g:[31,50,53,58,69],a:[33,49,52,57,64],s:[33,50,52,57,64],
+e:[39,51,55,58,62],m:[34,49,53,58,61],f:[41,53,57,60,64],c:[36,48,52,55,62]};
+const PR='dddd'+'dbgsdbga'+'fcfcdbgsda'+'dbgsdbgags'+'bfgdbfgdecsa'+'demsdemadbea'+'dbgsdbga'+'dbgsdb'+'gsdd';
+const DM=b=>b<8||b>=70?0:(b>=32&&b<36)?1:(b>=36&&b<44)?3:(b>=44&&b<56)?4:2;
+const KP=[[0,7,10],[0,3,7,10],[0,7,9,10],[0,6,10,13]];
+function kicks(b){const m=DM(b);if(!m)return[];if(m==1)return[0];if(m==3)return[0,10];return b%4==3?[0,7,10,13]:KP[hb(b,1)*4|0]}
+function kick(t){let e=0;const b=Math.floor(t/BAR);for(let k=b-1;k<=b;k++)if(k>=0)for(const s of kicks(k)){const d=t-k*BAR-st(s);if(d>=0)e=Math.max(e,Math.exp(-d*7))}return e}
+const LN={0:57,1:60,2:62,3:64,4:65,5:67,6:69,7:70,8:72,9:74,a:76,b:77,c:63,d:61};
+const PA=['6-----5-4---2---','....4-5-6---8-6-','5-----4-2---0---','3-----2-----....'],
+PB=['2.4.6.4.9...8.6.','4.6.8.6.9-----..','5.7.9.7.6...5.4.','3...2...3---d---'],
+PC=['9---------8-----','6---------------','7-------5-------','6---------......'],
+PD=['6---7---6-----..','c-----5-----7---','7-----4-----7---','3-----d-----0---'],
+PX=['6---------------','d-----3-----....'];
+const LEAD=[],put=(b,p)=>p.forEach((s,i)=>LEAD[b+i]=s);
+put(16,PA);put(20,PX);put(26,PB);put(36,PC);put(48,PD);put(52,[PA[0],PA[1],PD[1],PX[1]]);put(60,PB);put(64,PA);put(68,[PA[0],PA[1]]);
+const NAR=[
+[4.5,0,'This is a meadow.',"Dis iz A 'medoU."],
+[6.6,0,'Everything here is counting.',"'evrETiN hEr iz 'kIUntiN."],
+[9,0,'The grass counts the wind.',"DA 'gras 'kIUnts DA 'wind."],
+[12.5,0,'Look closer at the flower.',"'luk 'kloUzR at DA 'flIUR."],
+[14.6,0,'The seeds turn by the golden angle.',"DA 'sEdz 'tRn bIE DA 'goUldAn 'aNgAl."],
+[16.8,0,'Thirty-four one way. Fifty-five the other.',"'TRtEfor 'wun 'weE. 'fiftEfIEv DA 'uDR."],
+[19,0,'Every seed is a smaller flower.',"'evrE 'sEd iz A 'smOlR 'flIUR."],
+[20.8,1,'And every flower is a seed.',"and 'evrE 'flIUR iz A 'sEd."],
+[22.5,0,'The bees learned it first.',"DA 'bEz 'lRnd it 'fRst."],
+[24.5,0,'Six sides. No gaps. No waste.',"'siks 'sIEdz. 'noU 'gaps. 'noU 'weEst."],
+[26.8,0,'Then the stones learned it too.',"Den DA 'stoUnz 'lRnd it 'tU."],
+[29,1,'How long did they practise?',"hIU 'loN did DeE 'praktis?"],
+[30.6,0,'A very long time.',"A 'verE 'loN 'tIEm."],
+[32.6,0,'Now look up.',"'nIU luk 'up."],
+[34.5,0,'The horizon does not end. It folds.',"DA hA'rIEzAn duz 'not 'end. it 'foUldz."],
+[37,0,'That is the same field, above you.',"Dat iz DA 'seEm 'fEld, A'buv yU."],
+[39.6,0,'We walked there as children.',"wE 'wOkt Der az 'cildrAn."],
+[41.6,1,'We are still walking there.',"wE Ir 'stil 'wOkiN Der."],
+[44.6,0,'Follow the line of poles.',"'foloU DA 'lIEn Av 'poUlz."],
+[46.8,0,'They do not get smaller.',"DeE dU 'not get 'smOlR."],
+[49,0,'The further they go, the taller they grow.',"DA 'fRDR DeE 'goU, DA 'tOlR DeE 'groU."],
+[51.8,0,'Do not count them.',"dU 'not 'kIUnt Dem."],
+[53.6,1,'I counted them.',"IE 'kIUntid Dem."],
+[56.6,0,'This film was made a long time ago.',"Dis 'film woz 'meEd A 'loN 'tIEm A'goU."],
+[59,0,'It is still playing.',"it iz 'stil 'pleEiN."],
+[60.6,1,'Is that us?',"iz 'Dat 'us?"],
+[61.8,0,'You are watching it now.',"yU Ir 'wociN it 'nIU."],
+[64.5,0,'The sun goes down at the usual time.',"DA 'sun goUz 'dIUn at DA 'yUZUAl 'tIEm."],
+[67,0,'This is the end of the lesson.',"Dis iz DE 'end Av DA 'lesAn."],
+[69.2,0,'Remember the number.',"rE'membR DA 'numbR."],
+[71.2,1,'What was the number?',"'wot woz DA 'numbR?"]];
+const VW={a:[700,1650,2500],e:[550,1800,2500],i:[420,1950,2600],o:[600,950,2450],u:[640,1200,2400],A:[520,1350,2450],
+E:[290,2250,3000],U:[330,950,2250],R:[480,1350,1650],I:[750,1200,2500],O:[580,850,2450]};
+const CN={m:[280,1000,2300,.45,0,0,.07],n:[280,1600,2600,.45,0,0,.06],N:[280,2200,2700,.45,0,0,.07],l:[380,1100,2600,.65,0,0,.06],
+r:[420,1250,1600,.65,0,0,.06],w:[300,700,2200,.55,0,0,.06],y:[280,2200,3000,.55,0,0,.05],v:[300,1200,2400,.35,.15,4000,.06],
+z:[300,1600,2600,.3,.3,5500,.08],Z:[300,1800,2600,.3,.3,2800,.08],D:[300,1500,2500,.35,.12,5000,.05],s:[0,0,0,0,.5,5500,.1],
+S:[0,0,0,0,.45,2700,.1],f:[0,0,0,0,.22,6500,.09],T:[0,0,0,0,.22,6000,.08],h:[0,0,0,0,.2,1600,.06],
+b:[300,900,2300,.45,0,0,.04],d:[300,1700,2600,.45,.05,4000,.04],g:[300,2000,2600,.45,.05,2500,.04],
+p:[0,0,0,0,.3,1500,.05],t:[0,0,0,0,.35,4500,.05],k:[0,0,0,0,.35,2600,.06]};
+const LINES=NAR.map(([bar,ch,text,phon])=>{let t=0,stress=0;const ph=[],words=[],r=ch?1:1.15,ws=phon.split(' ');
+ws.forEach((w,wi)=>{const w0=t,last=wi==ws.length-1;
+for(const c0 of w){if(c0=="'"){stress=1;continue}
+if(',.?'.includes(c0)){ph.push([t,.1,0,0,0,0,0,0,0]);t+=c0==','?.2:.32;continue}
+for(const c of c0=='c'?'tS':c0=='j'?'dZ':c0){const v=VW[c];
+if(v){const d=.125*r*(stress?1.5:1)*(last?1.3:1);ph.push([t,d,...v,1,0,0,stress]);t+=d;stress=0}
+else{const k=CN[c];if('ptkbdg'.includes(c)){ph.push([t,.035*r,0,0,0,0,0,0,0]);t+=.035*r}
+ph.push([t,k[6]*r,k[0],k[1],k[2],k[3],k[4],k[5],0]);t+=k[6]*r}}}
+words.push([w0,t]);ph.push([t,.06*r,0,0,0,0,0,0,0]);t+=.06*r});
+const q=text.endsWith('?');
+ph.forEach((p,i)=>{const u=p[0]/t;p[8]=(1.08-.2*u)*(p[8]?1.13:1)*(q&&u>.75?1+(u-.75)*1.6:1)*(1+(hb(i,bar)-.5)*.04)});
+return{t:bar*BAR,ch,text,d:t,ph,words}});
+function setup(A,base){
+const SR=A.sampleRate;let bag=[];const BAGS=[],keep=n=>(bag.push(n),n);
+const G=(v,...to)=>{const g=keep(A.createGain());g.gain.value=v;to.forEach(n=>g.connect(n));return g};
+const O=(type,f,t,end)=>{const o=keep(A.createOscillator());o.type=type;o.frequency.value=f;o.start(t);o.stop(end);return o};
+const F=(type,f,q,...to)=>{const x=keep(A.createBiquadFilter());x.type=type;x.frequency.value=f;x.Q.value=q;to.forEach(n=>x.connect(n));return x};
+const T=b=>base+b*BAR,END=base+LEN;
+const env=(g,t,a,h,r,v)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.setValueAtTime(v,t+h);g.gain.linearRampToValueAtTime(0,t+r)};
+const nb=A.createBuffer(1,SR*2,SR),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+const N=(t,e,loop)=>{const s=keep(A.createBufferSource());s.buffer=nb;s.loop=!!loop;s.start(t,Math.random()*1.5);s.stop(e);return s};
+const comp=A.createDynamicsCompressor();comp.threshold.value=-15;comp.ratio.value=4;comp.attack.value=.006;comp.release.value=.25;comp.connect(A.destination);
+const out=G(.56,comp);out.gain.setValueAtTime(.56,T(73.4));out.gain.linearRampToValueAtTime(0,END-.2);
+const lp=F('lowpass',7200,.5,out);lp.frequency.setValueAtTime(7200,T(55.8));lp.frequency.exponentialRampToValueAtTime(1900,T(56.4));lp.frequency.setValueAtTime(1900,T(63.6));lp.frequency.exponentialRampToValueAtTime(7200,T(64.1));
+const hp=F('highpass',38,.7,lp);
+const ws=A.createWaveShaper(),cu=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;cu[i]=Math.tanh(x*2.2)/Math.tanh(2.2)}
+ws.curve=cu;ws.connect(hp);
+const tape=A.createDelay(4);tape.delayTime.value=.014;tape.connect(ws);
+const lfo=(f,d)=>{const o=A.createOscillator();o.frequency.value=f;const g=G(d,tape.delayTime);o.connect(g);o.start(base);o.stop(END);return g};
+const wow=lfo(.43,.0016);lfo(.17,.0011);lfo(6.1,.00009);
+wow.gain.setValueAtTime(.0016,T(32));wow.gain.linearRampToValueAtTime(.0045,T(36));wow.gain.linearRampToValueAtTime(.0018,T(44));
+const dt=tape.delayTime;dt.setValueAtTime(.014,base);
+for(const b of[31.6,43.6,55.6,63.6]){dt.setValueAtTime(.014,T(b));dt.linearRampToValueAtTime(.075,T(b)+1.3);dt.linearRampToValueAtTime(.014,T(b)+2.6)}
+{const t0=T(73.25),Ts=2.6,c=new Float32Array(64);for(let i=0;i<64;i++){const x=i/63*Ts;c[i]=.014+x*x/(2*Ts)}dt.setValueCurveAtTime(c,t0,Ts)}
+const mus=G(1,tape),vo=G(1);
+const ir=A.createBuffer(2,SR*3|0,SR);for(let c=0;c<2;c++){const d=ir.getChannelData(c);let y=0;for(let i=0;i<d.length;i++){y=y*.55+(Math.random()*2-1)*.45;d[i]=y*Math.exp(-i/SR*1.7)}}
+const cv=A.createConvolver();cv.buffer=ir;cv.connect(G(.5,mus));const rv=G(1,cv);
+const ec=A.createDelay(2);ec.delayTime.value=BEAT*.75;const efb=G(.38,ec),elp=F('lowpass',1800,.5,efb,mus,rv);ec.connect(elp);const eIn=G(1,ec);
+{const h=N(base,END,1),g=G(.016,hp);h.connect(F('highpass',3500,.5,g));
+const cb=A.createBuffer(1,SR*3,SR),cd=cb.getChannelData(0);for(let i=0;i<cd.length;i++)cd[i]=Math.random()<.0004?(Math.random()-.5)*(Math.random()<.1?1.6:.5):0;
+const cs=A.createBufferSource();cs.buffer=cb;cs.loop=true;cs.start(base);cs.stop(END);cs.connect(F('bandpass',2400,.6,G(.35,hp)))}
+{const pg=G(0,hp),o=A.createOscillator();o.type='square';o.frequency.value=24;const og=G(.2,pg.gain);o.connect(og);o.start(base);o.stop(END);
+N(base,END,1).connect(F('bandpass',1500,1.4,pg));pg.gain.setValueAtTime(.2,base);pg.gain.setValueAtTime(.2,T(3.7));pg.gain.linearRampToValueAtTime(0,T(4.2));
+pg.gain.setValueAtTime(0,T(72.6));pg.gain.linearRampToValueAtTime(.2,T(73.3));og.gain.setValueAtTime(0,T(3.7));og.gain.linearRampToValueAtTime(0,T(4.2));
+og.gain.setValueAtTime(0,T(72.6));og.gain.linearRampToValueAtTime(.2,T(73.3))}
+{const vh=F('highpass',140,.7,G(2.6,tape),G(.14,rv));const vl=F('lowpass',3900,.6,vh);vo.connect(vl)}
+function kk(t,v){const o=O('sine',150,t,t+.6),g=G(0,mus);o.connect(g);o.frequency.setValueAtTime(155,t);o.frequency.exponentialRampToValueAtTime(47,t+.11);
+g.gain.setValueAtTime(v*.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.5);
+const c=N(t,t+.02),cg=G(v*.25,mus);c.connect(F('lowpass',2500,.5,cg))}
+function sn(t,v){const g=G(0,mus,rv),n=N(t,t+.3);n.connect(F('bandpass',1700,.7,g));g.gain.setValueAtTime(v*.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.24);
+const o=O('triangle',200,t,t+.15),og=G(0,mus);o.connect(og);o.frequency.exponentialRampToValueAtTime(150,t+.1);og.gain.setValueAtTime(v*.45,t);og.gain.exponentialRampToValueAtTime(.001,t+.12)}
+function hh(t,v,op){const g=G(0,mus),n=N(t,t+.4);n.connect(F('highpass',7000,.7,g));g.gain.setValueAtTime(v*.16,t);g.gain.exponentialRampToValueAtTime(.001,t+(op?.32:.045))}
+function rim(t,v){const o=O('square',820,t,t+.05),g=G(0,mus,eIn);o.connect(F('bandpass',1600,4,g));g.gain.setValueAtTime(v*.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.04)}
+function shk(t,v){const g=G(0,mus),n=N(t,t+.1);n.connect(F('bandpass',6500,1.5,g));g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.12,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+.08)}
+function bass(t,m,d,v){const f=mf(m),g=G(0,mus),l=F('lowpass',420,.8,g);const o=O('sine',f,t,t+d+.2),o2=O('triangle',f,t,t+d+.2);
+o.connect(l);const g2=G(.35,l);o2.connect(g2);o.detune.value=o2.detune.value=(hb(t,3)-.5)*14;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.2,t+.012);g.gain.setTargetAtTime(v*.11,t+.05,.25);g.gain.setTargetAtTime(0,t+d,.05)}
+function pad(t,ns,cut,v){const g=G(0,mus,rv),f=F('lowpass',cut,.6,g),e=t+BAR+1.6;
+ns.forEach((m,i)=>[-8,7].forEach(c=>{const o=O('sawtooth',mf(m),t,e);o.detune.setValueAtTime(c+(hb(t,i)-.5)*18,t);o.detune.linearRampToValueAtTime(c+(hb(t,i+9)-.5)*18,e);o.connect(f)}));
+const sb=O('triangle',mf(ns[0]-12),t,e);sb.connect(f);
+f.frequency.setValueAtTime(cut*.55,t);f.frequency.linearRampToValueAtTime(cut,t+BAR*.5);f.frequency.linearRampToValueAtTime(cut*.6,e);
+env(g,t,.8,BAR,e,v*.045)}
+function lead(t,m,d,v){const f=mf(m)*(1+(hb(t,5)-.5)*.012),g=G(0,mus,eIn,rv),l=F('lowpass',1700,1.5,g);
+[['square',5],['triangle',-6]].forEach(([ty,c])=>{const o=O(ty,f,t,t+d+.3);o.detune.value=c;o.frequency.setValueAtTime(f*.965,t);o.frequency.setTargetAtTime(f,t,.05);
+const vb=O('sine',4.7,t,t+d+.3),vg=G(0,o.frequency);vb.connect(vg);vg.gain.setValueAtTime(0,t);vg.gain.linearRampToValueAtTime(f*.008,t+Math.min(d,.6));
+o.connect(ty=='square'?G(.35,l):l)});
+env(g,t,.03,d,d+.25,v*.11)}
+function bell(t,m,v){const f=mf(m),g=G(0,mus,eIn,rv),c=O('sine',f,t,t+2.2),md=O('sine',f*2,t,t+2.2),mg=G(f*1.4,c.frequency);md.connect(mg);c.connect(g);
+mg.gain.setValueAtTime(f*1.4,t);mg.gain.exponentialRampToValueAtTime(f*.02,t+.7);
+g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.001,t+2)}
+function choir(t,ns,v){const g=G(0,mus,rv,eIn),mx=G(1),e=t+BAR+1.4;
+[[750,330],[1200,900],[2500,2250]].forEach(([a,b],i)=>{const f=F('bandpass',a,8,G([1,.5,.25][i],g));f.frequency.setValueAtTime(a,t);f.frequency.linearRampToValueAtTime(b,e);mx.connect(f)});
+ns.forEach((m,i)=>[-11,10].forEach(c=>{const o=O('sawtooth',mf(m+12),t,e);o.detune.value=c+i*2;o.connect(mx)}));env(g,t,1.2,BAR,e,v*.17)}
+function beep(t){const o=O('sine',1000,t,t+.09),g=G(.12,mus);o.connect(g)}
+function speak(L){const t0=base+L.t,k=L.ch?1.17:1,f0=L.ch?208:98,e=t0+L.d+.3;
+const o=O('sawtooth',f0,t0-.05,e),src=G(0);o.connect(src);
+const n=N(t0-.05,e),ng=G(0),nf=F('bandpass',3000,2.2,vo);n.connect(ng);ng.connect(nf);
+const fs=[7,9,12].map((q,j)=>{const x=F('bandpass',500*(j+1),q,G([1,.6,.32][j],vo));src.connect(x);return x});
+for(const p of L.ph){const at=t0+p[0];
+fs.forEach((f,j)=>{if(p[2+j])f.frequency.setTargetAtTime(p[2+j]*k,at,.016)});
+src.gain.setTargetAtTime(p[5],at,.012);ng.gain.setTargetAtTime(p[6],at,.008);if(p[7])nf.frequency.setTargetAtTime(p[7],at,.01);
+if(p[8])o.frequency.setTargetAtTime(f0*p[8],at,.04)}
+src.gain.setTargetAtTime(0,t0+L.d,.03);ng.gain.setTargetAtTime(0,t0+L.d,.01);
+mus.gain.setTargetAtTime(.62,t0-.1,.12);mus.gain.setTargetAtTime(1,t0+L.d+.1,.4)}
+function bar(b,t){const c=CH[PR[b]],ns=c.slice(1),dm=DM(b);
+const cut=b<4?500+b*120:b<12?1200:b<22?1500:b<32?1400:b<44?2300:b<56?1000+(b-44)*130:b<64?1300:b<70?1600:900;
+const pv=b<4?.5+b*.15:b>=70?1-(b-70)*.2:b>=32&&b<36?1.15:1;
+pad(t,ns,cut,pv);
+if(b==3)beep(t);
+if([12,22,32,44,56,64].includes(b)){bell(t,86,.07);bell(t+BEAT*.5,81,.06)}
+if((b>=33&&b<44)||b>=68)choir(t,ns,b>=68?.7:1);
+if(b>=4&&b<72){const ks=kicks(b);if(dm<2||!ks.length){bass(t,c[0],BAR*(dm==3?.48:.95),.8);if(dm==3)bass(t+BAR/2,c[0],BAR*.45,.6)}
+else ks.forEach((s,i)=>{const e=i+1<ks.length?ks[i+1]:16;bass(t+st(s),c[0]+(s==10&&hb(b,4)>.55?12:0),(e-s)*S16*.9,i?.75:1)})}
+for(const s of kicks(b))kk(t+st(s),s?.75:1);
+if(dm==2||dm==4){sn(t+st(4)+.012,1);sn(t+st(12)+.012,1);if(hb(b,6)>.55)sn(t+st(15),.22);if(hb(b,7)>.6)sn(t+st(7),.15)}
+if(dm==3)sn(t+st(8)+.015,1);
+if([21,31,43,55,63].includes(b))for(let s=12;s<16;s++)sn(t+st(s),.35+(s-12)*.2);
+if(dm)for(let s=0;s<16;s+=dm==4?1:2)hh(t+st(s),(dm==1?.4:1)*(s%4==2?1:s%2?.35:.6),s==14&&hb(b,8)>.6);
+if(b>=22&&b<32){rim(t+st(3),.8);rim(t+st(11),.6);if(hb(b,9)>.5)rim(t+st(14),.4)}
+if(dm==4)for(let s=0;s<16;s++)shk(t+st(s),s%2?.6:1);
+const bo=(b>=4&&b<16)||(b>=22&&b<26)||(b>=30&&b<36)||b>=64,qt=(b>=32&&b<36)||b>=70,AR=[0,2,1,3,2,1,3,0];
+if(bo)for(let i=0;i<8;i++)if((!qt||i%2==0)&&hb(b,i+20)>.25)bell(t+st(i*2),ns[AR[i]]+12+(hb(b,i+40)>.85?12:0),.05);
+const L=LEAD[b];if(L)for(let i=0;i<16;i++){const ch=L[i];if(ch in LN){let j=i+1;while(L[j]=='-')j++;lead(t+st(i),LN[ch],(j-i)*S16,b>=36&&b<40?.8:1)}}
+LINES.forEach(L=>{if(Math.floor(L.t/BAR+1e-6)==b)speak(L)})}
+function sched(b){bag=[];
+if(b>3&&BAGS[b-4]){BAGS[b-4].forEach(n=>n.disconnect());BAGS[b-4]=0}
+BAGS[b]=bag;bar(b,base+b*BAR)}
+bag=[];sched.out=comp;return sched}
+function live(A,from=0){const base=A.currentTime+.12-from,sched=setup(A,base);let b=Math.max(0,Math.ceil(from/BAR-.001));
+const tick=()=>{while(b<BARS&&base+b*BAR<A.currentTime+1.2)sched(b++)};tick();const iv=setInterval(tick,100);
+return{base,stop(){clearInterval(iv);sched.out.disconnect()}}}
+function render(){const SR=44100,A=new OfflineAudioContext(2,SR*LEN|0,SR),sched=setup(A,0);sched(0);
+for(let b=1;b<BARS;b++)A.suspend(((b*BAR-.5)*SR/128|0)*128/SR).then(()=>{sched(b);A.resume()});
+return A.startRendering()}
+return{live,render,kick,LINES,BPM,BAR,BEAT,BARS,LEN}})();</script>
+<script>(()=>{
+const $=s=>document.getElementById(s),cv=$('c'),Q=new URLSearchParams(location.search),MUTE=Q.has('mute'),T0=+Q.get('t')||0;
+const gl=cv.getContext('webgl2',{antialias:false,depth:false,powerPreference:'high-performance'});
+const BAR=SONG.BAR,BEAT=SONG.BEAT,LEN=SONG.LEN,B=b=>b*BAR,PI=Math.PI,s=Math.sin;
+const ss=(a,b,x)=>(x=Math.min(1,Math.max(0,(x-a)/(b-a))),x*x*(3-2*x));
+const nrm=v=>{const l=Math.hypot(...v);return v.map(x=>x/l)};
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const PAL={gold:[[1,.68,.38],[.38,.55,.58],[1,.62,.3]],fold:[[.98,.7,.46],[.3,.5,.56],[1,.6,.33]],hex:[[1,.72,.42],[.34,.52,.55],[1,.66,.34]],
+dusk:[[.95,.5,.32],[.22,.33,.42],[1,.42,.22]],tv:[[1,.62,.36],[.33,.48,.55],[1,.55,.28]],set:[[1,.55,.3],[.28,.36,.48],[1,.45,.2]]};
+const CUTS=[4,12,22,32,44,56,64].map(B);
+const CHAP=[[4,'one','the meadow'],[12,'two','the seed'],[22,'three','the cell'],[32,'four','the fold'],[44,'five','the poles'],[56,'six','the television'],[64,'seven','the usual time']];
+function meadow(L){return{S:1,L,c:[s(L*.07)*.6,2.4+.15*s(L*.4),10+L*2.2],f:[s(L*.05)*.15,.04+.02*s(L*.3),1],P:[1e4,0,0,1],D:nrm([.05,.1,1]),pal:PAL.gold,mo:1,bm:L>5?2:0}}
+function state(t){const b=t/BAR;let r;
+if(b<4)r={S:0,L:t,c:[0,0,0],f:[0,0,1],P:[(t/(BEAT*2))%1,1-ss(B(3.5),B(3.95),t),0,0],D:[0,.1,1],pal:PAL.gold,mo:0};
+else if(b<12)r=meadow(t-B(4));
+else if(b<22)r={S:2,L:t-B(12),c:[0,0,0],f:[0,0,1],P:[0,0,0,0],D:[0,.1,1],pal:PAL.gold,mo:0};
+else if(b<32){const L=t-B(22),k=ss(B(28.5),B(32),t);
+r={S:3,L,c:[s(L*.08)*2,5.2+k*4.5,L*2.4],f:[s(L*.06)*.2,-.16-.14*k,1],P:[ss(B(26.6),B(28.8),t),0,0,0],D:nrm([.22,.1,1]),pal:PAL.hex,mo:1,bm:b<28?1:0}}
+else if(b<44){const L=t-B(32),k=ss(B(33),B(40.5),t),pu=ss(B(32.6),B(34.6),t)*.55-ss(B(36),B(38.5),t)*.4+ss(B(39),B(40.6),t)*.5-ss(B(42.6),B(43.9),t)*.3;
+r={S:1,L,c:[0,2.4,200+L*2.6],f:[s(L*.05)*.1,.04+pu,1],roll:ss(B(37.5),B(43.6),t)*PI,P:[3000*Math.pow(20/3000,k),0,0,1-ss(B(32),B(33.4),t)],
+Q:[0,b>39.2?245+L*2.6-(t-B(39.2))*.8:0,t*4.5,0],D:nrm([0,.08,1]),pal:PAL.fold,mo:1}}
+else if(b<56){const L=t-B(44);r={S:4,L,c:[.3+s(L*.1)*.3,1.7+s(L*.3)*.05,30-L*1.6],f:[s(L*.04)*.08-.03,.07,1],P:[0,0,.045+.06*ss(B(44),B(56),t),0],D:nrm([-.1,-.03,1]),pal:PAL.dusk,mo:0}}
+else if(b<64){const L=t-B(56),k=ss(B(56.2),B(63.9),t),cz=40-1.05-14*k,cy=.6+.9*k,cx=s(L*.2)*.4*k;
+r={S:1,L,c:[cx,cy,cz],f:[-.225*(1-k)-cx,.6-cy+.25*k,40-cz],P:[1e4,0,0,ss(B(57.5),B(60),t)],Q:[40,0,0,0],D:nrm([-.25,.07,1]),pal:PAL.tv,mo:k}}
+else{const L=t-B(64),k=ss(B(64.5),B(72.5),t);
+r={S:1,L,c:[0,2.6+k*55,600-L*1.4],f:[0,.03-k*.5,1],P:[1e4,ss(B(66),B(71.5),t),0,1-ss(B(64.2),B(65.6),t)],D:nrm([0,.035,1]),pal:PAL.set,mo:1-k,bm:2}}
+return r}
+function basis(f,roll=0){f=nrm(f);let r=nrm(cross([0,1,0],f)),u=cross(f,r);const c=Math.cos(roll),sn=Math.sin(roll);
+const r2=r.map((v,i)=>v*c+u[i]*sn),u2=u.map((v,i)=>v*c-r[i]*sn);return[...r2,...u2,...f]}
+const BX=[[-1e3,-50,-1e3,1e3,1.75,2e3],[1e4-1e3,-50,-1e3,1e4+1e3,3.25,2e3],[2e4-1e3,-50,-1e3,2e4+1e3,0,2e3]];
+for(let n=-3;n<20;n++){const c=n*28,k=1+Math.max(c,0)/55;BX.push([2e4-4.5-.15*k,0,c-.15*k,2e4-4.5+.15*k,9*k,c+.15*k],[2e4-4.5-1.6*k,8.2*k,c-.08*k,2e4-4.5+1.6*k,8.4*k,c+.08*k])}
+BX.push([3e4-1e3,-50,-1e3,3e4+1e3,.3,2e3],[3e4-.95,0,39.45,3e4+.95,1.2,40.55]);
+window.__probe={dur:LEN,boxes:BX,cam:t=>{const r=state(t),o=r.Q&&r.Q[0]?3e4:r.S==3?1e4:r.S==4?2e4:0;return r.S==1||r.S>2?[r.c[0]+o,r.c[1],r.c[2]]:[-5e4,0,0]}};
+if(!gl){document.body.innerHTML='<p style="color:#eca;font:20px sans-serif;padding:2em">This film needs WebGL2.</p>';return}
+function prog(vs,fs){const p=gl.createProgram();for(const[ty,src]of[[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]]){const h=gl.createShader(ty);
+gl.shaderSource(h,src);gl.compileShader(h);if(!gl.getShaderParameter(h,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(h));gl.attachShader(p,h)}
+gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))console.error(gl.getProgramInfoLog(p));
+const U={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const a=gl.getActiveUniform(p,i);U[a.name]=gl.getUniformLocation(p,a.name)}p.U=U;return p}
+const FSQ='#version 300 es\nvoid main(){gl_Position=vec4(vec2(gl_VertexID&1,gl_VertexID>>1)*4.-1.,0,1);}';
+const PS=prog(FSQ,`#version 300 es
+precision highp float;uniform vec2 R;uniform float T,S,L,K;uniform vec3 C,D,H0,H1,H2;uniform mat3 M;uniform vec4 P,Q;uniform sampler2D F;out vec4 o;
+#define ss smoothstep
+float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1,0)),f.x),mix(h1(i+vec2(0,1)),h1(i+1.),f.x),f.y);}float fbm(vec2 p,int o){float s=0.,a=.5;for(int i=0;i<o;i++){s+=a*vn(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=.5;}return s;}float fbm(vec2 p){return fbm(p,5);}mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}float hx(vec2 p){p=abs(p);return max(dot(p,vec2(.5,.866)),p.x);}vec4 hcell(vec2 p){vec2 s=vec2(1,1.732),h=s*.5,a=mod(p,s)-h,b=mod(p-h,s)-h,g=dot(a,a)<dot(b,b)?a:b;return vec4(p-g,g);}vec4 vogel(vec2 p){float r=length(p),lo=max(1.,floor((r-1.3)*(r-1.3))),hi=min(256.,ceil((r+1.3)*(r+1.3))),b1=1e9,b2=1e9,bn=0.;for(int i=0;i<140;i++){float n=lo+float(i);if(n>hi)break;float a=n*2.39996;vec2 d=p-sqrt(n)*vec2(cos(a),sin(a));float dd=dot(d,d);if(dd<b1){b2=b1;b1=dd;bn=n;}else if(dd<b2)b2=dd;}return vec4(sqrt(b1),sqrt(b2)-sqrt(b1),bn,r);}vec3 sky(vec3 rd){float y=rd.y,s=max(dot(rd,D),0.),az=atan(rd.x,rd.z);vec3 c=mix(H0,H1,ss(-.02,.55,y));c=mix(c,H0*.55+H1*.25,ss(.0,-.25,y));if(y>0.){vec2 cp=rd.xz/(y+.06)*.7+vec2(T*.004,0.);float cl=ss(.45,.8,fbm(cp*vec2(.35,1.6)));c=mix(c,mix(H0*1.05,H1+.05,.4)+H2*pow(s,3.)*.6,cl*.55*ss(0.,.12,y));}c+=H2*(pow(s,5.)*.35+pow(s,48.)*.6);vec3 sx=normalize(cross(D,vec3(0,1,0))),sy=cross(sx,D);vec2 sp=vec2(dot(rd,sx),dot(rd,sy));float r=S==3.?hx(rot(T*.05)*sp)*2.:length(sp);c+=H2*1.8*ss(.045,.04,r)*step(0.,dot(rd,D))*ss(-.03,0.,y);if(S>3.5){vec3 md=normalize(vec3(.62,.13,1.)),mx=normalize(cross(md,vec3(0,1,0))),my=cross(mx,md);vec2 mp=vec2(dot(rd,mx),dot(rd,my))/P.z;float mr=length(mp);if(mr<1.&&dot(rd,md)>0.){vec3 mn=vec3(mp,sqrt(1.-mr*mr));float cr=fbm(mp*3.+7.);c=mix(c,vec3(1.,.9,.72)*(.55+.45*mn.z)*(.75+.35*ss(.35,.6,cr))*(.8-.3*mn.x),ss(1.,.97,mr)*.85);}c+=vec3(1.,.8,.6)*.12*exp(-max(mr-1.,0.)*4.)*step(0.,dot(rd,md));}if(S>.5&&S<1.5){float tl=.006+.016*pow(vn(vec2(az*38.,0.)),2.)+.006*vn(vec2(az*140.,1.));c=mix(c,mix(H1*.55+H0*.35,H2,pow(s,6.)*.5),ss(.002,0.,y-tl)*.55*ss(500.,3000.,P.x));}return c;}float Rc,km;float hgt(vec2 q){float a=abs(q.x);float h=(fbm(vec2(a,q.y)*.022,4)*7.4-1.6)*ss(1.,28.,min(a,3.14159*Rc-a));return h+.22*vn(vec2(a,q.y)*.45)+.06*vn(vec2(a,q.y)*3.1);}float cap(vec3 p,vec3 a,vec3 b,float r){vec3 pa=p-a,ba=b-a;return length(pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.))-r;}float kid(vec3 p,float ph,float s){p/=s;float w=sin(ph)*.14;float d=min(length(p-vec3(0,1.12,0))-.16,cap(p,vec3(0,.38,0),vec3(0,.8,0),.17));d=min(d,min(cap(p,vec3(.08,.05,w),vec3(.07,.42,0),.065),cap(p,vec3(-.08,.05,-w),vec3(-.07,.42,0),.065)));return min(d,cap(p,vec3(.18*sign(p.x),.75,0),vec3(.42*sign(p.x),.6,0),.05))*s;}float mapM(vec3 p,out vec2 q){vec2 xy=p.xy-vec2(0,Rc);float r=length(xy);q=vec2(atan(xy.x,-xy.y)*Rc,p.z);float d=(Rc-hgt(q)-r)*.8;km=0.;if(Q.y>0.){vec3 k=vec3(-p.x,2.*Rc-p.y,p.z-Q.y);float kd=min(kid(k-vec3(.84,0,0),Q.z,2.),kid(k+vec3(.8,0,0),Q.z+2.,1.7));if(kd<d){d=kd;km=1.;}}return d;}vec2 box(vec3 ro,vec3 rd,vec3 c,vec3 h,out vec3 n){vec3 m=1./rd,k=abs(m)*h,o=-m*(ro-c),t1=o-k,t2=o+k;float tn=max(max(t1.x,t1.y),t1.z),tf=min(min(t2.x,t2.y),t2.z);n=-sign(rd)*step(t1.yzx,t1.xyz)*step(t1.zxy,t1.xyz);return vec2(tn,tn>tf||tf<0.?-1.:tf);}vec3 tv(vec3 ro,vec3 rd,vec3 p,vec3 n){vec3 l=p-vec3(0,.6,Q.x),c;vec2 s=(l.xy-vec2(-.225,0))/vec2(1.25,.86)+.5;if(n.z<-.5&&abs(s.x-.5)<.5&&abs(s.y-.5)<.5){vec2 v=s-.5;float cr=length(max(abs(v)-.44,0.));vec2 w=v*(1.-.12*dot(v,v))+.5;c=textureLod(F,w,1.2).rgb*vec3(.86,1.,.92)*.93*(.82+.18*sin(w.y*900.))*ss(.06,.0,cr)*(1.-.6*dot(v,v));c+=sky(reflect(rd,normalize(vec3(v*.4,-1))))*.07+.012;}else{float gr=.5+.5*sin(l.x*60.+fbm(l.xy*vec2(3.,20.))*6.);vec3 al=mix(vec3(.24,.12,.06),vec3(.38,.21,.1),gr);if(n.z<-.5){vec2 kp=l.xy-vec2(.66,.27);float kn=min(length(kp),length(kp-vec2(0,-.3)));al=mix(al,vec3(.6,.55,.45),ss(.1,.08,kn));if(abs(l.x-.66)<.2&&l.y<-.25&&l.y>-.5)al*=.6+.4*step(.5,fract(l.y*30.));if(abs(s.x-.5)<.54&&abs(s.y-.5)<.55)al=vec3(.04);}c=al*(H2*max(dot(n,D),0.)*1.3+H1*.5+H0*.1);c+=H2*pow(1.-abs(dot(n,rd)),3.)*.2;}return c;}vec3 meadow(vec3 ro,vec3 rd){Rc=P.x;float t=.05,d;vec2 q;bool hit=false;for(int i=0;i<130;i++){d=mapM(ro+rd*t,q);if(d<.0015*t){hit=true;break;}t+=d;if(t>420.)break;}vec3 fc=mix(H0,H2,pow(max(dot(rd,D),0.),4.)*.6),bn;vec2 bt=Q.x>0.?box(ro,rd,vec3(0,.6,Q.x),vec3(.95,.6,.55),bn):vec2(-1);if(bt.y>0.&&(!hit||bt.x<t))return mix(tv(ro,rd,ro+rd*bt.x,bn),fc,1.-exp(-bt.x*.0065));if(!hit)return sky(rd);vec3 p=ro+rd*t;vec2 e=vec2(.004*t+.02,0),qq;mapM(p,q);float kk=km;vec3 n=normalize(vec3(mapM(p+e.xyy,qq)-mapM(p-e.xyy,qq),mapM(p+e.yxy,qq)-mapM(p-e.yxy,qq),mapM(p+e.yyx,qq)-mapM(p-e.yyx,qq)));if(kk>.5)return mix(vec3(.09,.07,.065)*(H1+H2*.4)+H2*.25*pow(1.-abs(dot(n,rd)),2.),fc,1.-exp(-t*.0065));vec3 up=normalize(vec3(-p.x,Rc-p.y,0.));float g=fbm(q*.13),g2=vn(q*2.7),g3=vn(q*vec2(9.,1.5));vec3 al=mix(vec3(.58,.44,.17),vec3(.3,.35,.17),ss(.35,.7,g));al=mix(al,vec3(.72,.57,.27),g2*.35)*(.8+.3*g3);if(P.y>0.){vec2 fp=(q-vec2(0,700.))/11.;vec4 v=vogel(fp);float k=h1(vec2(v.z,3.)),fr=v.w;vec3 cr=k<.3?vec3(.74,.56,.2):k<.55?vec3(.3,.38,.2):k<.8?vec3(.62,.34,.15):vec3(.55,.5,.3);cr*=.85+.3*vn(q*rot(k*6.)*vec2(.08,2.));cr=mix(cr,vec3(.25,.15,.07),ss(9.,2.,fr)*.6);if(fr>16.3){float a=atan(fp.y,fp.x),w=abs(fract(a/6.2832*34.)-.5)*2.,rr=(fr-16.3)/4.;cr=mix(vec3(.25,.3,.18),vec3(.9,.65,.2),ss(.05,0.,w-(1.-rr*rr)*.9)*step(rr,1.));}al=mix(al,cr,P.y*.85);al*=1.-P.y*.55*ss(.18,.04,v.y)*step(fr,16.3);}if(Q.x>0.)al*=.45+.55*ss(.8,2.2,length((p.xz-vec2(0,Q.x))/vec2(1.3,1.)));vec2 dq=q*.9;float dd=length(fract(dq)-.5);al+=vec3(.5,.45,.3)*ss(.12,.05,dd)*step(.86,h1(floor(dq)))*ss(40.,5.,t);float dif=max(dot(n,D)*.6+.4,0.),amb=.5+.5*dot(n,up);vec3 c=al*(H2*dif*1.15+H1*.5*amb);c+=H2*al*pow(max(dot(rd,D),0.),3.)*(.4+.6*g2)*.9;return mix(c,fc,1.-exp(-t*.0065));}vec3 seeds(vec2 uv){float lv=L/10.5,u=fract(lv);vec2 p=rot(.62*(u-2.))*uv*26.*pow(40.,u-1.)/40.;vec3 L2=normalize(vec3(-.5,.6,.65));vec3 c=vec3(0);float dep=0.;for(int l=0;l<4;l++){float r=length(p);if(r<.5){p=rot(.62)*p*40.;r=length(p);dep++;if(r>16.){float a=atan(p.y,p.x),rr=(r-16.)/4.6;float f=fract(a/6.2832*34.),f2=fract(a/6.2832*34.+.5),w=abs(f-.5)*2.,w2=abs(f2-.5)*2.;float pm=ss(.05,0.,w-(1.-rr*rr)*.92),pm2=ss(.05,0.,w2-(1.-rr*rr*.8)*.85)*ss(1.05,.9,rr);vec3 back=vec3(.1,.18,.17)*(1.-rr*.5);vec3 pt=vec3(.95,.66,.2)*(.75+.25*cos(w*3.))*(.8+.2*vn(vec2(a*40.,r*3.)));c=mix(back,pt*.8,pm2);c=mix(c,pt,pm*step(rr,1.));c*=.6+.4*ss(1.,.0,rr);break;}continue;}vec4 v=vogel(p);float bn=v.z,e=v.y;vec2 bl=p-sqrt(bn)*vec2(cos(bn*2.39996),sin(bn*2.39996));float sr=sqrt(bn)/16.;float dome=ss(0.,.45,e);vec3 n=normalize(vec3(bl*1.8*(1.-dome*.3),.6+dome));float spi=.5+.5*sin(atan(bl.y,bl.x)*3.+length(bl)*16.);vec3 al=mix(vec3(.4,.22,.09),vec3(.85,.6,.2),ss(.15,.95,sr))*(.8+.4*h1(vec2(bn,dep)));al*=.85+.25*spi;c=al*(max(dot(n,L2),0.)*1.4+.35)+pow(max(dot(reflect(-L2,n),vec3(0,0,1)),0.),12.)*.25*vec3(1,.8,.5);c*=ss(0.,.12,e)*.7+.3;if(r>16.5)c=mix(vec3(.08,.14,.13),vec3(.2,.26,.18),vn(p*.3));break;}return c*(1.25-.3*dot(uv,uv))+H2*.06;}float HC(vec2 id){float h=fbm(id*.11+3.,3)*4.4-1.2+h1(id)*.5;return clamp(floor(h*3.)/3.,-1.,3.2);}const float SC=1.7,WL=.35;float CH(vec2 id){return max(mix(.45,HC(id),P.x),WL);}vec4 cells(vec3 ro,vec3 rd,int N,out vec4 hc){float t=0.,lr=length(rd.xz)+1e-4,hh;vec3 p;for(int i=0;i<200;i++){if(i>=N)break;p=ro+rd*t;hc=hcell(p.xz/SC);hh=CH(hc.xy);if(p.y<hh)return vec4(p,t);float de=(.5-hx(hc.zw))*SC/lr,dv=rd.y<0.?(p.y-hh)/-rd.y:1e9;t+=min(de,dv)+.004;if(t>260.)break;}return vec4(p,-1.);}vec3 basalt(vec3 ro,vec3 rd){vec4 hc;vec4 h=cells(ro,rd,150,hc);if(h.w<0.)return sky(rd);vec3 p=h.xyz;float m=P.x,raw=HC(hc.xy),hh=CH(hc.xy);bool top=hh-p.y<.012;vec2 g=hc.zw,e=vec2(.002,0);vec2 gn=normalize(vec2(hx(g+e)-hx(g-e),hx(g+e.yx)-hx(g-e.yx)));vec3 n=top?vec3(0,1,0):vec3(gn.x,0,gn.y);vec3 c;float sh=1.;{vec4 h2;vec4 s=cells(p+n*.02+vec3(0,.01,0),D,32,h2);if(s.w>0.)sh=.25;}float dif=max(dot(n,D),0.)*sh;if(top&&(raw<WL&&m>.5||hx(hc.zw)<.42*(1.-m))){vec3 rf=reflect(rd,n);float fr=pow(1.-max(-rd.y,0.),4.);c=vec3(1.,.5,.13)*(.55+.25*vn(p.xz*3.+T*.3))+sky(rf)*(.25+.6*fr);}else{float lich=ss(.5,.78,fbm(p.xz*.6+hc.xy));vec3 al=top?mix(vec3(.3,.26,.21),vec3(.62,.47,.18),lich):vec3(.16,.14,.13)*(.8+.4*vn(vec2(p.y*6.,atan(g.y,g.x)*3.)));if(top)al*=1.+.5*ss(.44,.5,hx(g));al=mix(top?vec3(.95,.74,.33):vec3(.6,.42,.17),al,m);float ao=top?1.:clamp(1.+(p.y-hh)*.35,.2,1.);c=al*(H2*dif*1.5+H1*.45*ao+H0*.12);}float t=h.w;vec3 fc=mix(H0,H2,pow(max(dot(rd,D),0.),5.)*.5);c=mix(c,fc,1.-exp(-t*.011));c=mix(c,fc*1.05,ss(1.2,-.4,p.y)*.35*ss(5.,30.,t));return c;}const float KP=55.,DP=28.,XP=-4.5;float scl(float z){return 1.+max(z,0.)/KP;}float poles(vec3 p){float n=floor(p.z/DP+.5),d=p.y;for(float k=-1.;k<=1.;k++){float c=(n+k)*DP,s=scl(c);vec3 q=p-vec3(XP,0,c);float pd=max(length(q.xz)-.15*s*(1.-.3*q.y/(9.*s)),q.y-9.*s);vec3 b=q-vec3(0,8.3*s,0);pd=min(pd,max(abs(b.x)-1.6*s,max(abs(b.y)-.09*s,abs(b.z)-.08*s)));d=min(d,pd);}return d;}vec2 seg(vec3 ro,vec3 rd,vec3 a,vec3 b){vec3 ba=b-a,w=ro-a;float d=dot(rd,ba),e=dot(ba,ba),f=dot(rd,w),g=dot(ba,w);float s=clamp((g-d*f)/max(e-d*d,1e-5),0.,1.),t=d*s-f;return vec2(length(w+rd*t-ba*s),t);}vec3 field(vec3 ro,vec3 rd){float t=.1;bool hit=false;for(int i=0;i<140;i++){float d=poles(ro+rd*t);if(d<.001*t){hit=true;break;}t+=d*.9;if(t>700.)break;}vec3 c=sky(rd);float az=atan(rd.x,rd.z),hl=.025+.02*fbm(vec2(az*6.,1.))-.01;if(rd.y<hl&&rd.y>0.)c=mix(c,mix(H1*.5,H0*.7,.5),.8*ss(hl,hl-.004,rd.y));if(hit){vec3 p=ro+rd*t;if(p.y<.01){float road=ss(2.4,1.6,abs(p.x-.3+sin(p.z*.02)*.6));vec3 al=mix(vec3(.3,.22,.12),vec3(.42,.3,.15),fbm(p.xz*vec2(.6,.08)))*(.7+.3*vn(p.xz*4.));al=mix(al,vec3(.5,.4,.3),road*.7);c=al*(H1*.55+H0*.35*pow(max(dot(rd,D)+.3,0.),2.));}else{float s=scl(floor(p.z/DP+.5)*DP);c=H1*.08+H0*.05*ss(5.*s,9.*s,p.y);}vec3 fc=mix(H0*.9,H2,pow(max(dot(rd,D),0.),4.)*.6);c=mix(c,fc,1.-exp(-t*.0075));}float px=1.6/R.y;float w=0.,lm=0.;float n0=floor((ro.z-30.)/DP);for(int i=0;i<18;i++){float c0=(n0+float(i))*DP,s0=scl(c0),s1=scl(c0+DP);for(float sd=-1.;sd<=1.;sd+=2.){vec3 A=vec3(XP+sd*1.4*s0,8.4*s0,c0),B=vec3(XP+sd*1.4*s1,8.4*s1,c0+DP),Mi=(A+B)*.5-vec3(0,1.3*(s0+s1)*.5,0);vec2 a=seg(ro,rd,A,Mi),b=seg(ro,rd,Mi,B);a=a.x<b.x?a:b;if(a.y>0.&&(!hit||a.y<t))w=max(w,ss(px*1.5,0.,a.x/a.y-.02*s0/a.y)*exp(-a.y*.004));}vec3 lp=vec3(XP,9.25*s0,c0);vec3 v=lp-ro;float lt=dot(v,rd);if(lt>0.&&(!hit||lt<t+1.)){float ld=length(v-rd*lt)/lt;lm+=exp(-ld*ld/(px*px*9.))*.9+.0016/(ld*ld/(px*px)+1.)*30.;}}c=mix(c,H1*.07,w*.85);c+=vec3(1.,.55,.2)*lm*ss(44.,46.,T/2.7272727)*1.3;return c;}vec3 leader(vec2 uv){float r=length(uv);vec3 c=vec3(.55,.48,.37)*(.75+.25*ss(1.3,0.,r));if(atan(uv.x,uv.y)/6.2832+.5<P.x)c*=.72;float l=ss(.01,0.,abs(r-.62))+ss(.01,0.,abs(r-.74))+ss(.006,0.,abs(uv.x))+ss(.006,0.,abs(uv.y));return mix(c,vec3(.08,.07,.06),min(l,1.)*.85)*P.y;}vec3 grass(vec3 c,vec2 uv){for(int l=0;l<3;l++){float fl=float(l),sc=3.+fl*2.5,x=uv.x*sc+fl*7.3,id=floor(x),f=fract(x)-.5;float tip=-1.+(.12+.32*h1(vec2(id,fl)))/(1.+fl*.6),u=clamp((uv.y+1.)/(tip+1.),0.,1.);float lean=(h1(vec2(id,fl+9.))-.5)*.8+sin(T*1.1+id*2.)*.12*u,cx=lean*u*u+(h1(vec2(id,fl+4.))-.5)*.4;float w=.07*(1.-u)+.006,bl=.03/(1.+fl),m=ss(w+bl,w-bl,abs(f-cx))*step(uv.y,tip)*P.w;c=mix(c,H1*.12+H2*(.2+.6*u)*pow(max(D.z,0.),2.)*(.5+.5*ss(w,w*.3,abs(f-cx))),m*(.9-fl*.15));}return c;}void main(){vec2 uv=(gl_FragCoord.xy*2.-R)/R.y;vec3 rd=normalize(M*vec3(uv,1.6)),c;if(S<.5)c=leader(uv);else if(S<1.5){c=meadow(C,rd);if(P.w>0.)c=grass(c,uv);}else if(S<2.5)c=seeds(uv);else if(S<3.5)c=basalt(C,rd);else c=field(C,rd);o=vec4(c*(1.+K*.05),1);}`),PF=prog(FSQ,`#version 300 es
+precision highp float;uniform sampler2D A,X;uniform vec2 R;uniform float T,Fd,Lk,Tr,Bn,Ro,Cu;out vec4 o;
+#define ss smoothstep
+float h(float n){return fract(sin(n*91.7)*43758.5453);}float h2(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),mix(h2(i+vec2(0,1)),h2(i+1.),f.x),f.y);}void main(){vec2 uv=gl_FragCoord.xy/R;float fr=floor(T*24.);vec2 w=uv+(vec2(h(fr),h(fr+.37))-.5)*.0016+vec2(0,sin(T*1.1)*.0008);if(Ro>0.)w.y=fract(w.y+Ro);float fl=ss(.0,.03,w.y)*ss(1.,.97,w.y);w.x+=sin(uv.y*6.+T*.8)*.0011+sin(uv.y*140.+T*21.)*.00025;float tb=Tr*ss(.06,0.,abs(uv.y-fract(T*.17+.3)));w.x+=tb*(h2(vec2(fr,floor(uv.y*110.)))-.5)*.035;vec3 Y=vec3(.299,.587,.114),c=texture(A,w).rgb,cb=vec3(0);for(float i=-3.;i<=3.;i++)cb+=texture(A,w+vec2(i*.0028+.0025,0)).rgb;cb/=7.;c=dot(c,Y)+cb-dot(cb,Y);vec3 hl=textureLod(A,w,3.).rgb*.45+textureLod(A,w,5.).rgb*.55;c+=max(hl-.5,0.)*vec3(1.,.5,.25)*.9+hl*vec3(.05,.03,.02);c+=tb*.2;c=1.-exp(-c*1.2);float y=dot(c,Y);c=mix(vec3(y),c,.8);c=c*vec3(1.04,.98,.86)+vec3(-.01,.035,.05)*(1.-y)*(1.-y);c=mix(vec3(.055,.06,.06),vec3(.99,.95,.86),c);vec2 lq=uv-vec2(1.05+.1*sin(T*.21),.3+.4*sin(T*.13));c+=Lk*ss(.95,0.,length(lq*vec2(.8,1.2)))*(.6+.4*vn(uv*2.+T*.3))*vec3(1.,.38,.12);c+=Lk*.35*ss(.5,0.,uv.x)*vec3(.9,.3,.1)*vn(vec2(T*.5,uv.y*3.));c*=(1.-.45*pow(length((uv-.5)*vec2(1.,.8))*1.25,2.4))*(.965+.035*h(fr*1.3));c*=1.-.6*step(.99985,h2(floor(uv*R/3.)+fr*17.13));float sx=h(floor(T*1.7)+.3);c*=1.-.3*ss(.0012,0.,abs(uv.x-sx-.004*sin(uv.y*4.+T*3.)))*step(.55,h(floor(T*1.7)+.9));c=mix(c,vec3(.95,.9,.8),Cu*ss(.03,.026,length((uv-vec2(.9,.84))*vec2(R.x/R.y,1.)))*(.7+.3*vn(uv*90.)));if(Bn>0.){float b=Bn*1.35-(vn(uv*vec2(5.,3.)+3.)*.7+vn(uv*23.)*.3);c=mix(c,vec3(1.,.75,.4)*1.6,ss(-.12,0.,b));c=mix(c,vec3(.035,.025,.02),ss(0.,.12,b));}c*=Fd*mix(1.,.08+.92*fl,step(.001,Ro));vec4 tx=texture(X,w);c=mix(c,tx.rgb,tx.a);c+=(h2(uv*R*.5+fr*7.31)-.5)*.075*(1.-y*.4);o=vec4(c,1);}`),
+PC=prog(FSQ,'#version 300 es\nprecision highp float;uniform sampler2D A,B;uniform vec2 R;uniform float Fk;out vec4 o;void main(){vec2 u=gl_FragCoord.xy/R;o=vec4(mix(texture(A,u).rgb,texture(B,(u-.5)*.996+.5).rgb,Fk),1);}'),
+PM=prog(`#version 300 es
+uniform vec3 C,D;uniform mat3 M;uniform vec2 R;uniform float T,Mo,Bm;in vec4 a;out float v,k,fl;
+void main(){vec3 bx=vec3(36,14,44),p;float n=float(gl_VertexID);fl=0.;
+if(Bm>1.5){float r=sqrt(n)*1.4,th=n*2.39996+T*.11;
+p=vec3(C.x-34.+T*.9,C.y+24.+sin(T*.2)*3.,C.z+130.)+vec3(r*cos(th),r*sin(th)*.5,r*sin(th)*.7)+sin(T*vec3(.7,.9,.5)+n)*.7;fl=sin(T*8.+n*1.7);}
+else{p=a.xyz*bx+vec3(T*.7,sin(T*.4+a.w*9.)*.6+T*.15,T*.25+sin(T*.3+a.w*5.));if(Bm>.5)p=a.xyz*bx*.5+sin(T*vec3(5.3,7.1,4.2)+a.w*40.)*vec3(.6,.3,.6)+sin(T*.3+a.w*vec3(9,7,5))*4.;
+p=C+mod(p-C,bx*(Bm>.5?.5:1.))-bx*(Bm>.5?.25:.5);}
+vec3 q=transpose(M)*(p-C);v=0.;k=Bm>1.5?3.:Bm>.5?2.:step(.8,a.w);gl_PointSize=0.;gl_Position=vec4(2,2,2,1);
+if(q.z>.4){float sz=R.y*(Bm>1.5?.9:Bm>.5?.012:.045*(.3+a.w))/q.z;
+v=Bm>.5?.85*smoothstep(260.,60.,q.z)*min(1.,sz/1.5):Mo*(.2+1.3*pow(max(dot(normalize(p-C),D),0.),3.))*smoothstep(22.,7.,q.z)*min(1.,sz/2.);
+gl_PointSize=clamp(sz,1.5,90.);gl_Position=vec4(q.x*1.6/q.z*R.y/R.x,q.y*1.6/q.z,0,1);}}`,
+`#version 300 es
+precision highp float;in float v,k,fl;out vec4 o;
+void main(){vec2 d=gl_PointCoord*2.-1.;float r=length(d),a=atan(d.y,d.x);
+if(k>2.5){float w=abs(d.y+abs(d.x)*fl*.7-.1);o=vec4(vec3(v*smoothstep(.25,.08,w)*step(abs(d.x),.9)),0);return;}
+if(k>1.5){o=vec4(vec3(v*smoothstep(1.,.2,r)),0);return;}
+float f=exp(-r*r*(k>.5?40.:5.))+k*.45*smoothstep(1.,.25,r)*pow(abs(cos(a*7.)),40.)*smoothstep(.0,.25,r);
+o=vec4(vec3(1.,.86,.62)*f*v,0);}`);
+const NP=520,pd=new Float32Array(NP*4);let sd=11;for(let i=0;i<pd.length;i++)pd[i]=(sd=sd*16807%2147483647)/2147483647;
+const va=gl.createVertexArray();gl.bindVertexArray(va);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,pd,gl.STATIC_DRAW);
+const al=gl.getAttribLocation(PM,'a');gl.enableVertexAttribArray(al);gl.vertexAttribPointer(al,4,gl.FLOAT,false,0,0);
+const ev=gl.createVertexArray();
+const HF=!!gl.getExtension('EXT_color_buffer_float');
+function target(w,h,mip){const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
+gl.texImage2D(gl.TEXTURE_2D,0,HF?gl.RGBA16F:gl.RGBA8,w,h,0,gl.RGBA,HF?gl.HALF_FLOAT:gl.UNSIGNED_BYTE,null);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,mip?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+for(const p of[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,p,gl.CLAMP_TO_EDGE);
+if(mip)gl.generateMipmap(gl.TEXTURE_2D);
+const fb=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tx,0);return{tx,fb,w,h}}
+const ttx=gl.createTexture();
+let sc=1,SW,SH,FS,FC=[];
+const tcv=document.createElement('canvas'),c2=tcv.getContext('2d');let tkey='';
+function size(){const k=Math.min(devicePixelRatio||1,1.5);cv.width=innerWidth*k|0;cv.height=innerHeight*k|0;
+const q=Math.min(1,Math.sqrt(480000/(cv.width*cv.height)))*sc;SW=Math.max(64,cv.width*q|0);SH=Math.max(36,cv.height*q|0);
+[FS,...FC].forEach(f=>f&&(gl.deleteTexture(f.tx),gl.deleteFramebuffer(f.fb)));FS=target(SW,SH);FC=[target(SW,SH,1),target(SW,SH,1)];
+tcv.width=1280;tcv.height=Math.round(1280*cv.height/cv.width);tkey=''}
+addEventListener('resize',size);size();
+const FF='Futura,"Century Gothic","Avenir Next",Avenir,"Trebuchet MS","DejaVu Sans",Verdana,sans-serif';
+function txt(str,x,y,px,o={}){c2.font=`${o.it?'italic ':''}${o.w||500} ${px}px ${FF}`;c2.textAlign=o.al||'center';c2.letterSpacing=(o.ls||0)+'px';
+c2.globalAlpha=o.a??1;c2.shadowColor='rgba(0,0,0,.85)';c2.shadowBlur=px*.35;c2.shadowOffsetY=px*.06;c2.fillStyle=o.c||'#f6e8c8';
+c2.fillText(str,x,y);c2.shadowBlur=px*.9;c2.globalAlpha=(o.a??1)*.5;c2.fillText(str,x,y)}
+function text(t,started,wall,st,M){const W=tcv.width,H=tcv.height,u=H/720,ops=[];
+if(!started){const bl=(s(wall*2.2)>-.3)|0;
+ops.push(['an educational film for schools  ·  reel three',W/2,H*.36,20*u,{ls:4*u,a:.85}],['THE MEADOW COUNTS',W/2,H*.47,64*u,{ls:14*u,w:600}],
+['fig. 1 — a field, counting',W/2,H*.53,19*u,{it:1,a:.8}]);if(bl)ops.push(['press anywhere to begin the lesson',W/2,H*.78,18*u,{ls:6*u,a:.75}])}
+else{const b=t/BAR;
+if(b<3.5){const n=8-Math.floor(t/(BEAT*2));ops.push([''+n,W/2,H/2+70*u,200*u,{w:600,c:'#1a1712',a:.9}])}
+for(const[cb,n,name]of CHAP){const a=ss(cb+.2,cb+.7,b)*(1-ss(cb+2.6,cb+3.2,b));
+if(a>0)ops.push([('part '+n).toUpperCase(),60*u,70*u,17*u,{al:'left',ls:6*u,a:+a.toFixed(1)}],[name,60*u,108*u,34*u,{al:'left',it:1,a:+a.toFixed(1)}])}
+for(const L of SONG.LINES){const lt=t-L.t;if(lt<-.05||lt>L.d+1.3)continue;
+const a=+(ss(-.05,.15,lt)*(1-ss(L.d+.6,L.d+1.3,lt))).toFixed(1),n=L.words.filter(w=>lt>=w[0]-.03).length;
+ops.push(['#cap',L.text,n,a,L.ch])}
+const fa=(x,y)=>+(ss(x,x+.5,b)*(1-ss(y-.5,y,b))).toFixed(2),r2=v=>+v.toFixed(2);
+if(b>14.4&&b<19)ops.push(['#gold',fa(14.4,19),r2(ss(14.8,16,b)),r2(ss(16.9,18.3,b))]);
+if(b>24.2&&b<28.4)ops.push(['#hex',fa(24.2,28.4),r2(ss(24.4,26,b))]);
+if(b>34.2&&b<39)ops.push(['#fold',fa(34.2,39),r2(ss(34.6,37.6,b))]);
+if(b>53.4&&b<56){const n=Math.floor(ss(53.6,55.2,b)*15),pts=[];
+for(let j=0;j<n;j++){const k=1+j*28/55,d=[-4.5-st.c[0],10.4*k-st.c[1],j*28-st.c[2]],q=[0,3,6].map(i=>M[i]*d[0]+M[i+1]*d[1]+M[i+2]*d[2]);
+if(q[2]>1)pts.push([Math.round(W/2+q[0]*.8/q[2]*H),Math.round(H/2-q[1]*.8/q[2]*H),j+1])}
+ops.push(['#cnt',fa(53.4,56),pts])}
+if(b>72.27&&b<72.32)ops.push(['89',W/2,H*.6,240*u,{w:600,a:.7}]);
+if(b>73.3){const a=+ss(73.4,73.9,b).toFixed(1);
+ops.push(['end of lesson.',W/2,H*.45,46*u,{ls:6*u,a}],['please rewind the tape before returning it to the library.',W/2,H*.53,19*u,{it:1,a:a*.85}],
+['THE MEADOW COUNTS  ·  64k  ·  2026',W/2,H*.8,14*u,{ls:6*u,a:a*.6}])}}
+const key=JSON.stringify(ops);if(key==tkey)return;tkey=key;
+c2.clearRect(0,0,W,H);
+for(const op of ops){if(op[0][0]!='#'){txt(...op);continue}
+if(op[0]!='#cap'){fig(op,W,H,u);continue}
+const[,str,n,a,ch]=op,ws=str.split(' '),px=31*u,o={a,it:ch,c:ch?'#d4ece4':'#f6e8c8'};
+c2.font=`${ch?'italic ':''}500 ${px}px ${FF}`;c2.letterSpacing='1px';const sp=c2.measureText(' ').width;let x=W/2-c2.measureText(str).width/2;
+ws.forEach((w,i)=>{const ww=c2.measureText(w).width;if(i<n)txt(w,x,H*.87,px,{...o,al:'left',ls:1});x+=ww+sp})}
+gl.bindTexture(gl.TEXTURE_2D,ttx);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tcv);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR)}
+function fig(op,W,H,u){const[k,a]=op,cx=W-180*u,cy=175*u,TAU=2*PI,small={it:1,a:a*.85};
+c2.strokeStyle='#f6e8c8';c2.lineWidth=2.2*u;c2.shadowColor='rgba(0,0,0,.8)';c2.shadowBlur=6*u;c2.globalAlpha=a;c2.lineCap='round';
+const pl=(pts,cl)=>{c2.beginPath();pts.forEach((p,i)=>i?c2.lineTo(...p):c2.moveTo(...p));cl&&c2.closePath();c2.stroke()};
+if(k=='#gold'){const R=66*u,e=-PI/2,g=-137.5/180*PI*op[2];c2.beginPath();c2.arc(cx,cy,R,0,TAU);c2.stroke();
+pl([[cx+R*Math.cos(e),cy+R*Math.sin(e)],[cx,cy],[cx+R*Math.cos(e+g),cy+R*Math.sin(e+g)]]);
+c2.beginPath();c2.arc(cx,cy,R*.35,e+g,e,false);c2.stroke();
+txt((137.5*op[2]).toFixed(1)+'°',cx-R*.15,cy+R*.62,20*u,{a});txt('fig. 2 — the golden angle',cx,cy+R+34*u,16*u,small);
+if(op[3]>0){txt(Math.round(34*op[3])+'  one way',cx,cy+R+66*u,20*u,{a});txt(Math.round(55*op[3])+'  the other',cx,cy+R+94*u,20*u,{a})}}
+if(k=='#hex'){const r=26*u,n=Math.min(7,Math.floor(op[2]*7.99));
+for(let i=0;i<n;i++){const ox=i?cx+Math.cos(i*PI/3)*r*1.732:cx,oy=i?cy+Math.sin(i*PI/3)*r*1.732:cy;
+pl([0,1,2,3,4,5].map(j=>[ox+r*Math.cos(j*PI/3+PI/6),oy+r*Math.sin(j*PI/3+PI/6)]),1)}
+txt('120°',cx+r*1.25,cy+6*u,15*u,{a});txt('fig. 3 — six sides, no gaps',cx,cy+r*3.3+18*u,16*u,small)}
+if(k=='#fold'){const L=250*u,f=op[2]*TAU*.985,pts=[];
+for(let i=0;i<=48;i++){const s=(i/48-.5)*L;pts.push(f<.01?[cx+s,cy+40*u]:[cx+L/f*Math.sin(s*f/L),cy+40*u-L/f*(1-Math.cos(s*f/L))])}
+pl(pts);c2.beginPath();c2.arc(cx,cy+30*u,4*u,0,TAU);c2.stroke();
+txt('fig. 4 — a horizon, folded',cx,cy+82*u,16*u,small)}
+if(k=='#cnt')for(const[x,y,n]of op[2])txt(''+n,x,y,24*u,{a,w:600})}
+let actx,song,start=null,started=MUTE;
+function now(){if(MUTE)return start===null?T0:T0+(performance.now()-start)/1000;return song?actx.currentTime-song.base:0}
+async function go(){if(song||MUTE)return;started=true;actx=new AudioContext();await actx.resume();song=SONG.live(actx,T0)}
+addEventListener('pointerdown',go);addEventListener('keydown',e=>{if(e.key==' '||e.key=='Enter')go()});
+if(MUTE)start=performance.now();
+let last=performance.now(),ema=16,fr=0,pp=0;
+function U3(U,n,v){gl.uniform3fv(U[n],v)}
+function frame(){requestAnimationFrame(frame);const pn=performance.now(),W=pn/1000;
+ema=ema*.95+(pn-last)*.05;last=pn;if(++fr>90&&ema>24&&sc>.45){sc*=.85;size();ema=18;fr=0}
+const t=started?Math.min(now(),LEN):0,st=started?state(t):meadow(W*.6%60);
+let dc=1e9;for(const c of CUTS)if(t>=c)dc=t-c;
+const Fk=started?.14+.78*Math.exp(-dc*1.3):.3,b=t/BAR;
+const Lk=started?.1+.85*Math.exp(-dc*.9)+.3*Math.max(0,s(t*.23)*s(t*.071+1)):.35;
+let Tr=0;for(const x of[31.6,43.6,55.6,63.6])Tr+=ss(x,x+.3,b)*(1-ss(x+.6,x+1.1,b));
+const Bn=started?ss(B(72.5),B(73.6),t):0,K=started&&b>=8?SONG.kick(t):0,M=basis(st.f,st.roll);
+gl.bindFramebuffer(gl.FRAMEBUFFER,FS.fb);gl.viewport(0,0,SW,SH);gl.disable(gl.BLEND);
+gl.useProgram(PS);let U=PS.U;gl.bindVertexArray(ev);
+gl.uniform2f(U.R,SW,SH);gl.uniform1f(U.T,started?t:W);gl.uniform1f(U.S,st.S);gl.uniform1f(U.L,st.L);gl.uniform1f(U.K,K);
+U3(U,'C',st.c);U3(U,'D',st.D);U3(U,'H0',st.pal[0]);U3(U,'H1',st.pal[1]);U3(U,'H2',st.pal[2]);gl.uniformMatrix3fv(U.M,false,M);gl.uniform4fv(U.P,st.P);gl.uniform4fv(U.Q,st.Q||[0,0,0,0]);
+gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,FC[pp^1].tx);gl.uniform1i(U.F,3);
+gl.drawArrays(gl.TRIANGLES,0,3);
+if(st.mo>0){gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);gl.useProgram(PM);U=PM.U;gl.bindVertexArray(va);
+gl.uniform2f(U.R,SW,SH);gl.uniform1f(U.T,started?t:W);gl.uniform1f(U.Mo,st.mo);U3(U,'C',st.c);U3(U,'D',st.D);gl.uniformMatrix3fv(U.M,false,M);
+gl.uniform1f(U.Bm,0);gl.drawArrays(gl.POINTS,0,NP);
+if(st.bm){gl.blendFunc(gl.ZERO,gl.ONE_MINUS_SRC_COLOR);gl.uniform1f(U.Bm,st.bm);gl.drawArrays(gl.POINTS,0,st.bm>1?89:70)}gl.disable(gl.BLEND)}
+const A=FC[pp],Bk=FC[pp^1];pp^=1;
+gl.bindFramebuffer(gl.FRAMEBUFFER,A.fb);gl.useProgram(PC);U=PC.U;gl.bindVertexArray(ev);
+gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,FS.tx);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,Bk.tx);
+gl.uniform1i(U.A,0);gl.uniform1i(U.B,1);gl.uniform2f(U.R,SW,SH);gl.uniform1f(U.Fk,Fk);gl.drawArrays(gl.TRIANGLES,0,3);
+gl.bindTexture(gl.TEXTURE_2D,A.tx);gl.generateMipmap(gl.TEXTURE_2D);
+gl.activeTexture(gl.TEXTURE2);text(t,started,W,st,M);gl.bindTexture(gl.TEXTURE_2D,ttx);
+gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,cv.width,cv.height);gl.useProgram(PF);U=PF.U;
+gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,A.tx);gl.uniform1i(U.A,0);gl.uniform1i(U.X,2);
+gl.uniform2f(U.R,cv.width,cv.height);gl.uniform1f(U.T,started?t:W);gl.uniform1f(U.Fd,1);
+let Cu=0;for(const c of CUTS)if((t>c-7&&t<c-6.83)||(t>c-1&&t<c-.83))Cu=1;gl.uniform1f(U.Cu,Cu);let Ro=0;for(const x of[43.9,55.9])Ro+=ss(x,x+.14,b);gl.uniform1f(U.Ro,Ro%1);gl.uniform1f(U.Lk,Lk);gl.uniform1f(U.Tr,Tr);gl.uniform1f(U.Bn,Bn);
+gl.drawArrays(gl.TRIANGLES,0,3)}
+frame()})();</script>
+</body></html>

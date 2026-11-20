@@ -15,7 +15,7 @@ Open http://localhost:8000. The page lists every demo with a moving preview, and
 
 The page is a directory: each card plays a 4-second looping clip of the demo's start screen and links to the demo itself. The clips are `demos/<folder>/thumb.webm` (VP8) and `thumb.mp4` (H.264, for browsers without WebM), with `thumb.png` as the poster. A clip only plays while its card is near the screen, because phones have few video decoders. VP8 is used rather than VP9 because hardware VP9 decoding in Chrome on macOS throws decode errors. With reduced motion turned on, the card shows only the poster.
 
-To regenerate the clips after adding a demo to `index.html`, run `node tools/thumbs.mjs [folder]`. It needs Chrome, Node 22 or later, and ffmpeg with libvpx and libx264. It steps Chrome's virtual clock one frame per capture, so the motion is smooth even on a slow machine.
+To regenerate the clips after adding a demo to `index.html`, run `node tools/thumbs.mjs [folder]`. It needs Chrome, Node 22 or later, and ffmpeg with libvpx and libx264. It steps Chrome's virtual clock one frame per capture, so the motion is smooth even on a slow machine. Some heavy raymarched pages wedge headless Chrome's compositor under virtual time (screenshots stop returning); the tool then fails with an error rather than hanging, and `REALTIME=1 node tools/thumbs.mjs <folder>` records that demo on the wall clock instead.
 
 | Demo | Budget | Notes |
 |---|---|---|
@@ -24,6 +24,9 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 | [KAIJU](demos/kaiju-16k) | 16k | Neon city, a single raymarched shader |
 | [Autumn Walk](demos/autumn-walk) | 64k | Fox, forest, birthday cake |
 | [The Daily Flux](demos/daily-flux-16k) | 16k | 70s newspaper; built by Claude Haiku |
+| [The Meadow Counts](demos/meadow-counts-64k) | 64k | IDM: warm 70s school film, 88 BPM boom-bap, formant narrator |
+| [RECURSOR](demos/recursor-64k) | 64k | IDM: 170 BPM acid drill'n'bass, 4D and hyperbolic geometry |
+| [PLEASE ASSEMBLE](demos/please-assemble-64k) | 64k | IDM: toy speech chip, impossible objects, 7/8 and 5/4 |
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 
