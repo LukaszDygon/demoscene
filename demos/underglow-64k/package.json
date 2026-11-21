@@ -1,0 +1,8 @@
+{
+  "name": "underglow-64k",
+  "private": true,
+  "description": "Build-time only: build.py runs terser over the JavaScript.",
+  "devDependencies": {
+    "terser": "^5.51.4"
+  }
+}

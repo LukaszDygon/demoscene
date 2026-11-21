@@ -31,6 +31,7 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 | [READING FRAME](demos/reading-frame-64k) | 64k | Techno: 124 BPM progressive, the GFP gene transcribed and folded, the arpeggio is the DNA |
 | [CLEAVE](demos/cleave-64k) | 64k | Techno: dub to peak-time, cell division under seven microscopes, GPU reaction-diffusion |
 | [COWBELL GRAND PRIX](demos/cowbell-grand-prix-64k) | 64k | Drift phonk at 130 BPM: a kart race through a megacity with ridiculous powerups, settled by a rubber duck |
+| [UNDERGLOW](demos/underglow-64k) | 64k | Memphis-style phonk at 96 BPM: a night drive from a garage through downtown and a car meet to an overlook above the moonlit city |
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 
