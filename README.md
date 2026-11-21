@@ -30,7 +30,7 @@ To regenerate the clips after adding a demo to `index.html`, run `node tools/thu
 | [PROTON MOTIVE](demos/proton-motive-64k) | 64k | Techno: 134 BPM warehouse, inside a mitochondrion, ATP synthase on the drop |
 | [READING FRAME](demos/reading-frame-64k) | 64k | Techno: 124 BPM progressive, the GFP gene transcribed and folded, the arpeggio is the DNA |
 | [CLEAVE](demos/cleave-64k) | 64k | Techno: dub to peak-time, cell division under seven microscopes, GPU reaction-diffusion |
-| [COWBELL GRAND PRIX](demos/cowbell-grand-prix-64k) | 64k | Drift phonk at 144 BPM: a kart race through a megacity with ridiculous powerups, settled by a rubber duck |
+| [COWBELL GRAND PRIX](demos/cowbell-grand-prix-64k) | 64k | Drift phonk at 130 BPM: a kart race through a megacity with ridiculous powerups, settled by a rubber duck |
 
 Each demo folder has `src/`, `build.py` (rebuilds `dist/` and checks the budget) and a README with its timeline and assumptions.
 

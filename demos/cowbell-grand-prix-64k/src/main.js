@@ -14,22 +14,26 @@ VS="#version 300 es\nvoid main(){gl_Position=vec4(vec2(gl_VertexID&1,gl_VertexID
 if(!g||!g.getExtension("EXT_color_buffer_float"))D.body.innerHTML="<p style=color:#fff>This intro needs WebGL2 with float render targets.";
 
 // ---------- the race, in bars ----------
-// pack speed (m/s) -> distance table
-const VK=[8,0,9.2,80,24,80,24.4,112,27.5,112,28.5,80,39.6,80,40,30,48,30,48.01,70,55.8,75,56.3,125,61,125,62.5,80,103.6,80,104,16,105,16,105.4,50,106.5,30,108,0],
+// pack speed -> distance table. The speeds are metres per 1/144-minute beat-second: a bar always covers the same
+// distance whatever the tempo, so the choreography stays in bars; VF turns them into real m/s.
+const VF=5/3/BAR,VK=[8,0,9.2,80,24,80,24.4,112,27.5,112,28.5,80,39.6,80,40,30,48,30,48.01,70,55.8,75,56.3,125,61,125,62.5,80,103.6,80,104,16,105,16,105.4,50,106.5,30,108,0],
 ST=[0];
-for(let i=0;i<8500;i++)ST.push(ST[i]+K(VK,i/64)*BAR/64);
+for(let i=0;i<8500;i++)ST.push(ST[i]+K(VK,i/64)*5/3/64);
 const S=b=>{b=cl(b,0,132)*64;const i=b|0;return mix(ST[i],ST[i+1],b-i)},
 ZF=S(104)+2,TU0=S(33)+20,TU1=S(40)+150,RPA=S(80)+80,RPB=S(88)-10,
 // item box rows: z, slot mask, golden
 BX=[[S(20),15,0],[S(52),2,1],[S(67)-14,15,0],[S(84),15,0]],
-// road centre line (mirrors scene.glsl)
-TX=z=>cl(z/300-.5)*cl((ZF-z)/350-1)*(55*sin(z*.004+1)+26*sin(z*.011)),
+// The road is straight except for bends: at each bar listed here the pack is in the middle of one, where the road
+// steps 60 m sideways over 180 m, right and left alternately. Cars only drift there. The rocket (24-28), the black
+// hole (36-40), the magnet (56-62), the duck (96-100) and the run to the line are all on straights.
+CZ=[13,15.5,18,22,29.5,31.5,34.5,50,53,63,68.5,71,75,77.5,82,85,90,93,95,101.5].map(S),
+TX=z=>CZ.reduce((a,c,i)=>a+(i&1?-60:60)*sm(c-90,c+90,z),0),
 TY=z=>4*sin(z*.007)+.15*(max(z-RPA,0)-max(z-RPB,0)),
 // cars: 0 hero (pearl), 1 villain (matte black), 2 gold lowrider, 3 pink monster kei. Offsets ahead of the pack, lateral position.
 OF=[[8,-21,12,-34,24,-30,27.5,-3,32,0,38.5,-2,39.8,5,48,0,66,0,67.5,-16,70,-5,72,0,73,0,79,-18,84,-9,88,0,96,2,105.5,2],
-[8,0,12,14,24,20,32,24,40,26,56,230,62,55,64,40,72,16,79,50,88,16,96,7,97,12,98,18,99,25,100,30],
-[8,-7,12,0,24,4,36,12,40,12,56,190,62,30,64,1,70,1,72,-45,80,-28,84,-15,85.5,-30,100,-30,104,-24,108,-10],
-[8,-14,12,-12,28,-12,32,-70,40,-90,56,150,61,14,62,-14,72,-40,80,-36,88,-16,96,-40,100,-45,104,-40,108,-22]],
+[8,0,12,14,24,20,32,24,40,26,48,100,56,170,62,55,64,40,72,16,79,50,88,16,96,7,97,12,98,18,99,25,100,30],
+[8,-7,12,0,24,4,36,12,40,12,48,80,56,140,62,30,64,1,70,1,72,-45,80,-28,84,-15,85.5,-30,100,-30,104,-24,108,-10],
+[8,-14,12,-12,28,-12,32,-70,40,-90,48,60,56,110,61,14,62,-14,72,-40,80,-36,88,-16,96,-40,100,-45,104,-40,108,-22]],
 LA=[[0,2.5,24,2.5,25.5,5,28,5,30,-4,32,0,36,-1,38.5,0,48,0,50,3,52,-2,54,2,56,0,62,0,64,3,66,3,66.4,7.4,67.5,7,69,3,72,0,74,-5,76,5,78,-3,80,0,82,-3,84,2,86,-1,88,0,90,-4,92,5,94,-3,96,0,99.5,2,100.2,6.6,102,6,104,3],
 [0,-2.5,12,-2.5,16,0,20,3,24,-3,28,0,32,-2,36,-3,40,0,56,0,64,-4,72,-1,80,2,88,0,90.3,-4,92.3,5,94.3,-3,96,0,98,-3,100,-2],
 [0,2.5,14,2.5,18,-1,22,4,26,-2,28,0,32,3,40,2,56,-3,64,-1.5,70,-1.5,71,-5,99.5,-4,100.5,6.5,103,6.5,104,0,108,-6],
@@ -44,7 +48,7 @@ GC=[[.1,.9,1],[1,.07,.04],[.7,.2,1],[.5,1,.1]],
 PA=[[.03,.04,.12,.75,.3,.14,1.2,.5,.2,.35,.07,.93,.0012,.7,.35,.6,.9,.95,1.1,.45],
 [.004,.006,.02,.09,.035,.12,.25,.3,.45,-.25,.22,.94,.0012,.8,1,.75,1,.85,.6,.4],
 [.01,.008,.006,.04,.03,.02,0,0,0,0,1,0,.004,.6,1,.7,1.3,.7,.25,.4],
-[.008,.008,.012,.05,.03,.045,0,0,0,0,1,0,.011,1,1,.8,1,.45,.15,.15],
+[.008,.008,.012,.05,.03,.045,0,0,0,0,1,0,.006,1,1,.8,1,.45,.15,.15],
 [.015,.02,.03,.06,.07,.09,0,0,0,0,1,0,.004,1,.6,.8,.8,.9,1,.45],
 [.45,.47,.52,.55,.56,.6,0,0,0,0,1,0,.05,1,0,.6,.8,.9,1,.8],
 [.1,.2,.5,1.3,.65,.3,2.4,1.5,.8,.2,.15,.97,.0007,.5,0,.55,0,0,0,.8],
@@ -60,8 +64,8 @@ SH=[[-1,0,0,0,1.5,-5.5,3,.8,-5.5,-3,1.1],[0,3,3,0,1.4,-1,-4.5,.7,3,-4.5,.9],[2,1
 [17,2,2,0,1.3,1,5.5,.8,0,5,.7],[18,0,0,0,1.5,-5.5,-1,1.3,-5,0,1.2],[20,0,0,0,1.5,6,1.5,.9,5.5,-1,1],[22,0,0,0,1.5,-4.5,-3,.7,-4,-2.5,.8],
 [24,0,0,0,1.05,-3.8,.5,1.1,-5,0,1.3],[26,3,0,1,9,45,-8.6,1],[27,0,0,0,1.4,6,-1.5,1,5.5,1,1.1],[28,3,3,0,1.4,5,3.5,.9,5,-3.5,1.1,2.2],
 [30,3,3,0,1.2,0,-6,1.2,2,-5,1.5,2],[32,0,0,0,1.5,-9,0,4,-7,0,2.5,1],[34,1,1,0,1.5,6,1.5,.9,6,-1.5,1],[36,0,7,0,1.4,-5,-3,1.6,-4,3,1.4],
-[38,0,7,0,1.2,-6,0,1.3,-7.5,0,1.2],[40,0,0,0,1.3,0,0,0],[48,0,0,1,8,22,-5,1],[49,0,0,0,1.5,-5.5,1.5,1.3,-5,-1.5,1.2],
-[52,0,0,0,1.5,6,-1.5,.9,5.5,1,1],[54,0,0,0,1.3,.5,5.5,1,-.5,5,1.2,1.5],[56,0,0,0,1.1,-5,-1,1.4,-6,1,1.6,1.6],[57,0,0,0,1.4,5.5,-2,1,5,-2.5,1.1],[58,0,0,1,9,75,12,3],
+[38,0,7,0,1.2,-6,0,1.3,-7.5,0,1.2],[40,0,0,0,1.3,0,0,0],[48,0,0,1,8,22,-5,1],[49,0,0,0,2,-8,2,2.6,-7.5,-2,2.4,1.4],
+[52,0,0,0,1.5,6,-1.5,.9,5.5,1,1],[54,0,0,0,1.3,.5,5.5,1,-.5,5,1.2,1.5],[56,0,0,0,1.3,-6,-2,2.4,-7,2,2.6,1.6],[57,0,0,0,2.2,-9,2.5,2.8,-8,2,2.6,1.4],[58,0,0,1,9,75,12,3],
 [59,0,0,0,1.2,1,-6.5,1,-1,-6,1.2,2],[60,3,3,0,1.4,6,2,1.2,5,1.5,1.2],[61,0,0,0,1.2,1,-6.5,1,-1,-6,1.2,2],[62,2,2,0,3,-22,-13.5,12,-6,-13.5,10,0],[64,2,2,0,1.3,6.5,2.2,1,6,2.5,1.1,1],[66,0,0,0,1.3,-5.5,-2.5,1.5,-5,-3,1.3],
 [67,0,0,0,1.5,6,-2,.9,5.5,-2.5,1],[69,2,2,0,1.1,-14,-2.5,1,-12,-2.5,.9,6],[70,2,2,0,1.3,1,-5.5,1.2,3,-5,1,1.5],[71,0,0,0,1.5,-5.5,1,1.3],
 [72,1,1,0,1.4,6,2,1,6,-2,1.1],[74,0,0,0,1.3,1,7,1,-1,7,1.2],[76,0,0,0,1.5,7,0,1.6,6,0,1.3],[78,0,0,0,1.5,-4.5,2.5,1.2,-3.5,2,1],
@@ -71,7 +75,6 @@ SH=[[-1,0,0,0,1.5,-5.5,3,.8,-5.5,-3,1.1],[0,3,3,0,1.4,-1,-4.5,.7,3,-4.5,.9],[2,1
 [102,0,0,0,1.4,-5.5,0,1.4,-5,0,1.2],[104,0,0,1,1.4,7,-8.3,.6],[106,9,0,0,1.3,-10,0,6,-8,0,4.5],[109,9,4,1,1.5,25,-12,4],
 [112,4,4,1,1.3,18,-12,3.5],[116,9,0,0,1.5,-30,0,10,-60,0,45],[120,9,0,0,1.4,-60,0,45,-90,10,70],[999]],
 // item roulette faces; the last four are where each spin lands
-EMO=["🧊","🌀","🥊","🪩","🚀","🧲","🎹","🦆"],
 USE=[24,55,69,96];
 
 // ---------- cars ----------
@@ -96,14 +99,19 @@ function P(i,b){
   if(b>=28)h=(b<32?.5:.15)*abs(sin(PI*bt));
   if(b>61&&b<62)h+=4.5*sin(PI*(b-61));
  }
- if(i&&b>=40&&b<56)return[0,-999,0,0];
+ if(i&&b>=40&&b<48)return[0,-999,0,0];
  return[TX(s)+l,TY(s)+h,s,l]}
 // full pose: position, rotation matrix (world from local), scale, drift
 function pose(i,b){
- const p=P(i,b),q=P(i,b+.012),r=P(i,b+.024),bt=b*4;
- let dx=q[0]-p[0],dz=q[2]-p[2],hd=atan2(TX(p[2]+1)-TX(p[2]),1),h2=hd,dr,sp=SP[i]?K(SP[i],b):0,sc=[1,1,1],pit=-atan2(TY(p[2]+1)-TY(p[2]),1),rol=0,k;
- if(hypot(dx,dz)>.02){hd=atan2(dx,dz);h2=atan2(r[0]-q[0],r[2]-q[2])}
- dr=h2-hd;dr-=round(dr/6.283)*6.283;dr=cl(dr/.012*1.4,-.75,.75);
+ const p=P(i,b),q=P(i,b+.012),bt=b*4;
+ let dx=q[0]-p[0],dz=q[2]-p[2],hd=atan2(TX(p[2]+1)-TX(p[2]),1),dr=0,sp=SP[i]?K(SP[i],b):0,sc=[1,1,1],pit=-atan2(TY(p[2]+1)-TY(p[2]),1),k,a,c,e,f,w;
+ if(hypot(dx,dz)>.02)hd=atan2(dx,dz);
+ // drift angle: the yaw rate along the path, clamped, then averaged over a window from half a bar behind to a fifth
+ // of a bar ahead. The tail swings out as the car turns in and takes most of a second to come back after the exit.
+ for(k=-11,e=9;k<6;k++,a=c,e=f){
+  c=P(i,b+k*.05);f=9;
+  if(a){w=hypot(dx=c[0]-a[0],dz=c[2]-a[2]);if(w>.2&&w<50)f=atan2(dx,dz)}
+  if(e<9&&f<9)w=f-e,w-=round(w/6.283)*6.283,dr+=cl(w*28,-.75,.75)*(1+cos((k+2)*.419))/15}
  if(i==0){
   if(b>39.3&&b<40){k=sm(39.3,40,b);sc=[1-.45*k,1-.45*k,1+1.4*k]}
   if(b>=40&&b<48){k=1-sm(46,47.8,b);return{p,m:mm(mm(ry(b*2.1*k),rx(b*1.3*k)),rz(b*.7*k)),sc,dr:0,hd:0}}
@@ -127,7 +135,7 @@ duck=b=>{
 hole=b=>{const s=S(b)+mix(26,5,sm(36,37.5,b));return b<48?[TX(s)+mix(K(LA[1],36),0,sm(36,37.5,b)),TY(s)+1.6+4*sin(PI*cl((b-36)/1.5)),s,b<36||b>=40?0:mix(.3,2.3,sm(36,40,b))*(1+.12*KE)]
  :[TX(S(48)),TY(S(48))+15,S(48),2.6*(1-sm(48,49.6,b))]},
 piano=b=>{const c=P(2,b),u=cl(b-69);return[c[0],c[1]+(b<70?2.7+40*(1-u*u):1.9),c[2],b<69?0:1.5,b<70?(1-u)*5+.25:.25]},
-ball=b=>{const p=P(3,b),q=P(2,b),k=sm(28,28.6,b);return[mix(q[0],p[0],k),mix(q[1]+2,p[1]+5,k)+3*sin(PI*k),mix(q[2],p[2],k),b<28||b>=40&&b<56?0:1.3]},
+ball=b=>{const p=P(3,b),q=P(2,b),k=sm(28,28.6,b);return[mix(q[0],p[0],k),mix(q[1]+2,p[1]+5,k)+3*sin(PI*k),mix(q[2],p[2],k),b<28||b>=40&&b<48?0:1.3]},
 TG=(i,b)=>i<4?P(i,b):i==4?duck(b):i==5?ball(b):i==6?[0,9,12,0]:i==7?hole(b):i==8?piano(b):[TX(S(b)+6),TY(S(b)+6),S(b)+6,0];
 
 // ---------- GL ----------
@@ -180,7 +188,7 @@ function emit(n,[x,y,z],sp,[vx,vy,vz],vs,life,size,grow,[r,gr,bl],a,grav,drag){
  for(;n-->0;)PT.length<3900&&PT.push([x+rs()*sp,y+rs()*sp,z+rs()*sp,vx+rs()*vs,vy+rs()*vs,vz+rs()*vs,0,life*(.6+.8*random()),size*(.7+.6*random()),grow,r,gr,bl,a,grav,drag])}
 const up=(v,k)=>[v[0],v[1]+k,v[2]];
 function sim(b,dt,pal){
- const once=x=>lastb<x&&b>=x,vel=K(VK,b),fw=[0,0,vel],
+ const once=x=>lastb<x&&b>=x,vel=K(VK,b)*VF,fw=[0,0,vel],
  smoke=[pal[3]*.5+pal[0]+pal[6]*.2+.1,pal[4]*.5+pal[1]+pal[7]*.2+.1,pal[5]*.5+pal[2]+pal[8]*.2+.1];
  if(b<lastb||b>lastb+1)PT=[],boxm=BX.map(x=>x[1]),wp=[];
  for(let i=0;i<4;i++){
@@ -211,7 +219,7 @@ function sim(b,dt,pal){
  if(once(24)||once(55.5))emit(40,wl(0,0,1.5,0),.5,up(fw,3),6,.6,.4,2,[1,1,1],.4,0,2);
  // item boxes burst when a car takes them
  BX.map(([z,m,gold],r)=>{for(let i=0;i<4;i++){const c=CP[i].p,j=cl(round((c[3]+6)/4),0,3);
-  if(c[2]>z&&c[2]<z+12&&boxm[r]>>j&1){boxm[r]&=~(1<<j);emit(60,[TX(z)+j*4-6,TY(z)+1.3,z],.6,up(fw,3),9,.7,.14,0,gold?[5,3,.4]:[4*random(),4*random(),4*random()],0,9,1)}}});
+  if(c[2]>z&&c[2]<z+12&&boxm[r]>>j&1&&(r!=1||!i)){boxm[r]&=~(1<<j);emit(60,[TX(z)+j*4-6,TY(z)+1.3,z],.6,up(fw,3),9,.7,.14,0,gold?[5,3,.4]:[4*random(),4*random(),4*random()],0,9,1)}}});
  // steam rises off the undercity street
  if(b>=48&&b<56)emit(1,[TX(fw[2]=S(b)+90*random())+rs()*9,TY(fw[2]),fw[2]],.5,[0,2.5,0],.6,2.2,1.2,2.5,smoke,.25,-.5,.4),fw[2]=vel;
  // rags of cloud blow past on the climb through the storm
@@ -316,18 +324,20 @@ function state(b,t,dt){
  }
  u.set([pal[16]*(.7+.6*KE),pal[17]*(.7+.6*KE),pal[18]*(.7+.6*KE),sm(46,48,bb)],112);
  u.set(hl,116);
+ // the shader gets the six bends nearest the camera; any further behind are folded into a constant offset
+ CZ.map((c,i)=>[abs(c-ro[2]),c,i&1?-60:60]).sort((a,b)=>a[0]-b[0]).map((n,k)=>{if(k<6)u.set([n[1],n[2]],132+k*2);else if(n[1]<ro[2])u[131]+=n[2]});
  u[128]=S(bb)+140+(bb-96)*10;u[130]=sm(84,84.15,bb);u[129]=bb<12?-1e4:S(bb)+450-900*(bb/4%1);
  // shock ring from the latest impact
  [[24,0],[48.28,0],[66,0],[70,2],[80,0],[97,4],[98,4],[99,4],[100,4],[112,4]].map(([x,o])=>{if(bb>=x&&bb<x+.6)u.set([...TG(o,x)].slice(0,3).concat((bb-x)*BAR*50+.01),120)});
  // post: blur, exposure, fade, flash
  u.set([.015+K(VK,bb)*.0005+nit*.2+.3*exp(min(0,cut-t)*14)*(bb>0),pal[15],b<0?.75:min(sm(0,.3,bb)*.25+.75,(128.4-bb)/2)*(bb<40?1-sm(39.7,40,bb):sm(40,40.6,bb)),flash+(bb>=8?exp((8-bb)*6)*.3:0)+(bb<48?sm(47.5,48,bb):exp((48-bb)*5))],124);
  // rank
- const r=1+CP.filter((c,i)=>i&&c.p[2]>CP[0].p[2]&&c.p[1]>-99).length+(zone?3:0);
+ const r=1+CP.filter((c,i)=>i&&c.p[2]>CP[0].p[2]&&c.p[1]>-99).length+(zone==2?3:0);
  if(r!=rank)rkUp=r<rank,rank=min(r,4),rankT=t;
  return sim(bb,dt,pal)}
 
 // ---------- HUD ----------
-const FN='Impact,"Arial Black","DejaVu Sans",sans-serif',EF='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const FN='Impact,"Arial Black","DejaVu Sans",sans-serif';
 function txt(s,x,y,px,col,al="left",f=FN,it="italic 900 "){
  X.font=it+px+"px "+f;X.textAlign=al;X.lineJoin="round";
  X.lineWidth=px*.16;X.strokeStyle="#000d";X.strokeText(s,x,y);
@@ -338,6 +348,19 @@ function bell(x,y,s,a){
  X.beginPath();X.arc(0,s*.05,s*.16,3.14,0);X.stroke();
  X.beginPath();X.moveTo(-s*.22,s*.05);X.lineTo(s*.22,s*.05);X.lineTo(s*.36,s*.8);X.lineTo(-s*.36,s*.8);X.closePath();X.fill();X.stroke();
  X.fillStyle="#000";X.beginPath();X.arc(s*.1*Math.sin(a*6),s*.86,s*.07,0,7);X.fill();
+ X.restore()}
+// item icons, drawn in a box two units wide: 0 ice 1 black hole 2 glove 3 mirror ball 4 rocket 5 magnet 6 piano 7 duck
+function ico(i,x,y,s){
+ const f=c=>X.fillStyle=c,C=(x,y,r)=>{X.beginPath();X.arc(x,y,r,0,7);X.fill()},R=(x,y,w,h)=>X.fillRect(x,y,w,h);
+ X.save();X.translate(x,y);X.scale(s,s);
+ if(i==0)X.rotate(.3),f("#9ef"),R(-.6,-.6,1.2,1.2),f("#fff"),R(-.45,-.45,.3,.9);
+ if(i==1)f("#a4f"),C(0,0,.8),f("#000"),C(0,0,.55);
+ if(i==2)f("#e22"),C(.05,-.1,.6),C(-.5,.05,.25),f("#fff"),R(-.35,.42,.8,.3);
+ if(i==3){f("#dde");C(0,0,.72);f("#556");for(let k=-1;k<2;k++)R(-.7,k*.36-.03,1.4,.06),R(k*.36-.03,-.7,.06,1.4)}
+ if(i==4)X.rotate(.8),f("#f80"),C(0,.8,.22),f("#e22"),R(-.45,.3,.9,.3),f("#fff"),X.beginPath(),X.ellipse(0,0,.28,.75,0,0,7),X.fill(),f("#e22"),C(0,-.5,.2);
+ if(i==5)X.lineWidth=.32,X.strokeStyle="#e22",X.beginPath(),X.moveTo(-.45,.4),X.arc(0,-.1,.45,3.14,0),X.lineTo(.45,.4),X.stroke(),f("#ccc"),R(-.61,.4,.32,.25),R(.29,.4,.32,.25);
+ if(i==6){f("#444");R(-.75,-.55,1.5,.8);f("#fff");R(-.75,.25,1.5,.32);f("#000");for(let k=0;k<6;k++)R(-.62+k*.23,.25,.1,.18)}
+ if(i==7)f("#fc2"),C(-.1,.2,.55),C(.3,-.35,.34),f("#f72"),R(.5,-.38,.35,.14),f("#000"),C(.38,-.42,.06);
  X.restore()}
 function hud(b,t){
  const w=H.width,h=H.height,un=h/100,bb=max(b,0);
@@ -355,40 +378,43 @@ function hud(b,t){
   const pk=1+.5*exp(min(0,rankT-t)*6),z=bb>=40&&bb<48;
   txt(z?"?":rank,un*5,un*17,un*15*pk,rank<2&&!z?"#ffd23a":"#fff");
   txt(z?"":["ST","ND","RD","TH"][rank-1],un*(z?5:5+7.2*pk),un*17,un*5.5,"#fff");
-  if(t-rankT<1.6&&bb>9&&!z)txt(rkUp?"▲":"▼",un*6,un*25,un*6,rkUp?"#5f6":"#f44","left","sans-serif","");
-  txt(z?"??? km/h":(K(VK,bb)*3.6+(bb>8?sin(t*9)*3:0)|0)+" km/h",w-un*5,h-un*6,un*4.5,"#fff","right");
+  if(t-rankT<1.6&&bb>9&&!z)txt(rkUp?"▲":"▼",un*22,un*24,un*5,rkUp?"#5f6":"#f44","left","sans-serif","");
+  txt(z?"??? km/h":(K(VK,bb)*VF*3.6+(bb>8?sin(t*9)*3:0)|0)+" km/h",w-un*5,h-un*6,un*4.5,"#fff","right");
+  // gap to the car ahead
+  const ah=min(...CP.map((c,i)=>i&&c.p[1]>-99&&c.p[2]>CP[0].p[2]?c.p[2]-CP[0].p[2]:1e9));
+  if(!z&&bb>9&&bb<104&&ah<1e8)txt("+"+(ah/max(K(VK,bb)*VF,30)).toFixed(1)+" s",un*6,un*23.5,un*4,"#fffc");
   // gap strip: the four cars along the road, hero in the middle
   if(!z){X.fillStyle="#0007";X.fillRect(w*.3,h-un*5,w*.4,un*.8);
-   CP.map((c,i)=>{const dx=cl((c.p[2]-CP[0].p[2])/150,-1,1);if(c.p[1]>-99){X.fillStyle="#"+["7ef","f33","fc3","f6c"][i];X.beginPath();X.arc(w*(.5+dx*.2),h-un*4.6,un*(i?1.1:1.5),0,7);X.fill()}})}
+   CP.map((c,i)=>{const dx=cl((c.p[2]-CP[0].p[2])/200,-1,1);if(c.p[1]>-99){X.fillStyle="#"+["7ef","f33","fc3","f6c"][i];X.beginPath();X.arc(w*(.5+dx*.2),h-un*4.6,un*(i?1.1:1.5),0,7);X.fill()}})}
   // item box: spins from the first tick to the landing, holds until used
   SONG.RO.map(([a,e],i)=>{
    if(bb>=a&&bb<USE[i]){
     const land=bb>=e,sz=un*11*(land?1+.4*exp((e-bb)*8):1),x=w/2,y=un*10;
     X.fillStyle="#0009";X.strokeStyle=land?"#ffd23a":"#fff";X.lineWidth=un*.6;
     X.beginPath();X.roundRect(x-sz/2,y-sz/2,sz,sz,un*1.6);X.fill();X.stroke();
-    txt(land?EMO[4+i]:EMO[floor(bb*(i>2&&bb>85.5?bb>86.25?8:16:32))%8],x,y+sz*.24,sz*.66,"#fff","center",EF,"")}
+    ico(land?4+i:floor(bb*(i>2&&bb>85.5?bb>86.25?8:16:32))%8,x,y,sz*.36)}
    const k=(bb-USE[i])*4;
    if(k>0&&k<1){X.strokeStyle="#fff";X.globalAlpha=1-k;X.lineWidth=un*2*(1-k);X.strokeRect(w/2-un*(5+k*9),un*(5-k*9),un*(10+k*18),un*(10+k*18));X.globalAlpha=1}});
   // the grid: a name plate for whoever the camera is on
   [[0,2,"BUBBLEGUM",3],[2,4,"EL DORADO  ·  VANTA",2],[6,7,"PEARL",0]].map(([a,e,s,i])=>{if(bb>=a&&bb<e){X.globalAlpha=sm(a,a+.3,bb)*(1-sm(e-.3,e,bb));txt(s,un*6,h-un*12,un*7,"#"+["7ef","f33","fc3","f6c"][i]);X.globalAlpha=1}});
   if(bb>=4&&bb<7)txt(7-floor(bb),w/2,h*.6,un*36*(1.25-bb%1*.25),"#f53","center");
   const ck=max(0,min(bb,104)-8)*BAR;
-  txt("LAP 3/3",w-un*5,un*8,un*3.6,"#fffc","right");
-  txt((ck/60|0)+":"+(ck%60).toFixed(2).padStart(5,0),w-un*5,un*13.5,un*4.5,bb<104?"#fff":"#ffd23a","right");
+  txt(max(0,(ZF-CP[0].p[2])/1e3).toFixed(1)+" km to go",w-un*5,un*8,un*3.6,"#fffc","right");
+  txt(clk(ck),w-un*5,un*13.5,un*4.5,bb<104?"#fff":"#ffd23a","right");
   // comic-book lettering on the big hits
   [[66,"POW!","#ff3b3b"],[70,"CRASH!","#fff"],[72.6,"FREEZE!","#7df"],[84,"ZAP!","#ff6"],[100,"SQUEAK!","#ffd23a"]].map(([x,s,c],i)=>{
    if(bb>=x&&bb<x+.6){X.save();X.translate(w*(.3+i%2*.4),h*.34);X.rotate(i%2*.3-.15);txt(s,0,0,un*17*(1+.5*exp((x-bb)*14)),c,"center");X.restore()}});
   if(bb>=8&&bb<9.5)txt("GO!",w/2,h*.5,un*30*(1+.3*exp((8-bb)*9)),"#5f6","center");
-  if(bb>=88&&bb<91&&bt(bb))txt("FINAL LAP",w/2,h*.3,un*10,"#ffd23a","center");
+  if(bb>=88&&bb<91&&bt(bb))txt("LAST 2 KM",w/2,h*.3,un*10,"#ffd23a","center");
   if(bb>=104&&bb<108)txt("FINISH!",w/2,h*.5,un*22*(1+.3*exp((104-bb)*9)),"#ffd23a","center");
  }else{
   const a=sm(120,121,bb);
   X.globalAlpha=a;
   txt("COWBELL GRAND PRIX",w/2,h*.2,un*9,"#ffd23a","center");bell(w/2,h*.62,un*14,sin(t*3)*.4*exp((124-bb)*.5));
-  ["1ST  PEARL  2:40.00","2ND  EL DORADO  🎹  +1.42","3RD  BUBBLEGUM  🪩  +2.07","4TH  VANTA  🦆  +13.33"].map((s,i)=>bb>121+i*.5&&txt(s,w/2,h*.36+i*un*8,un*5.5,i?"#fff":"#ffd23a","center",FN+","+EF));
-  if(bb>124)txt("a 64k intro  ·  drift phonk at 144 bpm  ·  no ducks were harmed",w/2,h*.9,un*2.6,"#fffb","center",FN,"600 ");
+  ["1ST  PEARL  "+clk(96*BAR),"2ND  EL DORADO  +1.42","3RD  BUBBLEGUM  +2.07","4TH  VANTA  +13.33"].map((s,i)=>{if(bb>121+i*.5)txt(s,w/2,h*.36+i*un*8,un*5.5,i?"#fff":"#ffd23a","center"),i&&ico([6,3,7][i-1],w/2+un*38,h*.36+i*un*8-un*2,un*2.6)});
+  if(bb>124)txt("a 64k intro  ·  drift phonk at "+SONG.BPM+" bpm  ·  no ducks were harmed",w/2,h*.9,un*2.6,"#fffb","center",FN,"600 ");
   X.globalAlpha=1}}
-const bt=b=>b*4%1<.6;
+const bt=b=>b*4%1<.6,clk=s=>(s/60|0)+":"+(s%60).toFixed(2).padStart(5,0);
 
 // ---------- run ----------
 let actx,song,pt=0,acc=0,fc=0,la=0,nh=0,gov=1;

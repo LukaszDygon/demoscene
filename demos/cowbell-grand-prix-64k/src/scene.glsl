@@ -1,7 +1,7 @@
 // The world: a curving skyway through a megacity, four cars and the props they throw at each other, raymarched.
 uniform mat3 M[4];
 out vec4 O;
-const float AP=33.3333;   // arch spacing: one arch per beat at 80 m/s
+const float AP=33.3333;   // arch spacing: one arch per beat at cruising speed
 float mt;                 // material of the last map() call
 vec3 gB;                  // building under the last map() call: height, id hash, second hash
 bool noIce;
@@ -20,8 +20,8 @@ float rseg(vec3 ro,vec3 rd,vec3 a,vec3 b,out float s,out float tr){
  tr=max(dot(a+ab*s-ro,rd),0.);
  return length(ro+rd*tr-a-ab*s);
 }
-// road centre line (mirrored in main.js)
-float TX(float z){return clamp(z/300.-.5,0.,1.)*clamp((ZF-z)/350.-1.,0.,1.)*(55.*sin(z*.004+1.)+26.*sin(z*.011));}
+// road centre line: straight, with S-bends. main.js sends the six nearest bends (z, sideways step) and a base offset.
+float TX(float z){float x=U[32].w;for(int i=33;i<36;i++)x+=U[i].y*smoothstep(U[i].x-90.,U[i].x+90.,z)+U[i].w*smoothstep(U[i].z-90.,U[i].z+90.,z);return x;}
 float TY(float z){return 4.*sin(z*.007)+.15*(max(z-RPA,0.)-max(z-RPB,0.));}
 float fre(vec3 n,vec3 rd,float e){return pow(1.-clamp(dot(n,-rd),0.,1.),e);}
 // the airship flies over the road, ahead of the pack
